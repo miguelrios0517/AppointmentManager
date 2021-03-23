@@ -1,0 +1,81 @@
+.screen{
+  display: flex;
+  flex-direction: column;
+  margin-left: 228px;
+  padding-left: 25px;
+  padding-right: 25px; 
+  border: 2px solid black;
+  height: 100vh; 
+  overflow: auto;
+}
+
+.header {
+  height: 7vh; 
+  font-size: 1.5em;
+}
+
+.main {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.5em;
+}
+
+.box {
+  border: 2px solid black;
+  border-radius: 3px; 
+  margin: 5px;
+  padding: 10px;
+}
+
+.top-box {
+  height: 500px;  
+}
+
+.bottom-box {
+  height: 300px;
+}
+
+.appt-preview {
+  width: 800px;
+}
+
+.appt-carousel {
+  width: 800px;
+}
+
+.to-do {
+  width: 600px;
+}
+
+.new-appt-bttn {
+  border: 1px solid black;
+  border-radius: 3px; 
+  padding: 2px 4px;
+}
+
+.appt-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+}
+
+.appt-form label {
+  margin-top: 8px;
+}
+
+.submit-bttn {
+  margin-top:16px;
+}
+
+.main-vertical {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.main-appointments {
+  justify-content: space-between;
+}
