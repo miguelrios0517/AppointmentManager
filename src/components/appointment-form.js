@@ -4,7 +4,7 @@ import React from 'react';
 class appointmentForm extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {patient: '', date: '', time: '', location : '', address: '', provider: '', id: '', map: {}, apptform: {}, notes:[]};
+      this.state = {patient: '', date: '', time: '', duration: '', location : '', address: '', provider: '', id: '', map: {}, apptform: {}, notes:[]};
       this.showForm = props.showForm;
       this.newFormSubmit = props.newFormSubmit;
       this.handleChange = this.handleChange.bind(this);
@@ -37,6 +37,10 @@ class appointmentForm extends React.Component {
           <label>
             Time:
             <input name="time" type="time" value={this.state.time} onChange={this.handleChange} />
+          </label>
+          <label>
+            Duration (in minutes):
+            <input name="duration" type="number" value={this.state.duration} onChange={this.handleChange} />
           </label>
           <label>
             Location:

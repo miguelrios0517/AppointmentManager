@@ -11,14 +11,16 @@ import {
   
 
 function Appointments(props) {
-    const {path, url} = useRouteMatch();
+    const {path, url} = useRouteMatch();    
     const[showForm, setShowForm] = useState(false)
-    const[appointmentView, setAppointmentView] = useState(false)
 
     function newFormSubmit(appointment) {
         appointment.id = appointment.patient.substring(0,2) + appointment.provider.substring(0,2) + appointment.date
-        props.setAppointments([...props.appointments, appointment])
-        console.log(props.appointments)
+        appointment.time = appointment.time? appointment.time: '00:00'
+        console.log(appointment.time)
+        appointment.date = appointment.date? new Date(appointment.date+ 'T' + appointment.time): null
+        console.log(appointment.date)
+        props.db.send(appointment)
         setShowForm(false)
     }
 
@@ -29,9 +31,8 @@ function Appointments(props) {
                 <div className = "appt-list"> 
                     {props.appointments.length === 0? <p>There are no appointments to show. Click the button on the right to add a new appointment.</p>:
                     props.appointments.map((appt, i) => {
-                        return <ul key={i}><b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date: 'n/a'}, 
-                        <b>Time:</b> {appt.time? appt.time: 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
-                        <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <Link to={`/appointments/${appt.id}`}>view</Link></ul>
+                        return <ul key={i}><b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toString(): 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
+                        <b>Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <Link to={`/appointments/${appt.id}`}>view</Link></ul>
                     })}
                 </div>
                 <div className = "main main-vertical">

@@ -2,15 +2,15 @@ import React, { Component } from 'react';
 import ApptPreview from './appt-preview';
 import ApptCarousel from './appt-carousel';
 import ToDo from './to-do'; 
+import { PinDropSharp } from '@material-ui/icons';
 
-function Dashboard() {
-    const isApptHappening = false
+function Dashboard(props) {
 
     return(
         <div className = "dashboard"> 
             <header className = 'header'>Dashboard Overview</header>
             <div className = "main">
-                <ApptPreview isApptHappening={isApptHappening} />  
+                <ApptPreview appointments={props.appointments} />  
                 <ToDo />
                 <ApptCarousel />
             </div>

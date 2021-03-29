@@ -25,11 +25,12 @@ import Appointments from './appointments';
 import Schedule from './schedule';
 import PatientDirectory from './patient-directory';
 import Appointment from './appointment';
+import {db, useDB} from './db'
 
 function Sidebar(props) {
 
-  const [appointments, setAppointments] = useState([])
   const drawerWidth = 240;
+  const appointments = useDB()
 
   const classes = makeStyles((theme) => ({
     root: {
@@ -91,17 +92,17 @@ function Sidebar(props) {
         {/*main application*/}
         <div className = "screen">
           <Switch>
-            <Route path = "/dashboard">
+            <Route exact path = {["/", "/dashboard"]}>
               <Dashboard appointments={appointments}/>
             </Route>
             <Route exact path = "/appointments">
-              <Appointments appointments={appointments} setAppointments={setAppointments}/>
+              <Appointments appointments={appointments} db={db}/>
             </Route>
             <Route path = "/appointments/:id">
               <Appointment />
             </Route>
             <Route path = "/schedule">
-              <Schedule />
+              <Schedule appointments={appointments}/>
             </Route>
             <Route path = "/patients">
               <PatientDirectory />
