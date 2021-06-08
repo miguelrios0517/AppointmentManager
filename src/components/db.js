@@ -52,7 +52,7 @@ db.delete = function(id) {
 
 export { db, useDB }
 
-/*
+
 const firebaseConfig = {
     apiKey: "AIzaSyAsbi24FcfKqYbM1-aE2GXT96gJKRc5dj8",
     authDomain: "appointment-management-s-df6d3.firebaseapp.com",
@@ -64,7 +64,5 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
-*/
 
 store = firebase.firestore()
