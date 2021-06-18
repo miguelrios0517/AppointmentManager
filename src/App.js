@@ -7,8 +7,9 @@ import { Container } from 'react-bootstrap'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import Dashboard from "./components/dashboard"
 import Login from "./components/Login"
-import PrivateRoute from "./components/PrivateRoute"
+import PrivateRoute from "./components/PrivateRoute.js"
 import ForgotPassword from "./components/ForgotPassword.js"
+import UpdateProfile from "./components/UpdateProfile"
 
 
 import './App.css';
@@ -23,7 +24,8 @@ function App() {
             <Router>
               <AuthProvider>
                 <Switch>
-                  <Route exact path = "/" component={Dashboard} />
+                  <PrivateRoute exact path = "/" component={Dashboard} />
+                  <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
                   <Route path="/signup" component={Signup}/>  
                   <Route path="/login" component={Login}/>  
                   <Route path="/forgot-password" component={ForgotPassword}/>  

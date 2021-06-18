@@ -1,7 +1,8 @@
 //Auth context is an intermediate between your firebase program (returns firebase app.auth -
 // i.e., access to your backend) and your app.js, the parent component of your frontend. By using
 // React.creatContext and passing it the value = {currentUser, signup}, we grant every child nested 
-// within the <AuthProvider /> component a reference to the currentUser state and the signup() method
+// within the <AuthProvider /> component a reference to the currentUser (whether available or null)
+// state and methods such as signup, logout, resetPassword, updateEmail, etc.
 //
 
 import React, { useContext, useState, useEffect } from 'react'
@@ -22,10 +23,6 @@ export function AuthProvider({ children }) {
         return auth.createUserWithEmailAndPassword(email, password) //this returns a promise wich we can use inside of Signup.js
     }
 
-    function resetPassword(email) {
-        return auth.sendPasswordResetEmail(email)
-    }
-
     function login(email, password) {
         return auth.signInWithEmailAndPassword(email, password)
     }
@@ -34,6 +31,18 @@ export function AuthProvider({ children }) {
         return auth.signOut()
     }
 
+    function resetPassword(email) {
+        return auth.sendPasswordResetEmail(email)
+    }
+
+    function updateEmail(email) {
+        return currentUser.updateEmail(email)
+    }
+
+    function updatePassword(password) {
+        return currentUser.updatePassword(password)
+    }
+    
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
             setLoading(false)
@@ -49,6 +58,8 @@ export function AuthProvider({ children }) {
         login,
         logout,
         resetPassword,
+        updateEmail, 
+        updatePassword
     }
 
     return (

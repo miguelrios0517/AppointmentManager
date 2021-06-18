@@ -1,3 +1,12 @@
+/*
+This program creates a password reset request, which sends a reset email to the 
+user email that made the request. The backend that stores the user profiles
+is set up with Firebase. 
+
+Code from WebDevSimplified - React-Firebase-Auth
+Repo: https://github.com/WebDevSimplified/React-Firebase-Auth
+*/
+
 import React, { useRef, useState } from "react"
 import { Form, Button, Card, Alert } from "react-bootstrap"
 import { useAuth } from "../contexts/AuthContext"
