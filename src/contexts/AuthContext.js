@@ -19,7 +19,19 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true)
 
     function signup(email, password) {
-        auth.createUserWithEmailAndPassword(email, password) //this returns a promise wich we can use inside of Signup.js
+        return auth.createUserWithEmailAndPassword(email, password) //this returns a promise wich we can use inside of Signup.js
+    }
+
+    function resetPassword(email) {
+        return auth.sendPasswordResetEmail
+    }
+
+    function login(email, password) {
+        return auth.signInWithEmailAndPassword(email, password)
+    }
+
+    function logout() {
+        return auth.signOut()
     }
 
     useEffect(() => {
@@ -33,7 +45,10 @@ export function AuthProvider({ children }) {
     
     const value = {
         currentUser, 
-        signup
+        signup,
+        login,
+        logout,
+        resetPassword,
     }
 
     return (
