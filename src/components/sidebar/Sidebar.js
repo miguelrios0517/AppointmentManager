@@ -20,17 +20,14 @@ import EventNoteRoundedIcon from '@material-ui/icons/EventNoteRounded';
 import ScheduleRoundedIcon from '@material-ui/icons/ScheduleRounded';
 import PermContactCalendarRoundedIcon from '@material-ui/icons/PermContactCalendarRounded';
 
-import Dashboard from './dashboard';
-import Appointments from './appointments';
-import Schedule from './schedule';
-import PatientDirectory from './patient-directory';
-import Appointment from './appointment';
-import {db, useDB} from './db'
 
-function Sidebar(props) {
+
+import { SidebarData }  from './SidebarData'
+
+export default function Sidebar(props) {
 
   const drawerWidth = 240;
-  const appointments = useDB()
+  
 
   const classes = makeStyles((theme) => ({
     root: {
@@ -56,9 +53,6 @@ function Sidebar(props) {
     },
   }));
 
-  const icons = [<DashboardRoundedIcon />, <EventNoteRoundedIcon />, <ScheduleRoundedIcon />, <PermContactCalendarRoundedIcon />]
-  const pageUrls = ['/dashboard', '/appointments', '/schedule', '/patients']
-
   return (
     <Router> 
       <div>
@@ -75,10 +69,10 @@ function Sidebar(props) {
             <div className={classes.toolbar} />
             <Divider />
             <List>
-              {['Dashboard', 'View Appointments', 'Schedule', 'Patient Directory'].map((text, index) => (
-                <ListItem button key={text}>
-                  <ListItemIcon>{icons[index]}</ListItemIcon>
-                  <Link to = {pageUrls[index]}><ListItemText primary={text} /></Link>
+              {SidebarData.map((item, index) => (
+                <ListItem button key={index}>
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <Link to = {item.path}><ListItemText primary={item.title} /></Link>
                 </ListItem>
               ))}
             </List>
@@ -88,31 +82,7 @@ function Sidebar(props) {
             <div className={classes.toolbar} />
           </main>
         </div>
-
-        {/*main application*/}
-        <div className = "screen">
-          <Switch>
-            <Route exact path = {["/", "/dashboard"]}>
-              <Dashboard appointments={appointments}/>
-            </Route>
-            <Route exact path = "/appointments">
-              <Appointments appointments={appointments} db={db}/>
-            </Route>
-            <Route path = "/appointments/:id">
-              <Appointment />
-            </Route>
-            <Route path = "/schedule">
-              <Schedule appointments={appointments}/>
-            </Route>
-            <Route path = "/patients">
-              <PatientDirectory />
-            </Route>
-          </Switch>
-        </div>
-      
       </div>
     </Router>
   );
 }
-
-export default Sidebar;

@@ -2,10 +2,6 @@ import {useState, useEffect} from 'react'
 // Firebase App (the core Firebase SDK) is always required and must be listed first
 import app from '../firebase'
 
-import firebase from "firebase/app";
-// If you are using v7 or any earlier version of the JS SDK, you should import firebase using namespace import
-// import * as firebase from "firebase/app"
-
 // If you enabled Analytics in your project, add the Firebase SDK for Analytics
 import "firebase/analytics";
 
@@ -53,19 +49,5 @@ db.delete = function(id) {
 }
 
 export { db, useDB }
-
-/*
-const firebaseConfig = {
-    apiKey: "AIzaSyAsbi24FcfKqYbM1-aE2GXT96gJKRc5dj8",
-    authDomain: "appointment-management-s-df6d3.firebaseapp.com",
-    projectId: "appointment-management-s-df6d3",
-    storageBucket: "appointment-management-s-df6d3.appspot.com",
-    messagingSenderId: "674416326615",
-    appId: "1:674416326615:web:fcc3b834d4d20e9d693d92",
-    measurementId: "G-EY9PW9ZX08"
-};
-
-firebase.initializeApp(firebaseConfig);
-*/
 
 store = app.firestore()
