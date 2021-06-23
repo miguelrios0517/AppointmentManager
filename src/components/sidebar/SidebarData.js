@@ -6,29 +6,30 @@ import PermContactCalendarRoundedIcon from '@material-ui/icons/PermContactCalend
 
 const icons = [<DashboardRoundedIcon />, <EventNoteRoundedIcon />, <ScheduleRoundedIcon />, <PermContactCalendarRoundedIcon />]
 const pageUrls = ['/dashboard', '/appointments', '/schedule', '/patients']
+const root = '/home'
 
 export const SidebarData = [
   {
     title: 'Dashboard',
-    path: '/',
+    path: `${root}`,
     icon: <DashboardRoundedIcon />,
     cName: 'nav-item'
   },
   {
     title: 'Appointments',
-    path: '/appointments',
+    path: `${root}/appointments`,
     icon: <EventNoteRoundedIcon />,
     cName: 'nav-item'
   },
   {
     title: 'Schedule',
-    path: '/schedule',
+    path: `${root}/schedule`,
     icon: <ScheduleRoundedIcon />,
     cName: 'nav-item'
   },
   {
     title: 'Patients',
-    path: '/patients',
+    path: `${root}/patient`,
     icon: <PermContactCalendarRoundedIcon />,
     cName: 'nav-item'
   },

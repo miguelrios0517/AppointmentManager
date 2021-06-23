@@ -54,7 +54,6 @@ export default function Sidebar(props) {
   }));
 
   return (
-    <Router> 
       <div>
         <div className={classes.root}>
           <CssBaseline />
@@ -83,6 +82,5 @@ export default function Sidebar(props) {
           </main>
         </div>
       </div>
-    </Router>
   );
 }

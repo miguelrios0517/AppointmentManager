@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react'
 import Signup from "./components/Signup"
 import { AuthProvider } from "./contexts/AuthContext"
 import { Container } from 'react-bootstrap'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 
 import PrivateRoute from "./components/PrivateRoute.js"
 
@@ -12,10 +12,14 @@ import UpdateProfile from "./components/UpdateProfile"
 import Login from "./components/Login"
 import HomePage from "./components/HomePage"
 
+import { useAuth } from './contexts/AuthContext.js'
 
 import './App.css';
 
 function App() {
+
+  //console.log(currentUser? currentUser: null)
+
   
   return (
     // why is authprovider needed as an enclosing tag for the entire app and the switch inside the router?
@@ -25,8 +29,9 @@ function App() {
             <Router>
               <AuthProvider>
                 <Switch>
-                  <PrivateRoute exact path = "/" component={HomePage} />
+                  <PrivateRoute path = "/home" component={HomePage} />
                   <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
+                  <Route path = "/"><Redirect to ="/home" /></Route>
                   <Route path="/signup" component={Signup}/>  
                   <Route path="/login" component={Login}/>  
                   <Route path="/forgot-password" component={ForgotPassword}/>  
