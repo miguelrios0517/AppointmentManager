@@ -18,8 +18,6 @@ function HomePage() {
     const appointments = useDB()
     let { path, url } = useRouteMatch();
 
-    const { logout } = useAuth()
-
     return (
     <div className ="home-page">
         <Sidebar />

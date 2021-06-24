@@ -31,7 +31,7 @@ function App() {
                 <Switch>
                   <PrivateRoute path = "/home" component={HomePage} />
                   <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
-                  <Route path = "/"><Redirect to ="/home" /></Route>
+                  <Route exact path = "/"><Redirect to ="/home" /></Route>
                   <Route path="/signup" component={Signup}/>  
                   <Route path="/login" component={Login}/>  
                   <Route path="/forgot-password" component={ForgotPassword}/>  
