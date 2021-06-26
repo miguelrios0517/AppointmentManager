@@ -11,6 +11,7 @@ import ForgotPassword from "./components/ForgotPassword.js"
 import UpdateProfile from "./components/UpdateProfile"
 import Login from "./components/Login"
 import HomePage from "./components/HomePage"
+import Dashboard from "./components/dashboard"
 
 import { useAuth } from './contexts/AuthContext.js'
 
@@ -29,7 +30,7 @@ function App() {
             <Router>
               <AuthProvider>
                 <Switch>
-                  <PrivateRoute path = "/home" component={HomePage} />
+                  <PrivateRoute path = "/home" component={Dashboard} />
                   <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
                   <Route path = "/"><Redirect to ="/home" /></Route>
                   <Route path="/signup" component={Signup}/>  
