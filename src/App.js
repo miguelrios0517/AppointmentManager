@@ -19,6 +19,15 @@ import PatientDirectory from './components/patient-directory';
 import Appointment from './components/appointment'
 import Sidebar from './components/sidebar/Sidebar'
 
+//(just finalized a way to include all routes on the home page (login, dashboard, etc.))
+//To do... 
+// - Add database manipulation (add, delete, etc...) functionality for users in authcontext
+//        - look up how to manipulate data for specific user in firebase 
+// - Include context inside of dashboard, appointments, ...
+
+// Solution: add functions in db.js to auth context. Inport context and destructure the database 
+// manipulation functions (i.e., add appointment, delete, etc.) inside the different pages (dashboard, 
+// appointments, patients, schedule)
 
 
 import './App.css';
