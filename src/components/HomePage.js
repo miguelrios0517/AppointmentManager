@@ -18,13 +18,11 @@ function HomePage() {
     const appointments = useDB()
     let { path, url } = useRouteMatch();
 
-    const { logout } = useAuth()
-
     return (
     <div className ="home-page">
         <Sidebar />
         <Switch>
-            <Route exact path={`${path}`}>
+            <Route exact path={`${path}/dashboard`}>
                 <Dashboard appointments={appointments}/> 
             </Route>
             <Route exact path={`${path}/appointments`}>
