@@ -6,7 +6,7 @@ import PermContactCalendarRoundedIcon from '@material-ui/icons/PermContactCalend
 
 const icons = [<DashboardRoundedIcon />, <EventNoteRoundedIcon />, <ScheduleRoundedIcon />, <PermContactCalendarRoundedIcon />]
 const pageUrls = ['/dashboard', '/appointments', '/schedule', '/patients']
-const root = '/home'
+const root = ''
 
 export const SidebarData = [
   {
@@ -29,7 +29,7 @@ export const SidebarData = [
   },
   {
     title: 'Patients',
-    path: `${root}/patient`,
+    path: `${root}/patients`,
     icon: <PermContactCalendarRoundedIcon />,
     cName: 'nav-item'
   },

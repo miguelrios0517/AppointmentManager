@@ -32,7 +32,14 @@ function Appointments(props) {
         <div className = "appointments"> 
             <header className = 'header'>Appointments</header>
             <div className = "main main-appointments">
-                <div className = "appt-list"> 
+            no appointments to show
+            </div>
+        </div>
+    );
+    //{showForm? <AppoinmentForm setAppointments = {props.setAppointments} />: null}
+}
+/*
+<div className = "appt-list"> 
                     {props.appointments.length === 0? <p>There are no appointments to show. Click the button on the right to add a new appointment.</p>:
                     props.appointments.map((appt, i) => {
                         return <ul key={i}><b>Id:</b> {appt.id? appt.id: 'n/a'}, <b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toString(): 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
@@ -51,11 +58,6 @@ function Appointments(props) {
                     />
                     :null}
                 </div>        
-            </div>
-        </div>
-    );
-    //{showForm? <AppoinmentForm setAppointments = {props.setAppointments} />: null}
-}
-
+                */
 
 export default Appointments;  

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {BrowserRouter as Router, Switch, Route, Link} from "react-router-dom";
+import {BrowserRouter as Router, Switch, Route, Link, Outlet} from "react-router-dom";
 
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -54,33 +54,31 @@ export default function Sidebar(props) {
   }));
 
   return (
-      <div>
-        <div className={classes.root}>
-          <CssBaseline />
-          <Drawer
-            className={classes.drawer}
-            variant="permanent"
-            classes={{
-              paper: classes.drawerPaper,
-            }}
-            anchor="left"
-          >
-            <div className={classes.toolbar} />
-            <Divider />
-            <List>
-              {SidebarData.map((item, index) => (
-                <ListItem button key={index}>
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <Link to = {item.path}><ListItemText primary={item.title} /></Link>
-                </ListItem>
-              ))}
-            </List>
+      <div className={classes.root}>
+        <CssBaseline />
+        <Drawer
+          className={classes.drawer}
+          variant="permanent"
+          classes={{
+            paper: classes.drawerPaper,
+          }}
+          anchor="left"
+        >
+          <div className={classes.toolbar} />
+          <Divider />
+          <List>
+            {SidebarData.map((item, index) => (
+              <ListItem button key={index}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <Link to = {item.path}><ListItemText primary={item.title} /></Link>
+              </ListItem>
+            ))}
+          </List>
 
-          </Drawer>
-          <main className={classes.content}>
-            <div className={classes.toolbar} />
-          </main>
-        </div>
+        </Drawer>
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
+        </main>
       </div>
   );
 }

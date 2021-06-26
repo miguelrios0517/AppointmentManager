@@ -22,7 +22,7 @@ function HomePage() {
     <div className ="home-page">
         <Sidebar />
         <Switch>
-            <Route exact path={`${path}`}>
+            <Route exact path={`${path}/dashboard`}>
                 <Dashboard appointments={appointments}/> 
             </Route>
             <Route exact path={`${path}/appointments`}>
