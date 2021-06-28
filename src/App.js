@@ -18,6 +18,8 @@ import PatientDirectory from './components/patient-directory';
 import Appointment from './components/appointment'
 import Sidebar from './components/sidebar/Sidebar'
 
+<<<<<<< HEAD
+=======
 //(just finalized a way to include all routes on the home page (login, dashboard, etc.))
 //To do... 
 // - Add database manipulation (add, delete, etc...) functionality for users in authcontext
@@ -29,6 +31,7 @@ import Sidebar from './components/sidebar/Sidebar'
 // appointments, patients, schedule)
 
 
+>>>>>>> 051dc7d39f877877d1ccefd5ff92393b2aa2a81f
 import './App.css';
 
 
