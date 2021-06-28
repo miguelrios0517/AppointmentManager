@@ -8,43 +8,39 @@ import {
     useParams,
     useRouteMatch
   } from "react-router-dom";
-  
+import { useAuth } from '../contexts/AuthContext'
 
-function Appointments(props) {
+function Appointments() {
     const {path, url} = useRouteMatch();    
     const[showForm, setShowForm] = useState(false)
     const[ids, setIds] = useState([])
+    const { db, useDB } = useAuth()
+
+    const appointments = useDB()
 
     function newFormSubmit(appointment) {
         appointment.time = appointment.time? appointment.time: '00:00'
         console.log(appointment.time)
         appointment.date = appointment.date? new Date(appointment.date+ 'T' + appointment.time): null
         console.log(appointment.date)
-        props.db.send(appointment)
+        db.send(appointment)
         setShowForm(false)
     }
 
     function deleteAppointment(id) {
-        props.db.delete(id)
+        db.delete(id)
     }
  
     return(
         <div className = "appointments"> 
             <header className = 'header'>Appointments</header>
             <div className = "main main-appointments">
-            no appointments to show
-            </div>
-        </div>
-    );
-    //{showForm? <AppoinmentForm setAppointments = {props.setAppointments} />: null}
-}
-/*
-<div className = "appt-list"> 
-                    {props.appointments.length === 0? <p>There are no appointments to show. Click the button on the right to add a new appointment.</p>:
-                    props.appointments.map((appt, i) => {
-                        return <ul key={i}><b>Id:</b> {appt.id? appt.id: 'n/a'}, <b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toString(): 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
-                        <b>Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <div onClick = {() => deleteAppointment(appt.id)}>Delete</div> <Link to={`/appointments/${appt.id}`}>View</Link></ul>
-                    })}
+                <div className = "appt-list"> 
+                        {appointments.length === 0? <p>There are no appointments to show. Click the button on the right to add a new appointment.</p>:
+                        appointments.map((appt, i) => {
+                            return <ul key={i}><b>Id:</b> {appt.id? appt.id: 'n/a'}, <b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toString(): 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
+                            <b>Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <div onClick = {() => deleteAppointment(appt.id)}>Delete</div> <Link to={`/appointments/${appt.id}`}>View</Link></ul>
+                        })}
                 </div>
                 <div className = "main main-vertical">
                     {showForm? 
@@ -57,7 +53,12 @@ function Appointments(props) {
                         newFormSubmit = {newFormSubmit}
                     />
                     :null}
-                </div>        
-                */
+                </div> 
+            </div>    
+        </div>
+    );
+}
+
+               
 
 export default Appointments;  

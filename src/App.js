@@ -10,8 +10,6 @@ import PrivateRoute from "./components/PrivateRoute.js"
 import ForgotPassword from "./components/ForgotPassword.js"
 import UpdateProfile from "./components/UpdateProfile"
 import Login from "./components/Login"
-import HomePage from "./components/HomePage"
-import Dashboard from "./components/dashboard"
 
 import Dashboard from './components/dashboard';
 import Appointments from './components/appointments';
