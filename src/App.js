@@ -24,9 +24,12 @@ import Sidebar from './components/sidebar/Sidebar'
 //        - look up how to manipulate data for specific user in firebase 
 // - Include context inside of dashboard, appointments, ...
 
-// Solution: add functions in db.js to auth context. Inport context and destructure the database 
+// Solution: 
+// - add functions in db.js to auth context. Inport context and destructure the database 
 // manipulation functions (i.e., add appointment, delete, etc.) inside the different pages (dashboard, 
 // appointments, patients, schedule)
+// - change the auth context to add data for specific users
+
 
 
 import './App.css';
