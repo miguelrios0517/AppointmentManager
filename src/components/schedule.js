@@ -79,8 +79,11 @@ function Schedule(props) {
             if (appt.date) {
                 console.log(duration)
                 const start = appt.date.toDate()
-                const end = new Date(start)
-                end.setMinutes(start.getMinutes() + duration)
+                const endmin = start.getMinutes() + parseInt(duration)
+                console.log(start.getMinutes())
+                console.log(endmin)
+                const end = new Date(start.getFullYear(), start.getMonth(), start.getDate(), start.getHours(), endmin) 
+                console.log(end)
 
                 appts.push({
                     startDate: start,
