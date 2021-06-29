@@ -32,18 +32,17 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 function Schedule(props) {
+    const classes = useStyles();
+
     const { useDB } = useAuth()
     const appointments = useDB()
-
-    const classes = useStyles();
 
     const monthCur = new Date().getMonth() + 1
     const yearCur = new Date().getFullYear() 
     const [month, setMonth] = React.useState(monthCur)
     const [year, setYear] = React.useState(yearCur)
     const [currentDate, setCurrentDate] = React.useState(year.toString() + "-0" + month.toString() + "-01")
-    console.log('month', month)
-    console.log('currentDate', currentDate)
+
 
     const setToday = () => {
         console.log('CLICKED')
