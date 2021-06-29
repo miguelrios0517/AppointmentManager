@@ -18,17 +18,26 @@ class appointmentForm extends React.Component {
     }
   
     handleSubmit(event) {
+      console.log(this.state.error)
+      this.setState({error: ''})
       event.preventDefault();
-      console.log(this.state)
-
+      
+      //checking if time is filled in 
       if (this.state.time == '' && this.state.duration != '')  {
-        console.log('penis')
-        console.log(this.state.error)
-        return this.setState({error: 'Please enter a time, or leave the duration blank'})
-      }
+        console.log('error')
+        return this.setState({error: 'Please enter a time or leave duration blank'})
+      } 
 
-      this.newFormSubmit(this.state)
-      this.setState({patient: '', date: '', time: '', location : '', address: '', provider: ''});
+      //checking if date is filled in
+      if (this.state.date == '')  {
+        console.log('error')
+        return this.setState({error: 'Please enter a date'})
+      } 
+
+      this.setState({error: ''}, () => {
+        this.newFormSubmit(this.state)
+        this.setState({patient: '', date: '', time: '', location : '', address: '', provider: ''});
+      })
     }
   
     render() {
