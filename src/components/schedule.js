@@ -13,6 +13,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Button from '@material-ui/core/Button';
+import { useAuth } from '../contexts/AuthContext'
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -31,7 +32,11 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 function Schedule(props) {
+    const { useDB } = useAuth()
+    const appointments = useDB()
+
     const classes = useStyles();
+
     const monthCur = new Date().getMonth() + 1
     const yearCur = new Date().getFullYear() 
     const [month, setMonth] = React.useState(monthCur)
@@ -40,14 +45,14 @@ function Schedule(props) {
     console.log('month', month)
     console.log('currentDate', currentDate)
 
-    const handleClick = () => {
-        console.log('CKICKED')
+    const setToday = () => {
+        console.log('CLICKED')
         setMonth(monthCur)
         setYear(yearCur)
         setCurrentDate(yearCur.toString() +  "-0" + monthCur.toString() + "-01")
     }
   
-    const handleChange = (event) => {
+    const setCalendar = (event) => {
         console.log(event.target.name)
         if(event.target.name === "month") {
             setMonth(event.target.value)
@@ -65,21 +70,29 @@ function Schedule(props) {
 
 
     function getAppointments() {
-        console.log(props.appointments)
+        console.log(appointments)
         const appts = []
-        for (const key in props.appointments){
-            const appt = props.appointments[key]
-            const duration = appt.duration? appt.duration: 1
+        let i = 0
+        for (const key in appointments){
+            const appt = appointments[key]
+            const duration = (appt.duration && appt.duration > 0) ? appt.duration:1
             if (appt.date) {
+                console.log(duration)
+                const start = appt.date.toDate()
+                const end = new Date(start)
+                end.setMinutes(start.getMinutes() + duration)
+
                 appts.push({
-                    startDate: appt.date,
-                    endDate: new Date(appt.date + duration*60000),
+                    startDate: start,
+                    endDate: end,
                     title: appt.patient + ', ' + appt.provider,
-                    id: appts.length,
+                    id: appt.id,
                     location: appt.location
                 })
-
+                console.log(start)
+                console.log(end)
             }
+            i=i+1
         }
         console.log(appts)
         return appts;
@@ -98,7 +111,7 @@ function Schedule(props) {
                     id="demo-simple-select"
                     value={month}
                     name="month"
-                    onChange={handleChange}
+                    onChange={setCalendar}
                     >
                     <MenuItem value={1}>January</MenuItem>
                     <MenuItem value={2}>February</MenuItem>
@@ -121,7 +134,7 @@ function Schedule(props) {
                     id="demo-simple-select"
                     value={year}
                     name="year"
-                    onChange={handleChange}
+                    onChange={setCalendar}
                     >
                     <MenuItem value={2022}>2022</MenuItem>
                     <MenuItem value={2021}>2021</MenuItem>
@@ -130,7 +143,7 @@ function Schedule(props) {
                     <MenuItem value={2018}>2018</MenuItem>
                     </Select>
                 </FormControl>
-                <Button size="small" className={classes.margin} onClick={handleClick} >
+                <Button size="small" className={classes.margin} onClick={setToday} >
                     Today
                 </Button>
                 <Paper>

@@ -18,11 +18,12 @@ function Appointments() {
 
     const appointments = useDB()
 
+    console.log(appointments)
+
     function newFormSubmit(appointment) {
         appointment.time = appointment.time? appointment.time: '00:00'
         console.log(appointment.time)
         appointment.date = appointment.date? new Date(appointment.date+ 'T' + appointment.time): null
-        console.log(appointment.date)
         db.send(appointment)
         setShowForm(false)
     }
@@ -38,7 +39,7 @@ function Appointments() {
                 <div className = "appt-list"> 
                         {appointments.length === 0? <p>There are no appointments to show. Click the button on the right to add a new appointment.</p>:
                         appointments.map((appt, i) => {
-                            return <ul key={i}><b>Id:</b> {appt.id? appt.id: 'n/a'}, <b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toString(): 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
+                            return <ul key={i}><b>Id:</b> {appt.id? appt.id: 'n/a'}, <b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toDate().toString(): 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
                             <b>Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <div onClick = {() => deleteAppointment(appt.id)}>Delete</div> <Link to={`/appointments/${appt.id}`}>View</Link></ul>
                         })}
                 </div>

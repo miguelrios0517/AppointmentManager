@@ -18,9 +18,6 @@ import "firebase/firestore";
 
 const AuthContext = React.createContext()
 
-let store
-const coll = 'appointments'
-
 export function useAuth() {
   return useContext(AuthContext)
 }
@@ -29,6 +26,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState()
   const [loading, setLoading] = useState(true)
+  const[users, setUsers] = useState([])
 
   //database users
   function signup(email, password) {
@@ -65,6 +63,10 @@ export function AuthProvider({ children }) {
   }, [])
 
   //database collections 
+  let store
+  const coll = 'appointments'
+
+  // room is the dataset (i.e., appointments, patients, etc.)
   function useDB(room) {
     const [appointments, setAppointments] = useState([])
 
@@ -75,6 +77,7 @@ export function AuthProvider({ children }) {
             return appts
         })
     }
+
     function remove(id) {
         setAppointments(current=> current.filter(m=> m.id!==id))
     }
@@ -85,16 +88,21 @@ export function AuthProvider({ children }) {
             store.collection(coll)
         
         collection.onSnapshot(snap=> snap.docChanges().forEach(c=> {
+            console.log(snap.docChanges())
             const {doc, type} = c
             if (type==='added') add({...doc.data(),id:doc.id})
             if (type==='removed') remove(doc.id)
         }))
     }, [room])
-    return appointments
+
+    // filter the appointments for the current user
+    const filtered = appointments.filter(appt => appt.uid == currentUser.uid)
+    return filtered
 }
 
 const db = {}
 db.send = function(apt) {
+    apt.uid = currentUser.uid
     return store.collection(coll).add(apt)
 }
 db.delete = function(id) {
