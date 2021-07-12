@@ -1,3 +1,5 @@
+// use apptForm instead of this
+
 
 import React from 'react';
 import {Form, Button, Card, Alert} from 'react-bootstrap'
@@ -5,21 +7,20 @@ import {Form, Button, Card, Alert} from 'react-bootstrap'
 class appointmentForm extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {patient: '', date: '', time: '', duration: '', location : '', address: '', provider: '', id: '', map: {}, apptform: {}, notes:[], error:''};
-      this.showForm = props.showForm;
+      this.state = {patient: '', date: '', time: '', notKnowDuration: false, duration: '', location : '', address: '', provider: '', id: '', map: {}, apptform: {}, notes:[], error:''};
       this.newFormSubmit = props.newFormSubmit;
       this.handleChange = this.handleChange.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
     }
   
     handleChange(event) {
-      const name = event.target.name;
-      this.setState ({[name]: event.target.value});
+      const target = event.target;
+      const value = target.type === 'checkbox' ? target.checked : target.value;
+      const name = target.name;
+      this.setState ({[name]: value});
     }
   
     handleSubmit(event) {
-      console.log(this.state.error)
-      this.setState({error: ''})
       event.preventDefault();
       
       //checking if time is filled in 
@@ -58,8 +59,12 @@ class appointmentForm extends React.Component {
               <input name="time" type="time" value={this.state.time} onChange={this.handleChange} />
             </label>
             <label>
+              Don't know duration?
+              <input name="notKnowDuration" type="checkbox" checked={this.state.notKnowDuration} onChange={this.handleChange} />
+            </label>
+            <label>
               Duration (in minutes):
-              <input name="duration" type="number" value={this.state.duration} onChange={this.handleChange} />
+              <input name="duration" type="number" value={this.state.duration} onChange={this.handleChange} disabled = {(this.state.notKnowDuration)? "disabled" : ""}/>
             </label>
             <label>
               Location:

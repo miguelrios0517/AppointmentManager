@@ -14,21 +14,21 @@ import Login from "./components/Login"
 import Dashboard from './components/dashboard';
 import Appointments from './components/appointments';
 import Schedule from './components/schedule';
-import PatientDirectory from './components/patient-directory';
+import Patients from './components/patients';
 import Appointment from './components/appointment'
 import Sidebar from './components/sidebar/Sidebar'
 
-//(just finalized a way to include all routes on the home page (login, dashboard, etc.))
-//To do... 
-// - Add database manipulation (add, delete, etc...) functionality for users in authcontext
-//        - look up how to manipulate data for specific user in firebase 
-// - Include context inside of dashboard, appointments, ...
+//(filtered data for currentUser (not able to see entire collection), combined db with authcontext (i.e., db.send, db.delete, and usedb() is now in authcontext))
+// To do 6/30
+// - add form verification to appt_form
+// - finish ptntForm and switch with patientForm
+// 
 
-// Solution: 
-// - add functions in db.js to auth context. Inport context and destructure the database 
-// manipulation functions (i.e., add appointment, delete, etc.) inside the different pages (dashboard, 
-// appointments, patients, schedule)
-// - change the auth context to add data for specific users
+
+// Next steps
+// - Learn how to test components in react (e.g., using jest)
+// - Use firebase to host your site on the web
+// - Read about proper react documentation and commenting, modify readOnly
 
 
 
@@ -75,7 +75,7 @@ const LoginContainer = () => (
     <div className="container">
       <Sidebar />
       <PrivateRoute exact path="/" component={Dashboard} />
-      <PrivateRoute path="/patients" component={PatientDirectory} />
+      <PrivateRoute path="/patients" component={Patients} />
       <PrivateRoute exact path="/appointments" component={Appointments} />
       <PrivateRoute path="/schedule" component={Schedule} />
       <PrivateRoute exact path ="/appointments/:id" component ={Appointment} />

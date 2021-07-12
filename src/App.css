@@ -79,3 +79,12 @@
 .main-appointments {
   justify-content: space-between;
 }
+
+.form-container {
+  display: flex
+}
+
+.form{
+  margin-left: 10px;
+  margin-right: 10px;
+}

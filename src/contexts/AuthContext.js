@@ -64,10 +64,11 @@ export function AuthProvider({ children }) {
 
   //database collections 
   let store
-  const coll = 'appointments'
+  const [coll, setColl] = useState('appointments')
 
   // room is the dataset (i.e., appointments, patients, etc.)
-  function useDB(room) {
+  function useDB(collect) {
+    setColl(collect)
     const [appointments, setAppointments] = useState([])
 
     function add(a) {
@@ -83,9 +84,8 @@ export function AuthProvider({ children }) {
     }
 
     useEffect(() => {
-        const collection = room ? 
-            store.collection(coll).where('room','==',room) :
-            store.collection(coll)
+        const collection = collect? store.collection(collect) : 
+        store.collection(coll)
         
         collection.onSnapshot(snap=> snap.docChanges().forEach(c=> {
             console.log(snap.docChanges())
@@ -93,20 +93,21 @@ export function AuthProvider({ children }) {
             if (type==='added') add({...doc.data(),id:doc.id})
             if (type==='removed') remove(doc.id)
         }))
-    }, [room])
+    }, [])
 
-    // filter the appointments for the current user
+    // filter the appointments for the
     const filtered = appointments.filter(appt => appt.uid == currentUser.uid)
     return filtered
 }
 
 const db = {}
-db.send = function(apt) {
+db.send = function(apt, collect) {
     apt.uid = currentUser.uid
-    return store.collection(coll).add(apt)
+    return store.collection(collect).add(apt)
 }
-db.delete = function(id) {
-    return store.collection(coll).doc(id).delete()
+db.delete = function(id, collect) {
+    setColl(collect)
+    return store.collection(collect).doc(id).delete()
 }
 
 //database methods available to components

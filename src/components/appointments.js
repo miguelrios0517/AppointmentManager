@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AppoinmentForm from './appointment-form.js';
+import ApptForm from './appt_form';
 import {
     BrowserRouter as Router,
     Switch,
@@ -9,6 +10,8 @@ import {
     useRouteMatch
   } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext'
+import PtntForm from './ptnt_form.js'
+
 
 function Appointments() {
     const {path, url} = useRouteMatch();    
@@ -16,20 +19,20 @@ function Appointments() {
     const[ids, setIds] = useState([])
     const { db, useDB } = useAuth()
 
-    const appointments = useDB()
+    const appointments = useDB('appointments')
 
     console.log(appointments)
 
-    function newFormSubmit(appointment) {
+    /*function newFormSubmit(appointment) { 
         appointment.time = appointment.time? appointment.time: '00:00'
-        console.log(appointment.time)
         appointment.date = appointment.date? new Date(appointment.date+ 'T' + appointment.time): null
-        db.send(appointment)
+        console.log(appointment)
+        db.send(appointment, 'appointments')
         setShowForm(false)
-    }
+    }*/
 
     function deleteAppointment(id) {
-        db.delete(id)
+        db.delete(id, 'appointments')
     }
  
     return(
@@ -40,7 +43,7 @@ function Appointments() {
                         {appointments.length === 0? <p>There are no appointments to show. Click the button on the right to add a new appointment.</p>:
                         appointments.map((appt, i) => {
                             return <ul key={i}><b>Id:</b> {appt.id? appt.id: 'n/a'}, <b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toDate().toString(): 'n/a'}, <b>Location:</b> {appt.location? appt.location: 'n/a'}, 
-                            <b>Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <div onClick = {() => deleteAppointment(appt.id)}>Delete</div> <Link to={`/appointments/${appt.id}`}>View</Link></ul>
+                            <b>Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <div onClick = {() => deleteAppointment(appt.id, 'appointments')}>Delete</div> <Link to={`/appointments/${appt.id}`}>View</Link></ul>
                         })}
                 </div>
                 <div className = "main main-vertical">
@@ -48,12 +51,7 @@ function Appointments() {
                         <div onClick = {() => setShowForm(false)} className = "new-appt-bttn">Cancel</div>:
                         <div onClick = {() => setShowForm(true)} className = "new-appt-bttn">Add an appointment</div> 
                     }
-                    {showForm ? 
-                    <AppoinmentForm 
-                        showForm = {showForm}
-                        newFormSubmit = {newFormSubmit}
-                    />
-                    :null}
+                    {showForm ? <ApptForm setShowForm={setShowForm}/> :null}
                 </div> 
             </div>    
         </div>

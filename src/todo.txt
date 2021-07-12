@@ -1,0 +1,12 @@
+TO DO
+
+appointment_form: 
+- fix the date and time so that it submits (currently does not work if time is empty)
+- add error verification (make sure date can't be empty)
+- add a "don't know time" checkbox
+- make sure to submit data with pid and patient as seperate keys
+
+
+
+
+

@@ -18,7 +18,7 @@ function temp() {
                     <Schedule appointments={appointments}/>
                 </Route>
                 <Route path = "/patients">
-                    <PatientDirectory />
+                    <Patients />
                 </Route>
             </Switch>      
         </div>

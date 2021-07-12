@@ -35,7 +35,7 @@ function Schedule(props) {
     const classes = useStyles();
 
     const { useDB } = useAuth()
-    const appointments = useDB()
+    const appointments = useDB('appointments')
 
     const monthCur = new Date().getMonth() + 1
     const yearCur = new Date().getFullYear() 
