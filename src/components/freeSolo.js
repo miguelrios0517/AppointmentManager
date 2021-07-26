@@ -9,7 +9,7 @@ export default function FreeSolo(props) {
       <Autocomplete
         id="free-solo-demo"
         freeSolo
-        options={props.options}
+        options={props.options.length === 0 ? []:props.options}
         renderInput={(params) => (
           <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
         )}

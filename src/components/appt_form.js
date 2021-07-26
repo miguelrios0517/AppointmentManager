@@ -15,6 +15,8 @@ function ApptForm(props) {
     const [location, setLocation] = useState('');
     const [address, setAddress] = useState('');
     const [facility, setFacility] = useState('');
+    const [facilities, setFacilities] = useState([]);
+    const [providers, setProviders] = useState([]);
     const [provider, setProvider] = useState('');
     const [error, setError] = useState('');
     const[showForm, setShowForm] = useState(false)
@@ -54,10 +56,10 @@ function ApptForm(props) {
 
             //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
             const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
-            const facilities = pat_obj['facilities']
-            const providers = pat_obj['providers']
+            const _facilities = pat_obj['facilities']
+            const _providers = pat_obj['providers']
             console.log(pat_obj)
-            console.log(facilities, providers)
+            console.log(_facilities, _providers)
             /*
             for (let p in patients){
               console.log(patients[p].id)
@@ -65,7 +67,7 @@ function ApptForm(props) {
 
             await Promise.all([
               db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'address':address, 'provider':provider, 'error':error}, 'appointments'), 
-              facility!='' && db.edit(pid,{'facilities':[...facilities, facility]}, 'patients')
+              facility!='' && db.edit(pid,{'facilities':[..._facilities, facility]}, 'patients')
             ]);
 
             await 
@@ -105,12 +107,25 @@ function ApptForm(props) {
               <label>
               Patient Full Name: 
               <select value={patient} onChange={e => {
-                setPatient(e.target.value)
-                if (e.target.value == 'new-patient') {
+                const val = e.target.value
+                setPatient(val)
+                if (val == 'new-patient') {
                   setShowForm(true)
                 } else {
                   setShowForm(false)
+
+                  //taking the patient field and splitting it into name and pid (set as a string "patient name (pid)")
+                  const pat_arr = val.split(", ")
+                  const pid = pat_arr[0]
+                  const _patient = pat_arr[1]
+
+                  //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
+                  const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
+                  setFacilities(pat_obj['facilities'] === undefined? []:pat_obj['facilities'])
+                  setProviders(pat_obj['providers'])
+                  console.log(pat_obj['facilities'] === undefined? []:pat_obj['facilities'])
                 }
+                console.log('PATIENT FIELD CHANGE', val)
               }}>
                   <option value='select'>Select a patient</option>
                   <option value='new-patient'>Add a new patient</option>
@@ -143,7 +158,7 @@ function ApptForm(props) {
               </label>
               <label>
               Facility
-              <FreeSolo options ={['apple', 'organge', 'tomato']}/>
+              <FreeSolo options ={facilities}/>
               </label>
               <label>
               Address
