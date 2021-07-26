@@ -3,24 +3,28 @@ import {Form, Button, Card, Alert} from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react';
 
+//left of trying to figure out schema 
+// so far facilities fields are name, address, providers, and phone numbers
+// should providers be its own collection or be stored within facilities
+// how should providers be stored inside of facilities
+//    possible option: provider fields could be firstName, lastName, title(doctor, nurse, etc), phoneNum, email
 
-export default function PtntForm(props) {
+
+
+export function ShortPtntForm(props) {
     const [firstName, setFirstName] = useState('');
+    const [middleInitial, setMiddleInitial] = useState('');
     const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phoneNum, setPhoneNum] = useState('');
-    const [provider, setProvider] = useState('');
     const [error, setError] = useState('');
     const { db } = useAuth()
   
   const handleSubmit = (e) => {
     setError('')
     e.preventDefault();
-    db.send({'firstName': firstName, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'error':error}, 'patients').then(function(docRef) {
-        props.setPatient(docRef.id)
-    })
+    db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'providers': [], 'facilities': []}, 'patients').then(function(docRef) {
+        props.setPatient(docRef.id + ', ' + firstName + ' ' + lastName) })
     props.setShowForm(false)
-  }
+}
     
     return (
         <div>
@@ -35,6 +39,55 @@ export default function PtntForm(props) {
                 <input name="firstName" type="text" value={firstName} onChange={e => setFirstName(e.target.value)}/>
                 </label>
                 <label>
+                Middle Initial:
+                <input name="middleInitial" type="text" value={middleInitial} maxlength="1" onChange={e => setMiddleInitial(e.target.value)}/>
+                </label>
+                <label>
+                Last Name: 
+                <input name="lastName" type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
+                </label>
+                <input className = "submit-bttn" type="submit" value="Submit" />
+            </form>
+        </div>
+      );
+    }
+
+
+export default function PtntForm(props) {
+    const [firstName, setFirstName] = useState('');
+    const [middleInitial, setMiddleInitial] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phoneNum, setPhoneNum] = useState('');
+    const [facility, setFacility] = useState('');
+    const [provider, setProvider] = useState('');
+    const [error, setError] = useState('');
+    const { db } = useAuth()
+
+
+    
+  
+    const handleSubmit = (e) => {
+      setError('')
+      e.preventDefault();
+      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'providers': [provider]}, 'patients').then(function(docRef) {
+          props.setShowForm(false)
+      })
+    }
+    
+    return (
+        <div>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <form onSubmit={e => { handleSubmit(e) }} className = 'appt-form'>
+                <label>
+                First Name:
+                <input name="firstName" type="text" value={firstName} onChange={e => setFirstName(e.target.value)}/>
+                </label>
+                <label>
+                Middle Initial:
+                <input name="middleInitial" type="text" value={middleInitial} maxlength="1" onChange={e => setMiddleInitial(e.target.value)}/>
+                </label>
+                <label>
                 Last Name: 
                 <input name="lastName" type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
                 </label>
@@ -47,6 +100,10 @@ export default function PtntForm(props) {
                 <input name="email" type="text" value={email} onChange={e => setEmail(e.target.value)} />
                 </label>
                 <label>
+                Facility: 
+                <input name="facility" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
+                </label>
+                <label>
                 Provider: 
                 <input name="provider" type="text" value={provider} onChange={e => setProvider(e.target.value)} />
                 </label>
@@ -54,7 +111,7 @@ export default function PtntForm(props) {
             </form>
         </div>
       );
-    }
+}
   
 
 

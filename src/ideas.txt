@@ -1,0 +1,1 @@
+- Write or find a script that auto fills missing characters (like a closing bracket) in React code

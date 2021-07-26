@@ -1,10 +1,42 @@
 TO DO
 
+create recentyDeleted
+- inside firestore db as a collection
+- as a react component
+
+
+patients (7/22)
+- if patient is deleted, cascade delete down to its appointments (can we do this through firestore?)
+
+appointments (7/22)
+- add each appointment the patient's array of appointments
+
+
+appt_form (7/22)
+- make facility and provider drop down fields when there are existing facilities and providers in the selected patient object
+        UX: facilities and providers are a one-to-many relationship
+            first display, full list of facilities while disabling providers field
+            second, once a facility is selected enable the providers field and only display providers that are linked facility
+
+
+
+ptnt_form (7/22)
+- make a small version and export it so that it can be used in appointment form. When user wants to create new patient inside appt_form, only ask for
+    first and last name
+- how should patients fill in facility and provider field (regular form)? 
+        * Facilities and providers have a one-to-many relationship
+        * Idea for patient id view: have a field for facility, then a field for doctor (this is current set up), but also include the option to add more providers for that facility
+        * For now, we are going to assume that patients and providers have a one-to-one relationship
+
+
+
+OLD 
+
 appointment_form: 
-- fix the date and time so that it submits (currently does not work if time is empty)
-- add error verification (make sure date can't be empty)
-- add a "don't know time" checkbox
-- make sure to submit data with pid and patient as seperate keys
+- (done, fixed with error verification) fix the date and time so that it submits (currently does not work if time is empty, problem with joing the date and time)
+- (done) add error verification (make sure date can't be empty)
+- (done) add a "don't know time" checkbox
+- (done) make sure to submit data with pid and patient as seperate keys
 
 
 

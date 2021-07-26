@@ -64,11 +64,10 @@ export function AuthProvider({ children }) {
 
   //database collections 
   let store
-  const [coll, setColl] = useState('appointments')
+  const coll = 'appointments'
 
   // room is the dataset (i.e., appointments, patients, etc.)
   function useDB(collect) {
-    setColl(collect)
     const [appointments, setAppointments] = useState([])
 
     function add(a) {
@@ -88,7 +87,6 @@ export function AuthProvider({ children }) {
         store.collection(coll)
         
         collection.onSnapshot(snap=> snap.docChanges().forEach(c=> {
-            console.log(snap.docChanges())
             const {doc, type} = c
             if (type==='added') add({...doc.data(),id:doc.id})
             if (type==='removed') remove(doc.id)
@@ -101,14 +99,18 @@ export function AuthProvider({ children }) {
 }
 
 const db = {}
-db.send = function(apt, collect) {
-    apt.uid = currentUser.uid
-    return store.collection(collect).add(apt)
+db.send = function(data, collect) {
+  data.uid = currentUser.uid
+  return store.collection(collect).add(data)
 }
 db.delete = function(id, collect) {
-    setColl(collect)
-    return store.collection(collect).doc(id).delete()
+  return store.collection(collect).doc(id).delete()
 }
+
+db.edit = function(id, data, collect) {
+  return store.collection(collect).doc(id).set(data, {merge: true});
+}
+
 
 //database methods available to components
 const value = {

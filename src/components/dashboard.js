@@ -12,8 +12,6 @@ export default function Dashboard(props) {
     const { currentUser, logout } = useAuth()
     const history = useHistory()
 
-    console.log(currentUser)
-
     async function handleLogout() {
         setError('')
 

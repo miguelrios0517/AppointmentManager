@@ -25,13 +25,11 @@ class appointmentForm extends React.Component {
       
       //checking if time is filled in 
       if (this.state.time == '' && this.state.duration != '')  {
-        console.log('error')
         return this.setState({error: 'Please enter a time or leave duration blank'})
       } 
 
       //checking if date is filled in
       if (this.state.date == '')  {
-        console.log('error')
         return this.setState({error: 'Please enter a date'})
       } 
 

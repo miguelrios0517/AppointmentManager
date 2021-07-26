@@ -8,7 +8,7 @@ import {
     useRouteMatch
   } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext'
-import PatientForm from './patient-form.js';
+import PtntForm from './ptnt_form.js';
 
 function Patients() {
     const {path, url} = useRouteMatch();    
@@ -17,8 +17,6 @@ function Patients() {
     const { db, useDB } = useAuth()
 
     const patients = useDB('patients')
-
-    console.log(patients)
 
     function newFormSubmit(item) {
         db.send(item, 'patients')
@@ -43,11 +41,11 @@ function Patients() {
                 <div className = "main main-vertical">
                     {showForm? 
                         <div onClick = {() => setShowForm(false)} className = "new-appt-bttn">Cancel</div>:
-                        <div onClick = {() => setShowForm(true)} className = "new-appt-bttn">Add an appointment</div> 
+                        <div onClick = {() => setShowForm(true)} className = "new-appt-bttn">Add a Patient</div> 
                     }
                     {showForm ? 
-                    <PatientForm 
-                        newFormSubmit = {newFormSubmit}
+                    <PtntForm
+                        setShowForm = {setShowForm}
                     />
                     :null}
                 </div> 
