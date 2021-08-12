@@ -13,6 +13,8 @@ appointments ()
 
 
 appt_form (7/25)
+- currently stuck trying to get promise.all to work. Only returns an empty array not what db.send, etc should return. Db.send, etc works fine
+outside of promise.all
 - first display, full list of facilities while disabling providers field second, once a facility is selected enable the 
 providers field and only display providers that are linked facility
 - if new provider or facilty is entered (meaning an option from the drop suggestions is not selected), then edit the patient and

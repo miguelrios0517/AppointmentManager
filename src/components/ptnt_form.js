@@ -2,6 +2,7 @@ import React from 'react';
 import {Form, Button, Card, Alert} from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react';
+import { FacilityForm } from './fac_form';
 
 //left of trying to figure out schema 
 // so far facilities fields are name, address, providers, and phone numbers
@@ -61,16 +62,25 @@ export default function PtntForm(props) {
     const [phoneNum, setPhoneNum] = useState('');
     const [facility, setFacility] = useState('');
     const [provider, setProvider] = useState('');
+    const [providers, setProviders] = useState([]);
     const [error, setError] = useState('');
+    const [showFacForm, setShowFacForm] = useState(false);
     const { db } = useAuth()
+    var _facility;
 
-
+    const handleFacForm = (e) => {
+      //error handling
+      e.preventDefault();
+      console.log(e.value)
+      //db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':facility, 'providers': providers}, 'patients').then(function(docRef) {
+       // props.setShowForm(false)})
+    }
     
   
     const handleSubmit = (e) => {
       setError('')
       e.preventDefault();
-      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'providers': [provider]}, 'patients').then(function(docRef) {
+      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':facility, 'providers': providers}, 'patients').then(function(docRef) {
           props.setShowForm(false)
       })
     }
@@ -99,7 +109,22 @@ export default function PtntForm(props) {
                 Email: 
                 <input name="email" type="text" value={email} onChange={e => setEmail(e.target.value)} />
                 </label>
-                <label>
+                <br/>
+                <div onClick = {() => setShowFacForm(true)} className = "new-appt-bttn">Add a provider</div> 
+                {showFacForm && 
+                  <div> 
+                    facility form
+                    <FacilityForm handleFacForm = {handleFacForm}/>
+                  </div>}
+                <br/>
+                <input className = "new-appt-bttn" type="submit" value="Submit" />
+            </form>
+        </div>
+      );
+}
+  
+/*
+ <label>
                 Facility: 
                 <input name="facility" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
                 </label>
@@ -107,13 +132,7 @@ export default function PtntForm(props) {
                 Provider: 
                 <input name="provider" type="text" value={provider} onChange={e => setProvider(e.target.value)} />
                 </label>
-                <input className = "submit-bttn" type="submit" value="Submit" />
-            </form>
-        </div>
-      );
-}
-  
-
+*/
 
 
 /*

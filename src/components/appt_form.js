@@ -5,6 +5,10 @@ import { useAuth } from '../contexts/AuthContext'
 import { ShortPtntForm } from './ptnt_form.js'
 import FreeSolo from './freeSolo';
 
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import TextField from "@material-ui/core/TextField";
+
+
 function ApptForm(props) {
     const [patient, setPatient] = useState('');
     const [date, setDate] = useState('');
@@ -22,7 +26,57 @@ function ApptForm(props) {
     const[showForm, setShowForm] = useState(false)
     const [loading, setLoading] = useState(false)
     const { useDB, db } = useAuth()
+
+    //const patients = useDB('patients')
+    //const _facilities = useDB('facilities')
+
+    
+    /* const myPromise = new Promise((resolve, reject) => {  
+      patients = useDB('patients'); 
+      
+      if(patients) {    
+          resolve('Promise is resolved successfully.');  
+      } else {    
+          reject('Promise is rejected');  
+      }
+    }); */
+
     const patients = useDB('patients')
+    const _facilities = useDB('facilities')
+    console.log('patients',patients)
+    console.log('facilities', _facilities)
+
+    //useDB('facilities')
+
+    
+    /*useDB('patients').then(function(docRef) {
+      patients = docRef.id
+      console.log(patients) });*/
+
+    /*
+    
+    const promises = [
+      useDB('patients'),
+      ];
+
+    const allPromise = Promise.all([
+      useDB('patients')
+      ]);
+ 
+    allPromise.then(values => {
+      console.log('VALUES', values); // [valueOfPromise1, valueOfPromise2, ...]
+      patients = values[0]
+    }).catch(error => {
+      console.log(error)  // rejectReason of any first rejected promise
+    });
+    */
+
+    const handleInputChange = (e, data) => {
+      console.log(data);
+      setFacility(data);
+      return data;
+    };
+
 
     async function handleSubmit(e) {
       
@@ -46,58 +100,72 @@ function ApptForm(props) {
             const _time = time? time: '00:00'
             const _date = date? new Date(date+ 'T' + _time): null
             
-            //taking the patient field set by ptntForm (set as a string "patient name (pid)")
-            //TODO: once the patient field is set, need to grab the facilities and providers
-            // Move this inside of handle change, because string must be split each time the
-            // patient is changed in order to get the field suggestions for facility and provider
+            //taking the patient field set by ptntForm (set as a string "pid,patient name")
             const pat_arr = patient.split(", ")
             const pid = pat_arr[0]
             const _patient = pat_arr[1]
 
             //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
-            const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
-            const _facilities = pat_obj['facilities']
-            const _providers = pat_obj['providers']
-            console.log(pat_obj)
-            console.log(_facilities, _providers)
-            /*
-            for (let p in patients){
-              console.log(patients[p].id)
-            } */
+            console.log('FACILITY', facility) 
+            console.log([...facilities, facility])
 
-            await Promise.all([
-              db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'address':address, 'provider':provider, 'error':error}, 'appointments'), 
-              facility!='' && db.edit(pid,{'facilities':[..._facilities, facility]}, 'patients')
-            ]);
-
-            await 
+            console.log('!(facility in facilities)', facility in facilities)
+      
+            Promise.all([
+                db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'address':address, 'provider':provider, 'error':error}, 'appointments'), 
+                (facility!='' && !(facilities.includes(facility))) && db.edit(pid,{'facilities':[...facilities, facility]}, 'patients'), 
+                (facility!='' && !(facilities.includes(facility))) && db.send({'patients':[pid]}, 'facilities')
+              ]);
 
             props.setShowForm(false)
 
         } catch {
             setError('Failed to submit appointment')
         }
-  
     }
-    
-
-/*
-    const handleSubmit= (e) => {
-        setError('')
-        e.preventDefault();
-        const _time = time? time: '00:00'
-        const _date = date? new Date(date+ 'T' + _time): null
-        console.log(_time)
-        console.log(_date)
-
-        const pat_arr = patient.split(", ")
-        const pid = pat_arr[0]
-        const _patient = pat_arr[1]
-        setPatient(pat_arr[1])
-        db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'location':location, 'address':address, 'provider':provider, 'error':error}, 'appointments')
-    }
-*/
   
+
+
+            /*
+            //if facility = new option
+            !facilities.includes(facility) ?? db.send({'patients':[pid], 'address': address}, 'facilities').then(function(docRef) {
+              const fid = docRef.id
+              Promise.all([
+                db.edit(pid,[fid], 'patients'), 
+                db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'fid':fid , 'address':address, 'provider':provider, 'error':error}, 'appointments')
+              ])})
+
+            //if facility = existing option
+            if (facilities.includes(facility)) {
+              console.log(facility)
+              const fac_obj = _facilities.filter(fac => fac.id == facility)[0]
+              console.log(fac_obj)
+              // if address = different than in db -> confirm with user if they want to replace main addres
+              if (('address' in fac_obj && address != fac_obj['address']) || !('address' in fac_obj)) {
+                Promise.all([
+                  db.edit(facility,{'address': address}, 'facilities'), 
+                  db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'fid':facility , 'address':address, 'provider':provider, 'error':error}, 'appointments')
+                ])
+              } 
+              else {
+                db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'fid':facility , 'address':address, 'provider':provider, 'error':error}, 'appointments')
+              }
+            }
+            */
+      
+            
+            /*
+            place 1
+            place 2
+            place 3
+            
+
+            1) choose from existing facility
+              1a) choose from existing address
+              2b) set new address
+            2) set new facility
+              2a) set new address
+            */ 
   
     return (
       <div className = 'form-container'>
@@ -121,9 +189,9 @@ function ApptForm(props) {
 
                   //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
                   const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
-                  setFacilities(pat_obj['facilities'] === undefined? []:pat_obj['facilities'])
-                  setProviders(pat_obj['providers'])
-                  console.log(pat_obj['facilities'] === undefined? []:pat_obj['facilities'])
+                  pat_obj && (setFacilities(pat_obj['facilities'] != undefined && pat_obj['facilities']))
+                  //setProviders(pat_obj['providers'])
+                  console.log('FACILITIES', pat_obj, pat_obj && (pat_obj['facilities'] != undefined && pat_obj['facilities']))
                 }
                 console.log('PATIENT FIELD CHANGE', val)
               }}>
@@ -135,7 +203,8 @@ function ApptForm(props) {
               </label>
               <label>
               Date:
-              <input name="date" type="date" value={date} onChange={e => setDate(e.target.value)}/>
+              <input name="date" type="date" value={date} onChange={e => {setDate(e.target.value)
+              console.log('poop')} }/>
               </label>
               <label>
               Don't know Time?
@@ -158,7 +227,33 @@ function ApptForm(props) {
               </label>
               <label>
               Facility
-              <FreeSolo options ={facilities}/>
+              <Autocomplete
+                id="free-solo-demo"
+                freeSolo
+                value={facility}
+                onInputChange={(e, data) => {
+                  setFacility(data)
+                  console.log('data', data)
+                  if (data != '') {
+                    const fac_obj = _facilities.filter(fac => fac.name == data)[0]
+                    console.log('address', fac_obj['address'])
+                    setAddress(fac_obj['address'])
+                  }
+                }}
+                options={facilities.length === 0 ? []:facilities.map((fid)=> {
+                  const fac_obj = _facilities.filter(fac => {
+                    return fac.id === fid
+                  })[0]
+                  console.log('fac_obj', fid, fac_obj, (typeof fac_obj === 'undefined'))
+                  if(!(typeof fac_obj === 'undefined')) {
+                    console.log('return', fac_obj['name'])
+                    return fac_obj['name']
+                  } 
+                  return false
+                })}
+                renderInput={(params) => (
+                  <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                  )}/>
               </label>
               <label>
               Address
@@ -177,7 +272,7 @@ function ApptForm(props) {
     </div>
     )
   }
-
+//<FreeSolo value={facility} onChang={e => console.log(e.target.value)} options={facilities}/>
 //<input name="facility" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
 
   export default ApptForm;
