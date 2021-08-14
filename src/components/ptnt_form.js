@@ -90,19 +90,19 @@ export default function PtntForm(props) {
             {error && <Alert variant="danger">{error}</Alert>}
             <form onSubmit={e => { handleSubmit(e) }} className = 'appt-form'>
                 <label>
-                First Name:
+                First name:
                 <input name="firstName" type="text" value={firstName} onChange={e => setFirstName(e.target.value)}/>
                 </label>
                 <label>
-                Middle Initial:
+                Middle initial:
                 <input name="middleInitial" type="text" value={middleInitial} maxlength="1" onChange={e => setMiddleInitial(e.target.value)}/>
                 </label>
                 <label>
-                Last Name: 
+                Last name: 
                 <input name="lastName" type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
                 </label>
                 <label>
-                Phone Number:  
+                Phone number:  
                 <input name="phoneNum" type="text" value={phoneNum} onChange={e => setPhoneNum(e.target.value)} />
                 </label>
                 <label>
@@ -110,11 +110,11 @@ export default function PtntForm(props) {
                 <input name="email" type="text" value={email} onChange={e => setEmail(e.target.value)} />
                 </label>
                 <br/>
-                <div onClick = {() => setShowFacForm(true)} className = "new-appt-bttn">Add a provider</div> 
+                <div onClick = {() => setShowFacForm(true)} className = "new-appt-bttn">Add a Facility</div> 
                 {showFacForm && 
                   <div> 
                     facility form
-                    <FacilityForm handleFacForm = {handleFacForm}/>
+                    <FacilityForm handleFacForm = {handleFacForm} setShowForm = {setShowFacForm}/>
                   </div>}
                 <br/>
                 <input className = "new-appt-bttn" type="submit" value="Submit" />
