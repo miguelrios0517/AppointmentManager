@@ -2,7 +2,7 @@ import React from 'react';
 import {Form, Button, Card, Alert} from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react';
-import { FacilityForm } from './fac_form';
+//import { FacilityForm } from './fac_form';
 
 //left of trying to figure out schema 
 // so far facilities fields are name, address, providers, and phone numbers
@@ -22,7 +22,7 @@ export function ShortPtntForm(props) {
   const handleSubmit = (e) => {
     setError('')
     e.preventDefault();
-    db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'providers': [], 'facilities': []}, 'patients').then(function(docRef) {
+    db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName}, 'patients').then(function(docRef) {
         props.setPatient(docRef.id + ', ' + firstName + ' ' + lastName) })
     props.setShowForm(false)
 }
@@ -62,9 +62,7 @@ export default function PtntForm(props) {
     const [phoneNum, setPhoneNum] = useState('');
     const [facility, setFacility] = useState('');
     const [provider, setProvider] = useState('');
-    const [providers, setProviders] = useState([]);
     const [error, setError] = useState('');
-    const [showFacForm, setShowFacForm] = useState(false);
     const { db } = useAuth()
     var _facility;
 
@@ -80,7 +78,7 @@ export default function PtntForm(props) {
     const handleSubmit = (e) => {
       setError('')
       e.preventDefault();
-      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':facility, 'providers': providers}, 'patients').then(function(docRef) {
+      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':facility, 'provider':provider}, 'patients').then(function(docRef) {
           props.setShowForm(false)
       })
     }
@@ -109,13 +107,6 @@ export default function PtntForm(props) {
                 Email: 
                 <input name="email" type="text" value={email} onChange={e => setEmail(e.target.value)} />
                 </label>
-                <br/>
-                <div onClick = {() => setShowFacForm(true)} className = "new-appt-bttn">Add a Facility</div> 
-                {showFacForm && 
-                  <div> 
-                    facility form
-                    <FacilityForm handleFacForm = {handleFacForm} setShowForm = {setShowFacForm}/>
-                  </div>}
                 <br/>
                 <input className = "new-appt-bttn" type="submit" value="Submit" />
             </form>
