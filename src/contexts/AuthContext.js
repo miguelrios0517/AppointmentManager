@@ -72,6 +72,7 @@ export function AuthProvider({ children }) {
 
     function add(a) {
         setAppointments(current => {
+            console.log('BOOM', 'a', a, 'current', current)
             const appts = [a, ...current]
             appts.sort((a,b)=> (b.date - a.date))
             return appts

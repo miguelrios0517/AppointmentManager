@@ -22,14 +22,16 @@ export function ShortPtntForm(props) {
     const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
     const { db } = useAuth()
+   
   
+
   const handleSubmit = (e) => {
     setError('')
     e.preventDefault();
     db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName}, 'patients').then(function(docRef) {
         props.setPatient(docRef.id + ', ' + firstName + ' ' + lastName) })
     props.setShowForm(false)
-}
+  }
     
     return (
         <div>
@@ -65,6 +67,7 @@ export default function PtntForm(props) {
     const [email, setEmail] = useState('');
     const [phoneNum, setPhoneNum] = useState('');
     const [facility, setFacility] = useState('');
+    const [providers, setProviders] = useState([{'name':'provider'}]);
     const [provider, setProvider] = useState('');
     const [providerTitle, setProviderTitle] = useState('');
     const [providerEmail, setProviderEmail] = useState('');
@@ -72,21 +75,20 @@ export default function PtntForm(props) {
     const [error, setError] = useState('');
     const { db } = useAuth()
     var _facility;
-
-    const handleFacForm = (e) => {
-      //error handling
-      e.preventDefault();
-      console.log(e.value)
-      //db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':facility, 'providers': providers}, 'patients').then(function(docRef) {
-       // props.setShowForm(false)})
-    }
     
+
+    const handleBlur = (e) => {
+      setProviders(current => [...current, {'name':e.target.value}])
+      
+
+    }
   
     const handleSubmit = (e) => {
+      setProviders(current => [...current, {'name':provider}])
       setError('')
       e.preventDefault();
       //{'name':provider, 'title':providerTitle, 'email':providerEmail, 'phone':providerPhone}
-      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'provider':[{'name':provider}]}, 'patients').then(function(docRef) {
+      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'provider':providers}, 'patients').then(function(docRef) {
           props.setShowForm(false)
       })
     } 
@@ -121,7 +123,7 @@ export default function PtntForm(props) {
                 </label>
                 <label>
                 Provider:
-                <input name="email" type="text" value={provider} onChange={e => setProvider(e.target.value)} />
+                <input name="email" type="text" value={provider} onChange={e => {setProvider(e.target.value)}} onBlur={handleBlur}/>
                 </label>
                 <label>
                 Provider Title (i.e., doctor, nurse, physical therapist):
