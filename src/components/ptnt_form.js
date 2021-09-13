@@ -85,10 +85,11 @@ export default function PtntForm(props) {
     const handleSubmit = (e) => {
       setError('')
       e.preventDefault();
-      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'provider':[{'name':provider, 'title':providerTitle, 'email':providerEmail, 'number':providerPhone}]}, 'patients').then(function(docRef) {
+      //{'name':provider, 'title':providerTitle, 'email':providerEmail, 'phone':providerPhone}
+      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'provider':[{'name':provider}]}, 'patients').then(function(docRef) {
           props.setShowForm(false)
       })
-    }
+    } 
     
     return (
         <div>

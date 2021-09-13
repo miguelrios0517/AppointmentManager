@@ -18,7 +18,7 @@ function useDB(room) {
     function add(a) {
         setAppointments(current => {
             const appts = [a, ...current]
-            appts.sort((a,b)=> (b.date - a.date))
+            room === 'patients' ? appts.sort((a,b)=> (b.firstName - a.firstName)) : appts.sort((a,b)=> (b.date - a.date))
             return appts
         })
     }
