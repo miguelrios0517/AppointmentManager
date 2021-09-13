@@ -2,6 +2,10 @@ import React from 'react';
 import {Form, Button, Card, Alert} from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react';
+
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import TextField from "@material-ui/core/TextField";
+
 //import { FacilityForm } from './fac_form';
 
 //left of trying to figure out schema 
@@ -62,6 +66,9 @@ export default function PtntForm(props) {
     const [phoneNum, setPhoneNum] = useState('');
     const [facility, setFacility] = useState('');
     const [provider, setProvider] = useState('');
+    const [providerTitle, setProviderTitle] = useState('');
+    const [providerEmail, setProviderEmail] = useState('');
+    const [providerPhone, setProviderPhone] = useState('');
     const [error, setError] = useState('');
     const { db } = useAuth()
     var _facility;
@@ -78,7 +85,7 @@ export default function PtntForm(props) {
     const handleSubmit = (e) => {
       setError('')
       e.preventDefault();
-      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':facility, 'provider':provider}, 'patients').then(function(docRef) {
+      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'provider':[{'name':provider, 'title':providerTitle, 'email':providerEmail, 'number':providerPhone}]}, 'patients').then(function(docRef) {
           props.setShowForm(false)
       })
     }
@@ -106,6 +113,37 @@ export default function PtntForm(props) {
                 <label>
                 Email: 
                 <input name="email" type="text" value={email} onChange={e => setEmail(e.target.value)} />
+                </label>
+                <label>
+                Facility: 
+                <input name="phoneNum" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
+                </label>
+                <label>
+                Provider:
+                <input name="email" type="text" value={provider} onChange={e => setProvider(e.target.value)} />
+                </label>
+                <label>
+                Provider Title (i.e., doctor, nurse, physical therapist):
+                <Autocomplete
+                  id="free-solo-demo"
+                  freeSolo
+                  value={providerTitle}
+                  onInputChange={(e, data) => {
+                    setFacility(data)
+                    console.log('data', data)
+                  }}
+                  options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                  renderInput={(params) => (
+                    <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                    )}/>
+                </label>
+                <label>
+                Provider Email:
+                <input name="email" type="text" value={providerEmail} onChange={e => setProviderEmail(e.target.value)} />
+                </label>
+                <label>
+                Provider Phone Number:
+                <input name="email" type="text" value={providerPhone} onChange={e => setProviderPhone(e.target.value)} />
                 </label>
                 <br/>
                 <input className = "new-appt-bttn" type="submit" value="Submit" />
