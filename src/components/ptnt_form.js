@@ -1,7 +1,7 @@
 import React from 'react';
 import {Form, Button, Card, Alert} from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField";
@@ -22,7 +22,7 @@ export function ShortPtntForm(props) {
     const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
     const { db } = useAuth()
-   
+  
   
 
   const handleSubmit = (e) => {
@@ -67,30 +67,41 @@ export default function PtntForm(props) {
     const [email, setEmail] = useState('');
     const [phoneNum, setPhoneNum] = useState('');
     const [facility, setFacility] = useState('');
-    const [providers, setProviders] = useState([{'name':'provider'}]);
-    const [provider, setProvider] = useState('');
-    const [providerTitle, setProviderTitle] = useState('');
+    const [facilityAdd, setFacilityAdd] = useState('');
+    const [providerOne, setProviderOne] = useState('');
+    const [providerTwo, setProviderTwo] = useState('');
+    const [providerThree, setProviderThree] = useState('');
+    const [providerFour, setProviderFour] = useState('');
+    const [providerFive, setProviderFive] = useState('');
+    const [providerOneTitle, setProviderOneTitle] = useState('');
+    const [providerTwoTitle, setProviderTwoTitle] = useState('');
+    const [providerThreeTitle, setProviderThreeTitle] = useState('');
+    const [providerFourTitle, setProviderFourTitle] = useState('');
+    const [providerFiveTitle, setProviderFiveTitle] = useState('');
+    const [provNums, setProvNums] = useState(0);
     const [providerEmail, setProviderEmail] = useState('');
     const [providerPhone, setProviderPhone] = useState('');
     const [error, setError] = useState('');
     const { db } = useAuth()
     var _facility;
-    
+    var _provNums = ['one', 'two', 'three', 'four', 'five']
 
-    const handleBlur = (e) => {
-      setProviders(current => [...current, {'name':e.target.value}])
-      
-
-    }
   
     const handleSubmit = (e) => {
-      setProviders(current => [...current, {'name':provider}])
       setError('')
       e.preventDefault();
-      //{'name':provider, 'title':providerTitle, 'email':providerEmail, 'phone':providerPhone}
-      db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[facility], 'provider':providers}, 'patients').then(function(docRef) {
-          props.setShowForm(false)
-      })
+      var providers = [providerOne+';'+providerOneTitle, 
+      providerTwo+';'+providerTwoTitle,
+      providerThree+';'+providerThreeTitle,
+      providerFour+';'+providerFourTitle,
+      providerFive+';'+providerFiveTitle,]
+
+      db.send({'name': firstName, 'address':facilityAdd, 'providers': providers}, 'facilities').then(function(docRef) {
+        db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[docRef.id]}, 'patients').then(function(docRef) {
+          props.setShowForm(false) }) 
+        })
+
+      //{'name':provider, 'title':providerTitle, 'email':providerEmail, 'phone':providerPhone
     } 
     
     return (
@@ -117,37 +128,158 @@ export default function PtntForm(props) {
                 Email: 
                 <input name="email" type="text" value={email} onChange={e => setEmail(e.target.value)} />
                 </label>
+                <div>---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---</div>
                 <label>
                 Facility: 
-                <input name="phoneNum" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
+                <input name="facility" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
                 </label>
                 <label>
-                Provider:
-                <input name="email" type="text" value={provider} onChange={e => {setProvider(e.target.value)}} onBlur={handleBlur}/>
+                Facility Address (street, city, zip state) 
+                <input name="facAddress" type="text" value={facilityAdd} onChange={e => setFacilityAdd(e.target.value)} />
                 </label>
                 <label>
-                Provider Title (i.e., doctor, nurse, physical therapist):
-                <Autocomplete
-                  id="free-solo-demo"
-                  freeSolo
-                  value={providerTitle}
-                  onInputChange={(e, data) => {
-                    setFacility(data)
-                    console.log('data', data)
-                  }}
-                  options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                  renderInput={(params) => (
-                    <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                    )}/>
+                Facility Phone Number:
+                <input name="facPhoneNum" type="text" value={providerPhone} onChange={e => setProviderPhone(e.target.value)} />
                 </label>
                 <label>
-                Provider Email:
-                <input name="email" type="text" value={providerEmail} onChange={e => setProviderEmail(e.target.value)} />
+                Facility Contact Email:
+                <input name="facEmail" type="text" value={providerEmail} onChange={e => setProviderEmail(e.target.value)} />
                 </label>
-                <label>
-                Provider Phone Number:
-                <input name="email" type="text" value={providerPhone} onChange={e => setProviderPhone(e.target.value)} />
-                </label>
+                
+
+                {provNums >= 1 ? 
+                    <div>
+                      <div>
+                      <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
+                        <label>
+                        Provider #1:
+                        <input name="email" type="text" value={providerOne} onChange={e => {setProviderOne(e.target.value)}} />
+                        </label>
+                        <label>
+                        Provider #1 Title (i.e., doctor, nurse, physical therapist):
+                        <Autocomplete
+                          id="free-solo-demo"
+                          freeSolo
+                          value={providerOneTitle}
+                          onInputChange={(e, data) => {
+                            setProviderOneTitle(data)
+                            console.log('data', data)
+                          }}
+                          options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                          renderInput={(params) => (
+                            <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                            )}/>
+                        </label>
+                      </div>
+                    </div>
+                  :null}
+
+                {provNums >= 2 ? 
+                    <div>
+                      <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
+                      <label>
+                      Provider #2:
+                      <input name="email" type="text" value={providerTwo} onChange={e => {setProviderTwo(e.target.value)}} />
+                      </label>
+                      <label>
+                      Provider #2 Title (i.e., doctor, nurse, physical therapist):
+                      <Autocomplete
+                        id="free-solo-demo"
+                        freeSolo
+                        value={providerTwoTitle}
+                        onInputChange={(e, data) => {
+                          setProviderTwoTitle(data)
+                          console.log('data', data)
+                        }}
+                        options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                        renderInput={(params) => (
+                          <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                          )}/>
+                      </label>
+                    </div>
+                  :null}
+                
+
+                {provNums >= 3 ?
+                  <div>
+                    <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
+                    <label>
+                    Provider #3 :
+                    <input name="email" type="text" value={providerThree} onChange={e => {setProviderThree(e.target.value)}} />
+                    </label>
+                    <label>
+                    Provider #3 Title (i.e., doctor, nurse, physical therapist):
+                    <Autocomplete
+                      id="free-solo-demo"
+                      freeSolo
+                      value={providerThreeTitle}
+                      onInputChange={(e, data) => {
+                        setProviderThreeTitle(data)
+                        console.log('data', data)
+                      }}
+                      options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                      renderInput={(params) => (
+                        <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                        )}/>
+                    </label>
+                  </div>
+                :null}
+
+                {provNums >= 4 ?
+                  <div>
+                    <div>---------------------------------------------------------------------------</div>
+                    <label>
+                    Provider #4 :
+                    <input name="email" type="text" value={providerFour} onChange={e => {setProviderFour(e.target.value)}} />
+                    </label>
+                    <label>
+                    Provider #4 Title (i.e., doctor, nurse, physical therapist):
+                    <Autocomplete
+                      id="free-solo-demo"
+                      freeSolo
+                      value={providerFourTitle}
+                      onInputChange={(e, data) => {
+                        setProviderFourTitle(data)
+                        console.log('data', data)
+                      }}
+                      options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                      renderInput={(params) => (
+                        <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                        )}/>
+                    </label>
+                  </div>
+                :null}
+
+              {provNums >= 5 ?
+                  <div>
+                    <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
+                    <label>
+                    Provider #5 :
+                    <input name="email" type="text" value={providerFive} onChange={e => {setProviderFive(e.target.value)}} />
+                    </label>
+                    <label>
+                    Provider #5 Title (i.e., doctor, nurse, physical therapist):
+                    <Autocomplete
+                      id="free-solo-demo"
+                      freeSolo
+                      value={providerFiveTitle}
+                      onInputChange={(e, data) => {
+                        setProviderFiveTitle(data)
+                        console.log('data', data)
+                      }}
+                      options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                      renderInput={(params) => (
+                        <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                        )}/>
+                    </label>
+                  </div>
+                :null}
+                
+                {provNums>=1? <div onClick = {() => setProvNums(provNums-1)} className = "new-appt-bttn">Delete provider</div>:null }
+                <br/>
+                {provNums<5? <div onClick = {() => setProvNums(provNums+1)} className = "new-appt-bttn">Add a provider</div>:null }
+                
+
                 <br/>
                 <input className = "new-appt-bttn" type="submit" value="Submit" />
             </form>

@@ -89,3 +89,16 @@
   margin-left: 10px;
   margin-right: 10px;
 }
+
+.ptnt-form-prov{
+  display: flex;
+}
+ 
+.ptnt-form-prov > div > button {
+  height: 30px;
+}
+
+.ptnt-form-prov-delete {
+  display:flex;
+  align-items: center;
+}
