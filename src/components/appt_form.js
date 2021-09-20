@@ -23,6 +23,10 @@ function ApptForm(props) {
     const [facilities, setFacilities] = useState([]);
     const [providers, setProviders] = useState([]);
     const [provider, setProvider] = useState('');
+    const [providerTitle, setProviderTitle] = useState('');
+    const [providerName, setProviderName] = useState('');
+    const [ptntProviders, setPtntProviders] = useState('');
+    const [facProviders, setFacProviders] = useState('');
     const [error, setError] = useState('');
     const[showForm, setShowForm] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -113,19 +117,33 @@ function ApptForm(props) {
 
             console.log('!(facility in facilities)', facility in facilities)
       
-            (facility!='' && !(facilities.includes(facilityId))) && db.send({'address':address, 'providers':[providers]}, 'facilities').then(function(docRef) {
-              db.edit(pid,{'facilities':[...facilities, docRef.id]}, 'patients')
-              db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':docRef.id, 'address':address, 'provider':provider, 'error':error}, 'appointments')
-            })
+            
 
-            facilities.includes(facilityId) && db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider, 'error':error}, 'appointments')
-
-              Promise.all([          
-                , 
-                (facility!='' && !(facilities.includes(facilityId))) && db.edit(pid,{'facilities':[...facilities, facilityId]}, 'patients')
-              ]);
-
-            props.setShowForm(false)
+            if (facility!='' && !(facilities.includes(facilityId))) {
+              console.log('bitches go to =')
+              console.log(facilities, facilityId)
+              db.send({'name':facility, 'address':address, 'providers':[...facProviders, provider+';'+providerTitle]}, 'facilities').then(function(docRef) {
+                console.log('to yakima')
+                Promise.all([          
+                  !(ptntProviders.includes(provider+';'+providerTitle)) && db.edit(pid,{'facilities':[...facilities, docRef.id], 'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
+                  db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':docRef.id, 'address':address, 'provider':provider, 'error':error}, 'appointments')
+                ]);
+                props.setShowForm(false)
+              })
+            }
+            
+            if (facility!='' && facilities.includes(facilityId)) {
+              console.log('bitches go')
+              console.log(facilities)
+              db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider, 'error':error}, 'appointments').then(function(docRef) {
+                console.log('to acapulco')
+                Promise.all([          
+                  !(providers.includes(provider+';'+providerTitle)) && db.edit(pid,{'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
+                  !(providers.includes(provider+';'+providerTitle)) && db.edit(facilityId, {'providers':[...facProviders, provider+';'+providerTitle]}, 'facilities')
+                ]);
+              })
+              props.setShowForm(false)
+            } 
 
         } catch {
             setError('Failed to submit appointment')
@@ -198,7 +216,7 @@ function ApptForm(props) {
                   //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
                   const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
                   pat_obj && (setFacilities(pat_obj['facilities'] != undefined && pat_obj['facilities']))
-                  //setProviders(pat_obj['providers'])
+                  setPtntProviders(pat_obj['providers'])
                   console.log('FACILITIES', pat_obj, pat_obj && (pat_obj['facilities'] != undefined && pat_obj['facilities']))
                 }
                 console.log('PATIENT FIELD CHANGE', val)
@@ -248,13 +266,21 @@ function ApptForm(props) {
                   //console.log('FAC ID', fac_id['id'])
                   setFacility(data)
                   console.log('data', data)
-                  if (data != '' && id != 0) {
-                    const fac_obj = _facilities.filter(fac => fac.name == data)[0]
+
+                  const fac_arr = _facilities.filter(fac => fac.id == id)
+                  const fac_obj = fac_arr.length > 0? fac_arr[0]: null
+
+                  if (fac_obj != null) { // id == 0 means new facility 
+                    
                     console.log('address', fac_obj['address'])
                     console.log('FACILITIES DICT', _facs)
+                    console.log('PTNT PROVIDERS', ptntProviders)
                     setAddress(fac_obj['address'])
-                    setProviders(fac_obj['providers'])
-                  }
+                    setFacProviders(fac_obj['providers'])
+                    setProviders(fac_obj['providers'].filter( (p, i) => {
+                      return ptntProviders.includes(p)
+                    })) // set to fac_provs x ptnt_provs
+                  } 
                 }}
                 options={facilities.length === 0 ? []:facilities.map((fid)=> {
                   const fac_obj = _facilities.filter(fac => {
@@ -283,16 +309,40 @@ function ApptForm(props) {
                 freeSolo
                 value={provider}
                 onInputChange={(e, data) => {
-                  setProvider(data)
-                  console.log('data', data)
+                  const prov_ = data.split(";")
+                  setProvider(prov_[0])
+                  setProviderTitle(prov_[1])
+                  //setProviderTitle(title.substring(0, title_len-1))
+                  
+                  //setProvider(data)
                 }}
-                options={(providers.map((p) => { 
-                  var split = p.split(";")
-                  return (split[1] + ' ' + split[0])
-                })).filter(p=>p.length>1)} //1 is the lenght of the space in line 275
+                options={(providers.filter(p=>p.length>1))} //1 is the lenght of the space in line 275
+                /*getOptionLabel = {option => { 
+                  var split = option.split(";")
+                  return (split[0] + " (" + split[1] + ")")
+                }}*/
+                renderOption = {option => { 
+                  var split = option.split(";")
+                  return <p>{(split[0] + " (" + split[1] + ")")}</p>
+                }}
+                
                 renderInput={(params) => (
                   <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
                   )}/>
+              </label>
+              <label>
+                Provider Title (i.e., doctor, nurse, physical therapist):
+                <Autocomplete
+                  id="free-solo-demo"
+                  freeSolo
+                  value={providerTitle}
+                  onInputChange={(e, data) => {
+                    setProviderTitle(data)
+                  }}
+                  options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                  renderInput={(params) => (
+                    <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                    )}/>
               </label>
               <input className = "submit-bttn" type="submit" value="Submit" disabled = {(showForm)? "disabled" : ""}/>
             </form>
