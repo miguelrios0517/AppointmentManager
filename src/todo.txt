@@ -1,4 +1,25 @@
 TO DO
+- clean up appointment list/show new fields
+- clean up patient list/show new fields
+- ptnt id view
+- appt id viewxz grfrq1h
+- make widgets with data
+    - your next appointment (1)
+    - to do 
+    - upcoming appointments (5)
+
+
+
+
+
+
+
+
+
+
+
+
+OLD 
 
 create recentyDeleted
 - inside firestore db as a collection
@@ -21,15 +42,6 @@ providers field and only display providers that are linked facility
 facility objects to include the new entries
             
 
-
-
-
-
-
-
-
-
-OLD 
 
 appt_form (7/22)
 - make facility and provider drop down fields when there are existing facilities and providers in the selected patient object
