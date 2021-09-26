@@ -6,7 +6,7 @@ function Appointment() {
 
     return(
         <div className = "appointment-item">
-            <header className = 'header'>Appointments</header>
+            <header className = 'header'>Appointment</header>
             <div className = "main main-appointments">
                 Appointment ID #{id}
             </div>

@@ -28,7 +28,7 @@ function ApptForm(props) {
     const [ptntProviders, setPtntProviders] = useState('');
     const [facProviders, setFacProviders] = useState('');
     const [error, setError] = useState('');
-    const[showForm, setShowForm] = useState(false)
+    const [showForm, setShowForm] = useState(false)
     const [loading, setLoading] = useState(false)
     const { useDB, db } = useAuth()
 

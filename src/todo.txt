@@ -2,7 +2,7 @@ TO DO
 - clean up appointment list/show new fields
 - clean up patient list/show new fields
 - ptnt id view
-- appt id viewxz grfrq1h
+- appt id view
 - make widgets with data
     - your next appointment (1)
     - to do 

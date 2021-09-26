@@ -13,9 +13,10 @@ import Login from "./components/Login"
 
 import Dashboard from './components/dashboard';
 import Appointments from './components/appointments';
+import Appointment from './components/appointment'
 import Schedule from './components/schedule';
 import Patients from './components/patients';
-import Appointment from './components/appointment'
+import Patient from './components/patient';
 import Sidebar from './components/sidebar/Sidebar'
 
 //(filtered data for currentUser (not able to see entire collection), combined db with authcontext (i.e., db.send, db.delete, and usedb() is now in authcontext))
@@ -75,10 +76,11 @@ const LoginContainer = () => (
     <div className="container">
       <Sidebar />
       <PrivateRoute exact path="/" component={Dashboard} />
-      <PrivateRoute path="/patients" component={Patients} />
+      <PrivateRoute exact path="/patients" component={Patients} />
+      <PrivateRoute exact path="/patients/:id" component={Patient} />
       <PrivateRoute exact path="/appointments" component={Appointments} />
-      <PrivateRoute path="/schedule" component={Schedule} />
       <PrivateRoute exact path ="/appointments/:id" component ={Appointment} />
+      <PrivateRoute path="/schedule" component={Schedule} />
       <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
     </div>
  )
