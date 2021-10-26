@@ -1,16 +1,16 @@
- .screen{
+.screen {
   display: flex;
   flex-direction: column;
   margin-left: 228px;
   padding-left: 25px;
-  padding-right: 25px; 
+  padding-right: 25px;
   border: 2px solid black;
-  height: 100vh; 
+  height: 100vh;
   overflow: auto;
 }
 
 .header {
-  height: 7vh; 
+  height: 7vh;
   font-size: 1.5em;
 }
 
@@ -26,13 +26,13 @@
 
 .box {
   border: 2px solid black;
-  border-radius: 3px; 
+  border-radius: 3px;
   margin: 5px;
   padding: 10px;
 }
 
 .top-box {
-  height: 500px;  
+  height: 500px;
 }
 
 .bottom-box {
@@ -53,10 +53,9 @@
 
 .new-appt-bttn {
   border: 1px solid black;
-  border-radius: 3px; 
+  border-radius: 3px;
   padding: 2px 4px;
 }
-
 
 .appt-form {
   display: flex;
@@ -69,7 +68,7 @@
 }
 
 .submit-bttn {
-  margin-top:16px;
+  margin-top: 16px;
 }
 
 .main-vertical {
@@ -78,27 +77,28 @@
 }
 
 .main-appointments {
+  flex-direction: column;
   justify-content: space-between;
 }
 
 .form-container {
-  display: flex
+  display: flex;
 }
 
-.form{
+.form {
   margin-left: 10px;
   margin-right: 10px;
 }
 
-.ptnt-form-prov{
+.ptnt-form-prov {
   display: flex;
 }
- 
+
 .ptnt-form-prov > div > button {
   height: 30px;
 }
 
 .ptnt-form-prov-delete {
-  display:flex;
+  display: flex;
   align-items: center;
 }

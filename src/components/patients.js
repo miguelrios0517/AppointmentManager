@@ -18,6 +18,10 @@ function Patients() {
 
     const patients = useDB('patients')
 
+    const pat = patients.filter(p => {
+        return p.id === 'vvWEj7MpFyriKHdfHX1l'
+    })
+
     function newFormSubmit(item) {
         db.send(item, 'patients')
         setShowForm(false)

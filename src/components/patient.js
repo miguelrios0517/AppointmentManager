@@ -5,34 +5,49 @@ import {Form, Button, Card, Alert} from 'react-bootstrap'
 
 function Patient() {
     //const [patObj, setPatObj] = useState({'email':'', 'facilities':[],'firstName':'', 'lastName':'', 'midInit':'', 'phoneNum': ''})
-    const [name, setName] = useState('')
+    const [firstName, setFirstName] = useState('')
+    const [lastName, setLastName] = useState('')
+    const [middleInitial, setMiddleInitial] = useState('')
+    const [email, setEmail] = useState('')
+    const [facilities, setFacilities] = useState([])
     const [ error, setError ] = useState('')
+    const [keys, setKeys] = useState([])
 
     const { db, useDB } = useAuth()
-    const patients = useDB('patients')
-    const facilities = useDB('facilities')  
+    
+    //const _facilities = useDB('facilities')  
 
     let { id } = useParams();
-
-    
-    const pat_obj = patients.filter(ptnt => ptnt.id === id)[0]
-    const first_name =  (pat_obj != undefined)? pat_obj['firstName']: null
-    pat_obj != undefined && setPatObj({...patObj, 'firstName':first_name})
-    //pat_obj != undefined && console.log(pat_obj['firstName'])
-
-    
-    
+    console.log('id', id)
+    const patient = useDB('patients', id)
+    console.log(patient)
+    //console.log()
+    //setFirstName(patient.firstName)
 
 
+
+   
+   
+    //(typeof _firstName != 'undefined') && setFirstName(_firstName)    
 
     return(
         <div className = "appointment-item">
-            <header className = 'header'>Patient</header>
+            <header className = 'header'>Patient View</header>
             {error && <Alert variant="danger">{error}</Alert>}
             <div className = "main main-appointments">
-                Patient ID #{id}
+                ID #{id}
+                <br/><br/>
+                {patient.length === 0? <p>There is no patient in the database corresponding to the given ID</p>:
+                        patient.map((p, i) => {
+                            return <div key={i}>
+                                <b>Full Name:</b> {(p.firstName+p.lastName)? (p.firstName+' '+p.lastName):'n/a'} <br/>
+                                <b>Phone number:</b> {p.phoneNum? p.phoneNum: 'n/a'} <br/>
+                                <b>Email:</b> {p.email? p.email: 'n/a'} <br/>
+                                <b>Providers:</b> {p.providers? p.providers.map((q,i) =>
+                                {return <ul>{q.split(';')[0]} ({q.split(';')[1]})</ul>}): 'n/a'} </div> 
+                        })}
+
             </div>
-            <p></p>
         </div>
     );
 }

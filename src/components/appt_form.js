@@ -120,10 +120,7 @@ function ApptForm(props) {
             
 
             if (facility!='' && !(facilities.includes(facilityId))) {
-              console.log('bitches go to =')
-              console.log(facilities, facilityId)
               db.send({'name':facility, 'address':address, 'providers':[...facProviders, provider+';'+providerTitle]}, 'facilities').then(function(docRef) {
-                console.log('to yakima')
                 Promise.all([          
                   !(ptntProviders.includes(provider+';'+providerTitle)) && db.edit(pid,{'facilities':[...facilities, docRef.id], 'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
                   db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':docRef.id, 'address':address, 'provider':provider, 'error':error}, 'appointments')
@@ -133,7 +130,6 @@ function ApptForm(props) {
             }
             
             if (facility!='' && facilities.includes(facilityId)) {
-              console.log('bitches go')
               console.log(facilities)
               db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider, 'error':error}, 'appointments').then(function(docRef) {
                 console.log('to acapulco')

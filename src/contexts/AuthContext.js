@@ -14,6 +14,9 @@ import "firebase/analytics";
 // Add the Firebase products that you want to use
 import "firebase/auth";
 import "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import { CollectionsOutlined } from "@material-ui/icons";
+
 
 
 const AuthContext = React.createContext()
@@ -67,12 +70,12 @@ export function AuthProvider({ children }) {
   const coll = 'appointments'
 
   // room is the dataset (i.e., appointments, patients, etc.)
-  function useDB(collect) {
+  function useDB(collect, item) {
     const [appointments, setAppointments] = useState([])
+    //const [item, setItem] = useState([])
 
     function add(a) {
         setAppointments(current => {
-            console.log('BOOM', 'a', a, 'current', current)
             const appts = [a, ...current]
             appts.sort((a,b)=> (b.date - a.date))
             return appts
@@ -89,21 +92,39 @@ export function AuthProvider({ children }) {
         
         collection.onSnapshot(snap=> snap.docChanges().forEach(c=> {
             const {doc, type} = c
-            if (type==='added') add({...doc.data(),id:doc.id})
-            if (type==='removed') remove(doc.id)
+            console.log(doc.data().uid)
+            if (doc.data().uid === currentUser.uid) {
+              item? console.log('item available'): console.log('item not available')
+              if (item) {
+                if (doc.id === item) {
+                  console.log('getting item', doc.data())
+                  if (type==='added') add({...doc.data(),id:doc.id})
+                  if (type==='removed') remove(doc.id)
+                }
+              } else {
+                console.log('getting collection', doc.data())
+                if (type==='added') add({...doc.data(),id:doc.id})
+                if (type==='removed') remove(doc.id)
+              }
+              
+            }
         }))
     }, [])
 
     // filter the appointments for the
-    const filtered = appointments.filter(appt => appt.uid == currentUser.uid)
-    return filtered
+    //var appts_user = appointments.filter(appt => appt.uid == currentUser.uid)
+    console.log('AUTH CONTEXT', appointments)
+    //const appts_user = item? appointments.filter(appt => appt.id == item)[0]: appointments
+    return appointments
 }
 
 const db = {}
+
 db.send = function(data, collect) {
   data.uid = currentUser.uid
   return store.collection(collect).add(data)
 }
+
 db.delete = function(id, collect) {
   return store.collection(collect).doc(id).delete()
 }
@@ -112,6 +133,9 @@ db.edit = function(id, data, collect) {
   return store.collection(collect).doc(id).set(data, {merge: true});
 }
 
+db.get = function(id, collect) {
+  return store.collection(collect).doc(id);
+}
 
 //database methods available to components
 const value = {
