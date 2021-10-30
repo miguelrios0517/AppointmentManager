@@ -6,7 +6,7 @@ AppointmentManager is now available online! https://appointment-management-s-df6
 
 Use AppointmentManager to keep track of your interpreting appointments! The program was originally designed and built for a medical interpreter who needed a more efficient way to manage their patients, appointments, providers, documentation and more. 
 
-Currently the program provides...
+Currently the program offers the following features...
 1) appointment manager 
 2) patient directory 
 3) calendar
