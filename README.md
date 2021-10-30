@@ -1,5 +1,6 @@
 AppointmentManager is now available online! https://appointment-management-s-df6d3.web.app/
-*Email and password are only used for authentication. Nothing will be mailed to you (no confirmation). You could use a fake login if you'd prefer.
+
+*Email and password are only used for authentication. Nothing will be mailed to you (no confirmation). You could use a fake login if you'd prefer.*
 
 # Getting Started with Create React App
 
