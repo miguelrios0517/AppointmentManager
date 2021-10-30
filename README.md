@@ -1,6 +1,19 @@
+# Appointment Manager
+
 AppointmentManager is now available online! https://appointment-management-s-df6d3.web.app/
 
-*Email and password are only used for authentication. Nothing will be mailed to you (no confirmation). You could use a fake login if you'd prefer.*
+*Email and password are used for authentication only. You could use a email if you'd prefer. Nothing is emailed to you. *
+
+Use AppointmentManager to keep track of your interpreting appointments! The program was originally designed and built for a medical interpreter who needed a more efficient way to manage their patients, appointments, providers, documentation and more. 
+
+Currently the program provides...
+1) appointment manager 
+2) patient directory 
+3) calendar
+4) dashboard
+
+This program was made using React. The program is linked to a firestore database and hosted on a firebase server.
+
 
 # Getting Started with Create React App
 
