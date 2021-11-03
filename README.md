@@ -21,7 +21,8 @@ What I learned from designing/making this app...
 3) CRUD operations for backend w/firebase 
 4) React (useState, useEffect, useRef, useContext, and more)
 5) Authentication setup w/firebase (create profile/signup, login, update)
-6) User Centered Design/UX*
+6) Navigation bar
+7) User Centered Design/UX*
 
 *having a background in UX, I believe, truly helped developed this app. When testing out the features, I tried to place myself in the shoes of the user and think of every possible use case there is. Depending on the user, they may desired a certain experience. This thought really stuck with me while I was creating the patient and appointment forms. I tried to design the application in a way that optimizes user flexibility and ease.
 
