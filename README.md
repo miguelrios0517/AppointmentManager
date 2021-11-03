@@ -24,7 +24,9 @@ What I learned from designing/making this app...
 6) Navigation bar
 7) User Centered Design/UX*
 
-*having a background in UX, I believe, truly helped developed this app. When testing out the features, I tried to place myself in the shoes of the user and think of every possible use case there is. Depending on the user, they may desired a certain experience. This thought really stuck with me while I was creating the patient and appointment forms. I tried to design the application in a way that optimizes user flexibility and ease.
+*having a background in UX, I believe, truly helped developed this app. When testing out the features, I tried to place myself in the shoes of the user and think of every possible use case there is. Depending on the user, they may desired a certain experience. This thought really stuck with me while I was developing the forms for new patient and new appointment. In order to submit an appointment, the user must select from a drop-down list of patients that were already created. However, if the patient is new, the user must create a new patient. I thought this seemed like a very tedious process for the user (needing to go on two seperate pages and two seperate forms just to submit one appointment for a new patient). I aimed to design the experience in a way that optimizes user flexibility and ease, so in the appointment form, i added another item in the drop down options for the patient field, "create a new patient". 
+
+These forms are located in different pages which .  Just as an example, there are seperate forms for creating appointments and patients, once a patient is created it appears as a drop down option in the appointment form. However, if the user did not see their patient they would have to create a new patient. would be time consuming 
 
 
 # Getting Started with Create React App
