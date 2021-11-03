@@ -2,7 +2,7 @@
 
 Appointment Manager is available online: https://appointment-management-s-df6d3.web.app/
 
-*Email and password are used for authentication only. You could use a fake email if you'd prefer (nothing is emailed to you) *
+*Email and password are for authentication only. You could use a fake email if you'd prefer (nothing is emailed to you) *
 
 Use Appointment Manager to keep track of your interpreting appointments! This program was originally designed and developed for a medical interpreter who needed a more efficient way to manage their patients, appointments, providers, documentation and more. 
 
