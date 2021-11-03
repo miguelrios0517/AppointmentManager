@@ -16,11 +16,14 @@ The following features are inlcluded...
 This application was created with React JavaScrict. The user data is stored in a Google Firebase database. Firebase also provides the site hosting for the app. 
 
 What I learned from designing/making this app...
-1) Forms (dynamic forms which autopopulate fields given the current user inputs)
+1) Forms (error handling and validation, dynamic forms that autopopulate fields based on what the user inputs)
 2) Designing the database architecture (i.e., collections, documents, keys and values, foreign keys, queries)
 3) CRUD operations for backend w/firebase 
 4) React (useState, useEffect, useRef, useContext, and more)
 5) Authentication setup w/firebase (create profile/signup, login, update)
+6) User Centered Design/UX*
+
+*having a background in UX, I believe, truly helped developed this app. When testing out the features, I tried to place myself in the shoes of the user and think of every possible use case there is. Depending on the user, they may desired a certain experience. This thought really stuck with me while I was creating the patient and appointment forms. I tried to design the application in a way that optimizes user flexibility and ease.
 
 
 # Getting Started with Create React App
