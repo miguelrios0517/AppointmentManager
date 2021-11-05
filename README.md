@@ -6,12 +6,12 @@ Appointment Manager is available online: https://appointment-management-s-df6d3.
 
 Use Appointment Manager to keep track of your interpreting appointments! This program was originally designed and developed for a medical interpreter who needed a more efficient way to manage their patients, appointments, providers, documentation and more. 
 
-The following features are inlcluded...
+The following features are offered...
 1) appointment manager 
 2) patient directory 
 3) calendar
 4) dashboard
-5) create & edit user profile
+5) user profile (create & edit)
 
 This application was created with React JavaScrict. The user data is stored in a Google Firebase database. Firebase also provides the site hosting for the app. 
 
