@@ -1,3 +1,28 @@
+# Appointment Manager
+
+Appointment Manager is available online: https://appointment-management-s-df6d3.web.app/
+
+*Email and password are for authentication only. You may use a fake email if you'd prefer (nothing will be emailed to you)*
+
+Use Appointment Manager to keep track of your interpreting appointments! This program was originally designed and developed for a medical interpreter who needed a more efficient way to manage their patients, appointments, providers, documentation and more. 
+
+The following features are offered...
+1) appointment manager 
+2) patient directory 
+3) calendar
+4) dashboard
+5) user profile (create & edit)
+
+This application was created with React JavaScrict. The user data is stored in a Google Firebase database. Firebase also provides the site hosting for the app. 
+
+Functionality...
+1) Forms (error handling and validation, dynamic forms that autopopulate fields based on what the user inputs)
+3) CRUD operations for backend w/firebase 
+5) Authentication setup w/firebase (create profile/signup, login, update)
+6) Navigation bar
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
