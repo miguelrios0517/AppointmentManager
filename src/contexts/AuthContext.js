@@ -133,8 +133,31 @@ db.edit = function(id, data, collect) {
   return store.collection(collect).doc(id).set(data, {merge: true});
 }
 
-db.get = function(id, collect) {
-  return store.collection(collect).doc(id);
+db.get = async function(id, collect) {
+    const collectRef = store.collection(collect)
+    collectRef.where('id', '==', id).get().then( snapshot => {
+      if (snapshot.empty) {
+        console.log('No matching documents.');
+        return;
+      } 
+      snapshot.forEach(doc => {
+        console.log(doc.id, '=>', doc.data());
+      });
+    }).catch(error => console.log(error))
+
+    /*
+    try{
+      const snapshot = await collectRef.where('id', '==', id).get();
+      if (snapshot.empty) {
+        console.log('No matching documents.');
+        return;
+      } 
+      snapshot.forEach(doc => {
+        console.log(doc.id, '=>', doc.data());
+      });
+    } catch (error) {
+      console.log(error)
+    }*/
 }
 
 //database methods available to components

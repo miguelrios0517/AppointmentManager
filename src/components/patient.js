@@ -15,10 +15,14 @@ function Patient() {
 
     const { db, useDB } = useAuth()
     
-    //const _facilities = useDB('facilities')  
+    const _facilities = useDB('facilities')  
 
-    let { id } = useParams();
+    let { id } = useParams()
     console.log('id', id)
+    const _patient = db.get(id, 'patients');
+    console.log(_patient)
+    
+    console.log(firstName)
     const patient = useDB('patients', id)
     console.log(patient)
     //console.log()
@@ -43,8 +47,22 @@ function Patient() {
                                 <b>Full Name:</b> {(p.firstName+p.lastName)? (p.firstName+' '+p.lastName):'n/a'} <br/>
                                 <b>Phone number:</b> {p.phoneNum? p.phoneNum: 'n/a'} <br/>
                                 <b>Email:</b> {p.email? p.email: 'n/a'} <br/>
-                                <b>Providers:</b> {p.providers? p.providers.map((q,i) =>
-                                {return <ul>{q.split(';')[0]} ({q.split(';')[1]})</ul>}): 'n/a'} </div> 
+                                <b>Facilities:</b> {p.facilities? p.facilities.map((f,i) =>
+                                {
+                                    const fac = _facilities.filter(_f => {
+                                        f === _f.id && console.log('FACILITY', f, _f.id, _f.name)
+                                        return f === _f.id
+                                    })[0]
+                                    return <div>
+                                        <ul>{fac['name']}</ul>
+                                        <ul>{fac['providers'].map(_p => {
+                                            
+                                            const prov = p['providers'] && p['providers'].includes(_p)? (_p.split(';')[0] + ' (' + _p.split(';')[1] +')'): ''
+                                            return<ul>{prov}</ul>
+                                        })}</ul>
+                                        </div>}): 'n/a'} 
+
+                                </div> 
                         })}
 
             </div>

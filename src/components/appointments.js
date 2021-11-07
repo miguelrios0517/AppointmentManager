@@ -10,8 +10,8 @@ import {
     useRouteMatch
   } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext'
-import PtntForm from './ptnt_form.js'
-import FreeSolo from './freeSolo';
+import Modal from 'react-awesome-modal';
+
 
 
 function Appointments() {
@@ -19,6 +19,7 @@ function Appointments() {
     const[showForm, setShowForm] = useState(false)
     const[ids, setIds] = useState([])
     const { db, useDB } = useAuth()
+    const[modalIsOpen, setIsOpen] = useState(false)
 
     const appointments = useDB('appointments')
 
@@ -45,14 +46,29 @@ function Appointments() {
                             <b> Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <div onClick = {() => deleteAppointment(appt.id, 'appointments')}>Delete</div> <Link to={`/appointments/${appt.id}`}>View</Link></ul>
                         })}
                 </div>
-                <div className = "main main-vertical">
-                    {showForm? 
-                        <div onClick = {() => setShowForm(false)} className = "new-appt-bttn">Cancel</div>:
-                        <div onClick = {() => setShowForm(true)} className = "new-appt-bttn">Add an appointment</div> 
-                    }
-                    {showForm ? <ApptForm setShowForm={setShowForm}/> :null}
-                </div> 
             </div>    
+
+            <button onClick={() => {
+                setIsOpen(true)
+                console.log("OPEN MODAL")
+            }}>Add an appointment</button>
+            <Modal 
+                //isOpen={modalIsOpen}
+                visible = {modalIsOpen}
+                width="600"
+                height="400"
+                effect="fadeInUp"
+                onClickAway={() => setIsOpen(false)}
+            >
+                <div className="portfolio-modal">
+                <div>
+                    <h3>New Appointment</h3>
+                    <button onClick={() => setIsOpen(false)}>Cancel</button>
+                    <ApptForm setShowForm={setIsOpen}/>
+                </div>
+                </div>
+            </Modal>
+
         </div>
     );
 }
