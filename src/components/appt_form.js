@@ -341,6 +341,16 @@ function ApptForm(props) {
     </div>
     )
   }
+/*
+<label style={{display:'none'}}>
+              Don't know Time?
+              <input name="haveDuration" type="checkbox" style={{display:'none'}} checked={notKnowTime} onChange={e => {
+                setNotKnowTime(e.target.checked)
+                setNotKnowDuration(e.target.checked)
+                }} />
+              </label>
+*/
+
 //<FreeSolo value={facility} onChang={e => console.log(e.target.value)} options={facilities}/>
 //<input name="facility" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
 
