@@ -92,17 +92,17 @@ export function AuthProvider({ children }) {
         
         collection.onSnapshot(snap=> snap.docChanges().forEach(c=> {
             const {doc, type} = c
-            console.log(doc.data().uid)
+            //console.log(doc.data().uid)
             if (doc.data().uid === currentUser.uid) {
-              item? console.log('item available'): console.log('item not available')
+              //item? console.log('item available'): console.log('item not available')
               if (item) {
                 if (doc.id === item) {
-                  console.log('getting item', doc.data())
+                  //console.log('getting item', doc.data())
                   if (type==='added') add({...doc.data(),id:doc.id})
                   if (type==='removed') remove(doc.id)
                 }
               } else {
-                console.log('getting collection', doc.data())
+                //console.log('getting collection', doc.data())
                 if (type==='added') add({...doc.data(),id:doc.id})
                 if (type==='removed') remove(doc.id)
               }
@@ -113,7 +113,7 @@ export function AuthProvider({ children }) {
 
     // filter the appointments for the
     //var appts_user = appointments.filter(appt => appt.uid == currentUser.uid)
-    console.log('AUTH CONTEXT', appointments)
+    //console.log('AUTH CONTEXT', appointments)
     //const appts_user = item? appointments.filter(appt => appt.id == item)[0]: appointments
     return appointments
 }
@@ -137,13 +137,13 @@ db.get = async function(id, collect) {
     const collectRef = store.collection(collect)
     collectRef.where('id', '==', id).get().then( snapshot => {
       if (snapshot.empty) {
-        console.log('No matching documents.');
+        //console.log('No matching documents.');
         return;
       } 
       snapshot.forEach(doc => {
-        console.log(doc.id, '=>', doc.data());
+        //console.log(doc.id, '=>', doc.data());
       });
-    }).catch(error => console.log(error))
+    }).catch(error => console.log('ERROR', error))
 
     /*
     try{

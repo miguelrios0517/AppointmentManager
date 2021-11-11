@@ -11,7 +11,8 @@ import {
   } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext'
 import Modal from 'react-awesome-modal';
-
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import TextField from "@material-ui/core/TextField";
 
 
 function Appointments() {
@@ -20,8 +21,14 @@ function Appointments() {
     const[ids, setIds] = useState([]);
     const { db, useDB } = useAuth();
     const[modalIsOpen, setIsOpen] = useState(false);
+    const [providerTitle, setProviderTitle] = useState('');
+
 
     const appointments = useDB('appointments');
+    console.log('APPOINTMENT LENGTH', appointments.length, appointments.length === 0)
+    console.log('APPPPPOINTMENT LENGTHHHHH')
+    console.log(appointments)
+
 
     /*function newFormSubmit(appointment) { 
         appointment.time = appointment.time? appointment.time: '00:00'
@@ -39,19 +46,21 @@ function Appointments() {
         <div className = "appointments"> 
             <header className = 'header'>Appointments</header>
             <div className = "main main-appointments">
-                    <table style={{width:500}}>
+            {(appointments.length ===  0)? <p>There are no appointments to show. Click the button below to add a new appointment.</p>:<p></p>}
+                {(appointments.length !== 0) &&
+                <table style={{width:500}}>
                         <tr>
                             <th>Time</th>
                             <th>Patient</th>
                             <th>Facility</th>
                             <th>Provider</th>
                         </tr>
-                        {appointments.length === 0? <tr>There are no appointments to show. Click the button below to add a new appointment.</tr>:
-                        appointments.map((appt, i) => {
+                        {appointments.map((appt, i) => {
+
+                            //date cleanup
                             const date = appt.date.toDate();
                             var hour;
                             var minute = date.getMinutes();
-                            //minute = minute.toString()
                             (date.getHours() > 12)? (hour = date.getHours() - 12): (hour = date.getHours())
                             console.log('APPT DURATION',appt.duration);
                             const ampm = (date.getHours() > 12?'PM':'AM') 
@@ -68,27 +77,24 @@ function Appointments() {
                             hour = hour.toString();
                             (endminute > 60) && (endminute = endminute%60)
                             console.log('END TIME', hour, endminute);
-                            
-    
-
-
                             (hour.length == 1) && (hour != 0) && (hour = '0' + hour)
                             console.log('DATE', date, hour, minute)
+
+                            //provider clean up
+                            var prov = appt.provider? appt.provider.split(';'): false
+                            console.log('PROVIDER',prov, typeof prov[1])
+                            var prov_t =  (prov[1] === 'undefined' || prov[1] === '')? '' : (' (' + prov[1] + ')')
+
                             return <tr>
                                     <td>{(hour != 0)? (hour + ':' + minute + ampm + ' - ' + endhour + ':' + endminute + _ampm): 'not found'}</td>
                                     <td>{appt.patient? appt.patient: 'n/a'}</td>
                                     <td>{appt.facility? appt.facility: 'n/a'}</td>
-                                    <td>{appt.provider? appt.provider: 'n/a'}</td>
+                                    {}
+                                    <td>{prov? (prov[0] + ' ' + prov_t) : 'n/a'}</td>
+                                    <td><span onClick = {() => deleteAppointment(appt.id, 'appointments')}>Delete</span> <Link to={`/appointments/${appt.id}`}>View</Link></td>
                                 </tr>
                         })}
-                    </table>
-                <div className = "appt-list"> 
-                        {appointments.length === 0? <p></p>:
-                        appointments.map((appt, i) => {
-                            return <ul key={i}><b>Id:</b> {appt.id? appt.id: 'n/a'}, <b>Patient:</b> {appt.patient? appt.patient: 'n/a'}, <b>Date:</b> {appt.date? appt.date.toDate().toString(): 'n/a'}, <b>Facility:</b> {appt.facility? appt.facility: 'n/a'}, 
-                            <b> Duration:</b> {appt.duration? appt.duration: 'n/a'}, <b>Address:</b> {appt.address? appt.address: 'n/a'}, <b>Provider:</b> {appt.provider? appt.provider: 'n/a'} <div onClick = {() => deleteAppointment(appt.id, 'appointments')}>Delete</div> <Link to={`/appointments/${appt.id}`}>View</Link></ul>
-                        })}
-                </div>
+                    </table>}
             </div>    
 
             <button onClick={() => {
@@ -107,7 +113,39 @@ function Appointments() {
                 <div>
                     <h3>New Appointment</h3>
                     <button onClick={() => setIsOpen(false)}>Cancel</button>
-                    <ApptForm setShowForm={setIsOpen}/>
+                    <form>
+
+                        <label>
+                            Provider's Title (i.e., doctor, nurse, physical therapist):
+                            <Autocomplete
+                            disablePortal
+                            id="free-solo-demo"
+                            freeSolo
+                            value={providerTitle}
+                            onInputChange={(e, data) => {
+                                setProviderTitle(data)
+                            }}
+                            options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                            renderInput={(params) => (
+                                <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                                )}/>
+                        </label>
+                        <label>
+                            Provider's Title (i.e., doctor, nurse, physical therapist):
+                            <Autocomplete
+                            disablePortal
+                            id="free-solo-demo"
+                            freeSolo
+                            value={providerTitle}
+                            onInputChange={(e, data) => {
+                                setProviderTitle(data)
+                            }}
+                            options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                            renderInput={(params) => (
+                                <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
+                                )}/>
+                        </label>
+                    </form>
                 </div>
                 </div>
             </Modal>
@@ -116,6 +154,7 @@ function Appointments() {
     );
 }
 
+//<ApptForm setShowForm={setIsOpen}/>
                
 
 export default Appointments;  

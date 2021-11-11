@@ -8,7 +8,6 @@ import FreeSolo from './freeSolo';
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField";
 
-
 function ApptForm(props) {
     const [patient, setPatient] = useState('');
     const [date, setDate] = useState('');
@@ -115,7 +114,7 @@ function ApptForm(props) {
             console.log('NOT KNOW TIME', notKnowTime, notKnowDuration, (!notKnowTime? _time:'poop'), (!notKnowDuration? duration:'poop'))
 
             if (facility == '') {
-              db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':(!notKnowDuration? duration:''), 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider, 'error':error}, 'appointments')
+              db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':(!notKnowDuration? duration:''), 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider+';'+providerTitle, 'error':error}, 'appointments')
               props.setShowForm(false)
             }
 
@@ -123,7 +122,7 @@ function ApptForm(props) {
               db.send({'name':facility, 'address':address, 'providers':[...facProviders, provider+';'+providerTitle]}, 'facilities').then(function(docRef) {
                 Promise.all([          
                   !(ptntProviders.includes(provider+';'+providerTitle)) && db.edit(pid,{'facilities':[...facilities, docRef.id], 'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
-                  db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':docRef.id, 'address':address, 'provider':provider, 'error':error}, 'appointments')
+                  db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':docRef.id, 'address':address, 'provider':provider+';'+providerTitle, 'error':error}, 'appointments')
                 ]);
                 props.setShowForm(false)
               })
@@ -225,28 +224,27 @@ function ApptForm(props) {
               Date:
               <input name="date" type="date" value={date} onChange={e => {setDate(e.target.value)} }/>
               </label>
-              <label>
-              Don't know Time?
-              <input name="haveDuration" type="checkbox" checked={notKnowTime} onChange={e => {
-                setNotKnowTime(e.target.checked)
-                setNotKnowDuration(e.target.checked)
-                }} />
-              </label>
-              <label>
-              Time:
-              <input name="time" type="time" value={time} onChange={e => setTime(e.target.value)} disabled = {notKnowTime? true : false}  />
-              </label>
-              <label>
-              Don't know duration?
-              <input name="haveDuration" type="checkbox" checked={notKnowDuration} onChange={e => setNotKnowDuration(e.target.checked)} />
-              </label>
+              <div className = "form-row">
+                <label>
+                <div>Time:</div>
+                <input name="time" type="time" value={time} onChange={e => setTime(e.target.value)} disabled = {notKnowTime? true : false}  />
+                </label>
+                <label className = "time-checkbox">
+                <div>Don't know time?</div>
+                <input name="haveDuration" type="checkbox" checked={notKnowTime} onChange={e => {
+                  setNotKnowTime(e.target.checked)
+                  setNotKnowDuration(e.target.checked)
+                  }} />
+                </label>
+              </div>
               <label>
               Duration (in minutes):
-              <input name="duration" type="number" value={duration} onChange={e => setDuration(e.target.value)} disabled = {(notKnowDuration)? true : false }/>
-              </label>
+              <input className ="input" name="duration" type="number" max="1440" value={duration} onChange={e => setDuration(e.target.value)} disabled = {(notKnowDuration)? true : false }/>
+              </label> 
               <label>
               Facility
               <Autocomplete
+                disablePortal
                 id="free-solo-demo"
                 freeSolo
                 value={facility}
@@ -293,6 +291,7 @@ function ApptForm(props) {
               <label>
               Provider's Full Name
               <Autocomplete
+                disablePortal
                 id="free-solo-demo"
                 freeSolo
                 value={provider}
@@ -321,6 +320,7 @@ function ApptForm(props) {
               <label>
                 Provider's Title (i.e., doctor, nurse, physical therapist):
                 <Autocomplete
+                  disablePortal
                   id="free-solo-demo"
                   freeSolo
                   value={providerTitle}

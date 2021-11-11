@@ -105,10 +105,37 @@
 
 .portfolio-modal {
   padding: 25px;
-  height:100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   overflow: scroll;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.input {
+  width: 100px;
+}
+.label-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.time-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  margin-left: 20px;
+  padding-top: 20px;
+}
+
+.time-checkbox input {
+  margin-left: 5px;
+  padding-top: 30px;
 }
