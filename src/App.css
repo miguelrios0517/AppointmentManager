@@ -110,7 +110,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .form-row {
@@ -139,3 +139,36 @@
   margin-left: 5px;
   padding-top: 30px;
 }
+
+.md-autocomplete-suggestions-container{
+  z-index:100000 !important;
+}
+
+.modal-row {
+  display: flex;
+  flex-direction: row;
+
+    justify-content: space-between; 
+}
+
+.modal-button {
+  border: 0;
+  height: 30px;
+  font-size: 12px;
+}
+
+.form-modal {
+  margin-top: 20px;
+}
+
+.new-ptnt-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.appt-form p {
+  margin-bottom: 0px; 
+}
+
+

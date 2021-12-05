@@ -13,6 +13,7 @@ import { useAuth } from '../contexts/AuthContext'
 import Modal from 'react-awesome-modal';
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField";
+import ApptFormModal from './FormModal.js'
 
 
 function Appointments() {
@@ -46,7 +47,7 @@ function Appointments() {
         <div className = "appointments"> 
             <header className = 'header'>Appointments</header>
             <div className = "main main-appointments">
-            {(appointments.length ===  0)? <p>There are no appointments to show. Click the button below to add a new appointment.</p>:<p></p>}
+            {(appointments.length ===  0)? <p>There are no appointments to show. Click the button below to add a new appointment.</p>:<></>}
                 {(appointments.length !== 0) &&
                 <table style={{width:500}}>
                         <tr>
@@ -88,7 +89,7 @@ function Appointments() {
                             return <tr>
                                     <td>{(hour != 0)? (hour + ':' + minute + ampm + ' - ' + endhour + ':' + endminute + _ampm): 'not found'}</td>
                                     <td>{appt.patient? appt.patient: 'n/a'}</td>
-                                    <td>{appt.facility? appt.facility: 'n/a'}</td>
+                                    <td>{appt.facility? appt.facility: 'n/a'}</td>s
                                     {}
                                     <td>{prov? (prov[0] + ' ' + prov_t) : 'n/a'}</td>
                                     <td><span onClick = {() => deleteAppointment(appt.id, 'appointments')}>Delete</span> <Link to={`/appointments/${appt.id}`}>View</Link></td>
@@ -97,58 +98,9 @@ function Appointments() {
                     </table>}
             </div>    
 
-            <button onClick={() => {
-                setIsOpen(true)
-                console.log("OPEN MODAL")
-            }}>Add an appointment</button>
-            <Modal 
-                //isOpen={modalIsOpen}
-                visible = {modalIsOpen}
-                width="600"
-                height="400"
-                effect="fadeInUp"
-                onClickAway={() => setIsOpen(false)}
-            >
-                <div className="portfolio-modal">
-                <div>
-                    <h3>New Appointment</h3>
-                    <button onClick={() => setIsOpen(false)}>Cancel</button>
-                    <form>
 
-                        <label>
-                            Provider's Title (i.e., doctor, nurse, physical therapist):
-                            <Autocomplete
-                            disablePortal
-                            id="free-solo-demo"
-                            freeSolo
-                            value={providerTitle}
-                            onInputChange={(e, data) => {
-                                setProviderTitle(data)
-                            }}
-                            options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                            renderInput={(params) => (
-                                <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                                )}/>
-                        </label>
-                        <label>
-                            Provider's Title (i.e., doctor, nurse, physical therapist):
-                            <Autocomplete
-                            disablePortal
-                            id="free-solo-demo"
-                            freeSolo
-                            value={providerTitle}
-                            onInputChange={(e, data) => {
-                                setProviderTitle(data)
-                            }}
-                            options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                            renderInput={(params) => (
-                                <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                                )}/>
-                        </label>
-                    </form>
-                </div>
-                </div>
-            </Modal>
+            <ApptFormModal />
+
 
         </div>
     );

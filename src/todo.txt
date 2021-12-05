@@ -1,12 +1,8 @@
 TO DO
-- clean up appointment list/show new fields
-- clean up patient list/show new fields
-- ptnt id view
-- appt id view
-- make widgets with data
-    - your next appointment (1)
-    - to do 
-    - upcoming appointments (5)
+- Make a useContext for all the data cleaning/transfer (i.e., from db to app and vice versa)
+    - e.g., getProviderInfo(appt.provider) -> return provider name and title seperately (not 'name;title')
+            and makeProviderInfo(name, title) -> return 'name;title'
+    - make a list of all different ways data is sent to the back end, e.g, if new entry vs already existing, etc. Make sure data is cleaned up appropriately for each way
 
 
 
