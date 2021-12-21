@@ -14,6 +14,7 @@ import Modal from 'react-awesome-modal';
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import TextField from "@material-ui/core/TextField";
 import ApptFormModal from './FormModal.js'
+import Empty from './empty.js'
 
 
 function Appointments() {
@@ -100,6 +101,7 @@ function Appointments() {
 
 
             <ApptFormModal />
+            <Empty />
 
 
         </div>

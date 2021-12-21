@@ -140,15 +140,10 @@
   padding-top: 30px;
 }
 
-.md-autocomplete-suggestions-container{
-  z-index:100000 !important;
-}
-
 .modal-row {
   display: flex;
   flex-direction: row;
-
-    justify-content: space-between; 
+  justify-content: space-between;
 }
 
 .modal-button {
@@ -168,7 +163,5 @@
 }
 
 .appt-form p {
-  margin-bottom: 0px; 
+  margin-bottom: 0px;
 }
-
-
