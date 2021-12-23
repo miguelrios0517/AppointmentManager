@@ -32,6 +32,7 @@ class Autocomplete extends Component {
   };
 
   onClick = e => {
+    const { setFormValue } = this.props;
     setFormValue(e.currentTarget.innerText)
 
     this.setState({
