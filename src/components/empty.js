@@ -18,6 +18,8 @@ const customStyles = {
 
 // Make sure to bind modal to your appElement (https://reactcommunity.org/react-modal/accessibility/)
 Modal.setAppElement('#root');
+
+
   
 function Empty() {
     const[modalIsOpen, setIsOpen] = useState(false);
@@ -25,6 +27,13 @@ function Empty() {
     const [showForm, setShowForm] = useState(false);
     const [fruit, setFruit] = useState('')
     let subtitle;
+
+    useEffect(
+      () => {
+        console.log(fruit)
+      },
+      [fruit],
+    );
   
     function openModal() {
       setIsOpen(true);
@@ -43,7 +52,14 @@ function Empty() {
         setIsOpen(false)
     }
 
+    const checkKeyDown = (e) => {
+      if (e.code === 'Enter') e.preventDefault();
+    };
+
     return (<div className = "form-modal">
+
+
+
 
 <button onClick={openModal}>Open Empty</button>
       <Modal
@@ -58,7 +74,8 @@ function Empty() {
                     <button className="modal-button" onClick={closeModal}>Cancel</button>
                 </div>
 
-                    <form onSubmit={e => { handleSubmit(e) }} className = 'appt-form'>
+                    <form onSubmit={e => { 
+                      handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} className = 'appt-form'>
                           <Autocomplete suggestions={["Oranges", "Apples", "Banana", "Kiwi", "Mango"]} setFormValue = {setFruit} formValue = {fruit}/>
 
 
@@ -71,6 +88,7 @@ function Empty() {
     </div>);
 
 }
+
 
 export default Empty;  
 

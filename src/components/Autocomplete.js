@@ -44,6 +44,7 @@ class Autocomplete extends Component {
   };
 
   onKeyDown = e => {
+    const { setFormValue } = this.props;
     const { activeSuggestion, filteredSuggestions } = this.state;
   
     if (e.keyCode === 13) {
@@ -52,6 +53,8 @@ class Autocomplete extends Component {
         showSuggestions: false,
         userInput: filteredSuggestions[activeSuggestion]
       });
+      setFormValue(filteredSuggestions[activeSuggestion])
+
     } else if (e.keyCode === 38) {
       if (activeSuggestion === 0) {
         return;
@@ -60,6 +63,7 @@ class Autocomplete extends Component {
     }
     // User pressed the down arrow, increment the index
     else if (e.keyCode === 40) {
+
       if (activeSuggestion - 1 === filteredSuggestions.length) {
         return;
       }
@@ -111,15 +115,15 @@ class Autocomplete extends Component {
       }
 
       return (
-        <Fragment>
-          <input
-            type="text"
-            onChange={onChange}
-            onKeyDown={onKeyDown}
-            value={userInput}
-          />
-          {suggestionsListComponent}
-        </Fragment>
+          <Fragment>
+            <input
+              type="text"
+              onChange={onChange}
+              onKeyDown={onKeyDown}
+              value={userInput}
+            />
+            {suggestionsListComponent}
+          </Fragment>
       );
     }
   }

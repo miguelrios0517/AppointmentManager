@@ -14,6 +14,7 @@ import FreeSolo from './freeSolo';
 // import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from "react-datepicker";
 
+
 import "react-datepicker/dist/react-datepicker.css";
 
 // CSS Modules, react-datepicker-cssmodules.css
@@ -51,6 +52,7 @@ function ApptFormModal() {
     const [facility, setFacility] = useState('');
     const [facilityId, setFacilityId] = useState('');
     const [facilities, setFacilities] = useState([]);
+    const [facilityOptions, setFacilityOpts] = useState([]);
     const [providers, setProviders] = useState([]);
     const [provider, setProvider] = useState('');
     const [providerTitle, setProviderTitle] = useState('');
@@ -79,6 +81,88 @@ function ApptFormModal() {
     function closeModal() {
       setIsOpen(false);
     }
+
+    function handlePatientChange(e) {
+        const val = e.target.value
+        setPatient(val)
+        if (val == 'new-patient') {
+            setShowForm(true)
+        } else {
+            setShowForm(false)
+            //taking the patient field and splitting it into name and pid (set as a string "patient name (pid)")
+            const pat_arr = val.split(", ")
+            const pid = pat_arr[0]
+            const _patient = pat_arr[1]
+
+            //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
+            const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
+
+
+            pat_obj && (setFacilities(pat_obj['facilities'] != undefined && pat_obj['facilities']))
+            setPtntProviders(typeof pat_obj['providers'] != 'undefined'? pat_obj['providers'] : [])
+
+            console.log("GETTING FACILITY OPTIONS")
+
+            if (pat_obj['facilities'].length != 0 ) {
+                setFacilityOpts(pat_obj['facilities'].map((fid)=> {
+                    const fac_obj = _facilities.filter(fac => {
+                        return fac.id === fid
+                    })[0]
+                    if(!(typeof fac_obj === 'undefined')) {
+                        _facs.push({'id':fid, 'name':fac_obj['name']})
+                        return fac_obj['name']
+                    } 
+                    return false
+                    })) 
+            }
+        }
+    }
+
+    //matches name input w/ facility id, makes a query to the database for the following info...
+    //providers if matched with patient's, and the address...
+    //sets providers the input suggestions, and fills in the address field
+    function setFacilityInfo(data){
+        const fac_id = _facs.filter(fac => {
+            return fac.name === data
+        })[0]
+        var id = fac_id? fac_id['id']: 0
+        setFacilityId(id)
+        //console.log('FAC ID', fac_id['id'])
+        setFacility(data)
+        const fac_arr = _facilities.filter(fac => fac.id == id)
+        const fac_obj = fac_arr.length > 0? fac_arr[0]: null
+        if (fac_obj != null) { // id == 0 means new facility 
+            setAddress(fac_obj['address'])
+            setFacAddress(fac_obj['address'])
+            setFacProviders(fac_obj['providers'])
+            setProviders(fac_obj['providers'].filter( (p, i) => {
+                return ptntProviders.includes(p)
+            })) // set to fac_provs x ptnt_provs
+        } 
+    }
+
+    function getFacilityOptions() {
+        console.log("GETTING FACILITY OPTIONS")
+        let options = []
+        if (facilities.length != 0 ) {
+            options = facilities.map((fid)=> {
+                const fac_obj = _facilities.filter(fac => {
+                    return fac.id === fid
+                })[0]
+                if(!(typeof fac_obj === 'undefined')) {
+                    _facs.push({'id':fid, 'name':fac_obj['name']})
+                    return fac_obj['name']
+                } 
+                return false
+                })
+        }
+        console.log("THE FACILITY OPTIONS ARE", options)
+        return options
+    }
+
+    const checkKeyDown = (e) => {
+        if (e.code === 'Enter') e.preventDefault();
+      };
 
     async function handleSubmit(e) {
 
@@ -161,28 +245,10 @@ function ApptFormModal() {
                     <button className="modal-button" onClick={closeModal}>Cancel</button>
                 </div>
                 {error && <Alert variant="danger">{error}</Alert>}
-                <form onSubmit={e => { handleSubmit(e) }} className = 'appt-form'>
+                <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)}  className = 'appt-form'>
                     <label>
                     <p>Patient:</p>
-                    <select value={patient} onChange={e => {
-                        const val = e.target.value
-                        setPatient(val)
-                        if (val == 'new-patient') {
-                        setShowForm(true)
-                        } else {
-                        setShowForm(false)
-
-                        //taking the patient field and splitting it into name and pid (set as a string "patient name (pid)")
-                        const pat_arr = val.split(", ")
-                        const pid = pat_arr[0]
-                        const _patient = pat_arr[1]
-
-                        //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
-                        const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
-                        pat_obj && (setFacilities(pat_obj['facilities'] != undefined && pat_obj['facilities']))
-                        setPtntProviders(typeof pat_obj['providers'] != 'undefined'? pat_obj['providers'] : [])
-                        }
-                    }}>
+                    <select value={patient} onChange={e => { handlePatientChange(e)}}>
                         <option value='select'>Select a patient</option>
                         <option value='new-patient'>Add a new patient</option>
                         {patients.map((p, i) => {
@@ -237,36 +303,8 @@ function ApptFormModal() {
                         id="free-solo-demo"
                         freeSolo
                         value={facility}
-                        onInputChange={(e, data) => {
-                        const fac_id = _facs.filter(fac => {
-                            return fac.name === data
-                        })[0]
-                        var id = fac_id? fac_id['id']: 0
-                        setFacilityId(id)
-                        //console.log('FAC ID', fac_id['id'])
-                        setFacility(data)
-                        const fac_arr = _facilities.filter(fac => fac.id == id)
-                        const fac_obj = fac_arr.length > 0? fac_arr[0]: null
-                        if (fac_obj != null) { // id == 0 means new facility 
-                            
-                            setAddress(fac_obj['address'])
-                            setFacAddress(fac_obj['address'])
-                            setFacProviders(fac_obj['providers'])
-                            setProviders(fac_obj['providers'].filter( (p, i) => {
-                            return ptntProviders.includes(p)
-                            })) // set to fac_provs x ptnt_provs
-                        } 
-                        }}
-                        options={facilities.length === 0 ? []:facilities.map((fid)=> {
-                        const fac_obj = _facilities.filter(fac => {
-                            return fac.id === fid
-                        })[0]
-                        if(!(typeof fac_obj === 'undefined')) {
-                            _facs.push({'id':fid, 'name':fac_obj['name']})
-                            return fac_obj['name']
-                        } 
-                        return false
-                        })}
+                        onInputChange={(e, data) => {setFacilityInfo(data)}}
+                        options={facilityOptions}
                         renderInput={(params) => (
                         <TextField {...params} label="Facility" margin="normal" variant="outlined" />
                         )}/>
@@ -349,6 +387,7 @@ function ApptFormModal() {
 export default ApptFormModal;  
 
 /*
+                    <Autocomplete suggestions={["Oranges", "Apples", "Banana", "Kiwi", "Mango"]} setFormValue = {setFacilityInfo} formValue = {facility}/>
 
 
 
