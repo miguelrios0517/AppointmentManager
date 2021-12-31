@@ -58,7 +58,8 @@ function ApptFormModal() {
     // could be stored as variable not useState
     const [facilityId, setFacilityId] = useState(''); // the facility ID of the option selected (not rendered)
     let facilities = []; // facility id's stored inside of patient (not rendered)
-    const [ptntProviders, setPtntProviders] = useState(''); // stored patient providers (name;title)  
+    let ptntProviders = []; // stored patient providers (name;title)
+    const [ptntProviders, setPtntProviders] = useState('');   
     const [facProviders, setFacProviders] = useState(''); // stored facility providers (name;title) 
     const [facAddress, setFacAddress] = useState(''); // stored address - could be variable list not useState
     const [error, setError] = useState('');
