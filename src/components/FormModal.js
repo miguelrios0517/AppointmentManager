@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 //import Modal from 'react-awesome-modal';
-import Autocomplete from "@material-ui/lab/Autocomplete";
+//import Autocomplete from "@material-ui/lab/Autocomplete";
+import Autocomplete from './Autocomplete.js'
 import TextField from "@material-ui/core/TextField";
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
@@ -38,28 +39,28 @@ Modal.setAppElement('#root');
   
 function ApptFormModal() {
     const[modalIsOpen, setIsOpen] = useState(false);
-    const [patient, setPatient] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [middleName, setMiddleName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [date, setDate] = useState('');
-    const [time, setTime] = useState('');
-    const [notKnowDuration, setNotKnowDuration] = useState(false);
-    const [notKnowTime, setNotKnowTime] = useState(false);
-    const [duration, setDuration] = useState('');
-    const [location, setLocation] = useState('');
-    const [address, setAddress] = useState('');
-    const [facility, setFacility] = useState('');
-    const [facilityId, setFacilityId] = useState('');
-    const [facilities, setFacilities] = useState([]);
-    const [facilityOptions, setFacilityOpts] = useState([]);
-    const [providers, setProviders] = useState([]);
-    const [provider, setProvider] = useState('');
-    const [providerTitle, setProviderTitle] = useState('');
-    const [providerName, setProviderName] = useState('');
-    const [ptntProviders, setPtntProviders] = useState('');
-    const [facProviders, setFacProviders] = useState('');
-    const [facAddress, setFacAddress] = useState('');
+    const [patient, setPatient] = useState(''); //  form field value
+    const [firstName, setFirstName] = useState(''); //  form field value
+    const [middleName, setMiddleName] = useState(''); //  form field value
+    const [lastName, setLastName] = useState(''); //  form field value
+    const [date, setDate] = useState(''); //  form field value
+    const [time, setTime] = useState(''); //  form field value
+    const [notKnowDuration, setNotKnowDuration] = useState(false); //  form field value
+    const [notKnowTime, setNotKnowTime] = useState(false); //  form field value
+    const [duration, setDuration] = useState(''); //  form field value
+    const [address, setAddress] = useState(''); //  form field value
+    const [facility, setFacility] = useState(''); //  form field value
+    const [facilityOptions, setFacilityOpts] = useState([]); // form field value suggestions, names of facility in patient object
+    const [provider, setProvider] = useState(''); // form field value
+    const [providers, setProviders] = useState([]); // form field value suggestions, intersection of ptntProviders and facProviders (list of ids)
+    const [providerTitle, setProviderTitle] = useState(''); // from field value
+
+    // could be stored as variable not useState
+    const [facilityId, setFacilityId] = useState(''); // the facility ID of the option selected (not rendered)
+    let facilities = []; // facility id's stored inside of patient (not rendered)
+    const [ptntProviders, setPtntProviders] = useState(''); // stored patient providers (name;title)  
+    const [facProviders, setFacProviders] = useState(''); // stored facility providers (name;title) 
+    const [facAddress, setFacAddress] = useState(''); // stored address - could be variable list not useState
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -98,9 +99,8 @@ function ApptFormModal() {
             const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
 
 
-            pat_obj && (setFacilities(pat_obj['facilities'] != undefined && pat_obj['facilities']))
-            setPtntProviders(typeof pat_obj['providers'] != 'undefined'? pat_obj['providers'] : [])
-
+            pat_obj && (facilities = pat_obj['facilities'] != undefined && pat_obj['facilities'])
+            (typeof pat_obj['providers'] != 'undefined')? (ptntProviders = pat_obj['providers']) : (ptntProviders = [])
             console.log("GETTING FACILITY OPTIONS")
 
             if (pat_obj['facilities'].length != 0 ) {
@@ -158,6 +158,14 @@ function ApptFormModal() {
         }
         console.log("THE FACILITY OPTIONS ARE", options)
         return options
+    }
+
+    function provInputChange(data) {
+        const prov_ = data.split(";")
+        setProvider(prov_[0])
+        setProviderTitle(prov_[1])
+        //setProviderTitle(title.substring(0, title_len-1))
+        //setProvider(data)
     }
 
     const checkKeyDown = (e) => {
@@ -297,6 +305,48 @@ function ApptFormModal() {
 
                     <label>
                     Facility
+                    <Autocomplete suggestions={facilityOptions} setFormValue = {setFacilityInfo} formValue = {facility}/>
+                    </label>
+
+                    <label>
+                    <p>Address</p>
+                    <TextField id="outlined-basic" label="Address" variant="outlined" value={address} onChange={e => setAddress(e.target.value)}/>
+                    </label>
+
+                    <label>
+                    Provider's Full Name                            
+                    <Autocomplete suggestions={providers.reduce(function(filtered, option) {
+                        if(option.length>1){
+                            let split = option.split(";")
+                            filtered.push(split[0] + " (" + split[1] + ")")
+                            console.log( 'OPTION: ', split[0] + " (" + split[1] + ")")
+                        }
+                        return filtered;    
+                    }, [])} setFormValue = {provInputChange} formValue = {facility}/>
+                    </label>
+
+                    <label>
+                        Provider's Title (i.e., doctor, nurse, physical therapist):
+                        <Autocomplete suggestions={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']} setFormValue = {setProviderTitle} formValue = {providerTitle}/>
+                    </label>
+
+                    <input className = "submit-bttn" type="submit" value="Submit" disabled = {(showForm)? "disabled" : ""}/>
+                    </form>
+            </div>
+            </div>
+      </Modal>
+
+    </div>);
+
+}
+
+export default ApptFormModal;  
+
+/*
+                    <Autocomplete suggestions={["Oranges", "Apples", "Banana", "Kiwi", "Mango"]} setFormValue = {setFacilityInfo} formValue = {facility}/>
+
+                    <label>
+                    Facility
                     <Autocomplete
                         menuStyle = {{maxHeight: '550px'}}
                         disablePortal
@@ -316,79 +366,44 @@ function ApptFormModal() {
                     </label>
 
                     <label>
-                    Provider's Full Name
-                    <Autocomplete
-                        disablePortal
-                        id="free-solo-demo"
-                        freeSolo
-                        value={providerTitle}
-                        onInputChange={(e, data) => {
-                            setProviderTitle(data)
-                        }}
-                        options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                        renderInput={(params) => (
-                            <TextField {...params} label="Provider's Title" margin="normal" variant="outlined" />
-                            )}/>
-                            
-
+                    Provider's Full Name                            
                     <Autocomplete
                         disablePortal
                         id="free-solo-demo"
                         freeSolo
                         value={provider}
-                        onInputChange={(e, data) => {
-                        const prov_ = data.split(";")
-                        setProvider(prov_[0])
-                        setProviderTitle(prov_[1])
-                        //setProviderTitle(title.substring(0, title_len-1))
-                        //setProvider(data)
-                        }}
+                        onInputChange={(e, data) => { provInputChange(data) }}
                         options={(providers.filter(p=>p.length>1))} //1 is the lenght of the space in line 275
-                        /*getOptionLabel = {option => { 
+                        getOptionLabel = {option => { 
                         var split = option.split(";")
                         return (split[0] + " (" + split[1] + ")")
-                        }}*/
+                        }}
                         renderOption = {option => { 
-                        var split = option.split(";")
-                        return <p>{(split[0] + " (" + split[1] + ")")}</p>
-                        }}
-                        
-                        renderInput={(params) => (
-                        <TextField {...params} label="Provider" margin="normal" variant="outlined" />
-                        )}/>
-                    </label>
-
-                    <label>
-                        Provider's Title (i.e., doctor, nurse, physical therapist):
-                        <Autocomplete
-                        disablePortal
-                        id="free-solo-demo"
-                        freeSolo
-                        value={providerTitle}
-                        onInputChange={(e, data) => {
-                            setProviderTitle(data)
-                        }}
-                        options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                        renderInput={(params) => (
-                            <TextField {...params} label="Provider's Title" margin="normal" variant="outlined" />
+                            var split = option.split(";")
+                            return <p>{(split[0] + " (" + split[1] + ")")}</p>
+                            }}
+                            
+                            renderInput={(params) => (
+                            <TextField {...params} label="Provider" margin="normal" variant="outlined" />
                             )}/>
-                    </label>
-
-                    <input className = "submit-bttn" type="submit" value="Submit" disabled = {(showForm)? "disabled" : ""}/>
-                    </form>
-            </div>
-            </div>
-      </Modal>
-
-    </div>);
-
-}
-
-export default ApptFormModal;  
-
-/*
-                    <Autocomplete suggestions={["Oranges", "Apples", "Banana", "Kiwi", "Mango"]} setFormValue = {setFacilityInfo} formValue = {facility}/>
-
+                        </label>
+    
+                        <label>
+                            Provider's Title (i.e., doctor, nurse, physical therapist):
+                            <Autocomplete
+                            disablePortal
+                            id="free-solo-demo"
+                            freeSolo
+                            value={providerTitle}
+                            onInputChange={(e, data) => {
+                                setProviderTitle(data)
+                            }}
+                            options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
+                            renderInput={(params) => (
+                                <TextField {...params} label="Provider's Title" margin="normal" variant="outlined" />
+                                )}/>
+                        </label>
+    
 
 
   
