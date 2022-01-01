@@ -54,22 +54,81 @@ function ApptFormModal() {
     const [provider, setProvider] = useState(''); // form field value
     const [providers, setProviders] = useState([]); // form field value suggestions, intersection of ptntProviders and facProviders (list of ids)
     const [providerTitle, setProviderTitle] = useState(''); // from field value
+    const [error, setError] = useState(''); // error message
+    const [showForm, setShowForm] = useState(false); // opens modal
 
-    // could be stored as variable not useState
-    const [facilityId, setFacilityId] = useState(''); // the facility ID of the option selected (not rendered)
-    let facilities = []; // facility id's stored inside of patient (not rendered)
+    const [ptntObj, setPtntObj] = useState({});
+    const [facObj, setFacObj] = useState({});
+    let patObj; //patient object 
+    let facilityId = ''; // the facility ID of the option selected (not rendered)
+    let ptntFacilities = []; // facility id's stored inside of patient (not rendered)
     let ptntProviders = []; // stored patient providers (name;title)
-    const [ptntProviders, setPtntProviders] = useState('');   
-    const [facProviders, setFacProviders] = useState(''); // stored facility providers (name;title) 
-    const [facAddress, setFacAddress] = useState(''); // stored address - could be variable list not useState
-    const [error, setError] = useState('');
-    const [showForm, setShowForm] = useState(false);
-    const [loading, setLoading] = useState(false);
+    let facProviders = [];  // stored facility providers (name;title) 
+    let facAddress = ''; // stored facility address
+    let _facs = []; //array of {'id':fid, 'name':fac_obj['name']}
+    let subtitle;
+    
     const { useDB, db } = useAuth();
     const patients = useDB('patients');
     const _facilities = useDB('facilities');
-    var _facs = [];
-    let subtitle;
+
+    useEffect(
+        () => {
+            console.log('PTNT OBJ', ptntObj)
+
+            if (Object.keys(ptntObj).length != 0 && ptntObj['facilities'].length != 0) {
+                setFacilityOpts(ptntObj['facilities'].map((fid)=> {
+                    const fac_obj = _facilities.filter(fac => {
+                        return fac.id === fid;
+                    })[0]
+                    if(!(typeof fac_obj === 'undefined')) {
+                        _facs.push({'id':fid, 'name':fac_obj['name']});
+                        return fac_obj['name'];
+                    } 
+                    return false;
+                })) 
+                ptntFacilities = (ptntObj['facilities'] != undefined) && ptntObj['facilities'];
+                (typeof ptntObj['providers'] != 'undefined')? (ptntObj = patObj['providers']) : (ptntObj = []);
+            }
+        },
+        [ptntObj]
+    );
+
+    useEffect(
+        () => {
+            if (facility != '') {
+                
+            }
+            console.log('FACILITY OPT', facility)
+            const fac_id = _facs.filter(fac => {
+                return fac.name === facility;
+            })[0];
+            //[choose a different value/method to represent a new facility not just a numeric "0" which could be unstable]
+            facilityId = fac_id? fac_id['id']: 0; 
+            //console.log('FAC ID', fac_id['id'])
+            const fac_arr = _facilities.filter(fac => fac.id == facilityId);
+            const fac_obj = fac_arr.length > 0? fac_arr[0]: null;
+            setFacObj(facObj => ({
+                ...facObj, 
+                ...fac_obj
+            }));
+        },
+        [facility]
+    );
+
+    useEffect(
+        () => {
+            if (facObj != null) { // id == 0 means new facility 
+                setAddress(facObj['address']);
+                facAddress = facObj['address'];
+                facProviders = facObj['providers'];
+                setProviders(facObj['providers'].filter( (p, i) => {
+                    return ptntProviders.includes(p);
+                })); // set to fac_provs x ptnt_provs
+            }
+        },
+        [facObj]
+    );
   
     function openModal() {
       setIsOpen(true);
@@ -85,149 +144,133 @@ function ApptFormModal() {
     }
 
     function handlePatientChange(e) {
-        const val = e.target.value
-        setPatient(val)
+        const val = e.target.value;
+        setPatient(val);
         if (val == 'new-patient') {
-            setShowForm(true)
+            setShowForm(true);
         } else {
-            setShowForm(false)
+            setShowForm(false);
             //taking the patient field and splitting it into name and pid (set as a string "patient name (pid)")
-            const pat_arr = val.split(", ")
-            const pid = pat_arr[0]
-            const _patient = pat_arr[1]
+            const pat_arr = val.split(", ");
+            const pid = pat_arr[0];
+            const _patient = pat_arr[1];
 
             //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
-            const pat_obj = patients.filter(ptnt => ptnt.id == pid)[0]
+            //[set as global variable?]
+            patObj = patients.filter(ptnt => ptnt.id == pid)[0];
+            setPtntObj(ptntObj => ({
+                ...ptntObj, 
+                ...patObj
+            }));
 
+            // _facs = ?
+          
 
-            pat_obj && (facilities = pat_obj['facilities'] != undefined && pat_obj['facilities'])
-            (typeof pat_obj['providers'] != 'undefined')? (ptntProviders = pat_obj['providers']) : (ptntProviders = [])
-            console.log("GETTING FACILITY OPTIONS")
-
-            if (pat_obj['facilities'].length != 0 ) {
-                setFacilityOpts(pat_obj['facilities'].map((fid)=> {
+            /*
+            if (patObj['facilities'].length != 0 ) {
+                setFacilityOpts(patObj['facilities'].map((fid)=> {
                     const fac_obj = _facilities.filter(fac => {
-                        return fac.id === fid
+                        return fac.id === fid;
                     })[0]
                     if(!(typeof fac_obj === 'undefined')) {
-                        _facs.push({'id':fid, 'name':fac_obj['name']})
-                        return fac_obj['name']
+                        _facs.push({'id':fid, 'name':fac_obj['name']});
+                        return fac_obj['name'];
                     } 
-                    return false
+                    return false;
                     })) 
-            }
+            }*/
         }
     }
+
 
     //matches name input w/ facility id, makes a query to the database for the following info...
     //providers if matched with patient's, and the address...
     //sets providers the input suggestions, and fills in the address field
     function setFacilityInfo(data){
         const fac_id = _facs.filter(fac => {
-            return fac.name === data
-        })[0]
-        var id = fac_id? fac_id['id']: 0
-        setFacilityId(id)
+            return fac.name === data;
+        })[0];
+        facilityId = fac_id? fac_id['id']: 0;
         //console.log('FAC ID', fac_id['id'])
-        setFacility(data)
-        const fac_arr = _facilities.filter(fac => fac.id == id)
-        const fac_obj = fac_arr.length > 0? fac_arr[0]: null
+        setFacility(data);
+        const fac_arr = _facilities.filter(fac => fac.id == facilityId);
+        const fac_obj = fac_arr.length > 0? fac_arr[0]: null;
         if (fac_obj != null) { // id == 0 means new facility 
-            setAddress(fac_obj['address'])
-            setFacAddress(fac_obj['address'])
-            setFacProviders(fac_obj['providers'])
+            setAddress(fac_obj['address']);
+            facAddress = fac_obj['address'];
+            facProviders = fac_obj['providers'];
             setProviders(fac_obj['providers'].filter( (p, i) => {
-                return ptntProviders.includes(p)
-            })) // set to fac_provs x ptnt_provs
+                return ptntProviders.includes(p);
+            })); // set to fac_provs x ptnt_provs
         } 
     }
 
-    function getFacilityOptions() {
-        console.log("GETTING FACILITY OPTIONS")
-        let options = []
-        if (facilities.length != 0 ) {
-            options = facilities.map((fid)=> {
-                const fac_obj = _facilities.filter(fac => {
-                    return fac.id === fid
-                })[0]
-                if(!(typeof fac_obj === 'undefined')) {
-                    _facs.push({'id':fid, 'name':fac_obj['name']})
-                    return fac_obj['name']
-                } 
-                return false
-                })
-        }
-        console.log("THE FACILITY OPTIONS ARE", options)
-        return options
-    }
-
     function provInputChange(data) {
-        const prov_ = data.split(";")
-        setProvider(prov_[0])
-        setProviderTitle(prov_[1])
+        const prov_ = data.split(";");
+        setProvider(prov_[0]);
+        setProviderTitle(prov_[1]);
         //setProviderTitle(title.substring(0, title_len-1))
         //setProvider(data)
     }
 
     const checkKeyDown = (e) => {
         if (e.code === 'Enter') e.preventDefault();
-      };
+    };
 
     async function handleSubmit(e) {
 
         e.preventDefault();
 
         if (date == '') { 
-            return setError('You must submit a date')
+            return setError('You must submit a date');
         }
         if (patient == 'select') {
-          return setError('You must select a patient')
+          return setError('You must select a patient');
         }
         if (time === '' && notKnowDuration == false && duration !== '') {
-            return setError('You must input a time if a duration is present')
+            return setError('You must input a time if a duration is present');
         }
         
         try {
             setError('')
-            setLoading(true)
-            const _time = (time && !notKnowTime)? time: '00:00'
-            console.log('_TIME', _time)
-            const _date = date? new Date(date+ 'T' + _time): null
+            const _time = (time && !notKnowTime)? time: '00:00';
+            console.log('_TIME', _time);
+            const _date = date? new Date(date+ 'T' + _time): null;
             
             //taking the patient field set by ptntForm (set as a string "pid,patient name")
-            const pat_arr = patient.split(", ")
-            const pid = pat_arr[0]
-            const _patient = pat_arr[1]
+            const pat_arr = patient.split(", ");
+            const pid = pat_arr[0];
+            const _patient = pat_arr[1];
 
           
-            console.log('ADDRESS', address, facAddress, !(address === facAddress))
-            console.log('NOT KNOW TIME', notKnowTime, notKnowDuration, (!notKnowTime? _time:'poop'), (!notKnowDuration? duration:'poop'))
+            console.log('ADDRESS', address, facAddress, !(address === facAddress));
+            console.log('NOT KNOW TIME', notKnowTime, notKnowDuration, (!notKnowTime? _time:'poop'), (!notKnowDuration? duration:'poop'));
 
             if (facility == '') {
-              db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':(!notKnowDuration? duration:''), 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider+';'+providerTitle, 'error':error}, 'appointments')
-              setIsOpen(false)
+              db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':(!notKnowDuration? duration:''), 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider+';'+providerTitle, 'error':error}, 'appointments');
+              setIsOpen(false);
             }
 
-            if (facility!='' && !(facilities.includes(facilityId))) {
+            if (facility!='' && !(ptntFacilities.includes(facilityId))) {
               db.send({'name':facility, 'address':address, 'providers':[...facProviders, provider+';'+providerTitle]}, 'facilities').then(function(docRef) {
                 Promise.all([          
-                  !(ptntProviders.includes(provider+';'+providerTitle)) && db.edit(pid,{'facilities':[...facilities, docRef.id], 'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
+                  !(ptntProviders.includes(provider+';'+providerTitle)) && db.edit(pid,{'facilities':[...ptntFacilities, docRef.id], 'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
                   db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':duration, 'facility':facility, 'facilityId':docRef.id, 'address':address, 'provider':provider+';'+providerTitle, 'error':error}, 'appointments')
                 ]);
-                setIsOpen(false)
-              })
+                setIsOpen(false);
+              });
             }
             
-            if (facility!='' && facilities.includes(facilityId)) {
-              console.log(facilities)
+            if (facility!='' && ptntFacilities.includes(facilityId)) {
+              console.log(ptntFacilities);
               db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':(!notKnowDuration? duration:''), 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider, 'error':error}, 'appointments').then(function(docRef) {
                 Promise.all([          
                   !(providers.includes(provider+';'+providerTitle)) && db.edit(pid,{'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
                   !(providers.includes(provider+';'+providerTitle)) && db.edit(facilityId, {'providers':[...facProviders, provider+';'+providerTitle]}, 'facilities'),
                   !(address === facAddress) && db.edit(facilityId, {'address':address}, 'facilities'),
                 ]);
-              })
-              setIsOpen(false)
+              setIsOpen(false);
+              });
             } 
 
         } catch {
@@ -306,7 +349,7 @@ function ApptFormModal() {
 
                     <label>
                     Facility
-                    <Autocomplete suggestions={facilityOptions} setFormValue = {setFacilityInfo} formValue = {facility}/>
+                    <Autocomplete suggestions={facilityOptions} setFormValue = {setFacility} formValue = {facility}/>
                     </label>
 
                     <label>
