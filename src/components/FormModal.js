@@ -1,3 +1,9 @@
+/*
+TODO:
+- Create two use effects -> one listens for patient change, the other listens for facility change
+*/
+
+
 import React, { useState, useEffect } from 'react';
 //import Modal from 'react-awesome-modal';
 //import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -59,6 +65,10 @@ function ApptFormModal() {
 
     const [ptntObj, setPtntObj] = useState({});
     const [facObj, setFacObj] = useState({});
+    //other variables: const fac_obj
+
+    
+
     let patObj; //patient object 
     let facilityId = ''; // the facility ID of the option selected (not rendered)
     let ptntFacilities = []; // facility id's stored inside of patient (not rendered)
@@ -71,6 +81,24 @@ function ApptFormModal() {
     const { useDB, db } = useAuth();
     const patients = useDB('patients');
     const _facilities = useDB('facilities');
+
+    function setPatientInformation(ptntObj){
+        console.log('PTNT OBJ', ptntObj)
+
+            if (Object.keys(ptntObj).length != 0 && ptntObj['facilities'].length != 0) {
+                setFacilityOpts(ptntObj['facilities'].map((fid)=> {
+                    const fac_obj = _facilities.filter(fac => {
+                        return fac.id === fid;
+                    })[0]
+                    if(!(typeof fac_obj === 'undefined')) {
+                        _facs.push({'id':fid, 'name':fac_obj['name']});
+                        return fac_obj['name'];
+                    } 
+                    return false;
+                })) 
+                ptntFacilities = (ptntObj['facilities'] != undefined) && ptntObj['facilities'];
+                (typeof ptntObj['providers'] != 'undefined')? (ptntObj = patObj['providers']) : (ptntObj = []);
+    }
 
     useEffect(
         () => {
@@ -112,13 +140,26 @@ function ApptFormModal() {
                 ...facObj, 
                 ...fac_obj
             }));
+
+            /////////////////////////////////////////////
+            if (Object.keys(fac_obj).length != 0) { // id == 0 means new facility 
+                setAddress(fac_obj['address']);
+                facAddress = fac_obj['address'];
+                setProviders(fac_obj['providers'].filter( (p, i) => {
+                    return ptntProviders.includes(p);
+                })); // set to fac_provs x ptnt_provs
+                facProviders = fac_obj['providers'];    
+            }
+            /////POSSIBLY DELETE, COULD JUST STORE PTNT AND FAC DATA AS OBJECT NOT KEYS AS VARIABLES////////
+
         },
         [facility]
     );
-
+    
+    //grab information from facility
     useEffect(
         () => {
-            if (facObj != null) { // id == 0 means new facility 
+            if (Object.keys(facObj).length != 0) { // id == 0 means new facility 
                 setAddress(facObj['address']);
                 facAddress = facObj['address'];
                 facProviders = facObj['providers'];
@@ -157,7 +198,9 @@ function ApptFormModal() {
 
             //grabbing current facilitis and providers arrays and appending the new inputs inside db.send
             //[set as global variable?]
-            patObj = patients.filter(ptnt => ptnt.id == pid)[0];
+            ptntObj = patients.filter(ptnt => ptnt.id == pid)[0];
+
+            /*
             setPtntObj(ptntObj => ({
                 ...ptntObj, 
                 ...patObj
