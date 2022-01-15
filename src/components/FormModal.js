@@ -72,7 +72,8 @@ function ApptFormModal() {
 
     //const [ptntObj, setPtntObj] = useState({});
     let ptntObj;
-    const [facObj, setFacObj] = useState({});
+    let facObj;
+    //const [facObj, setFacObj] = useState({});
     //other variables: const fac_obj
 
 
@@ -104,14 +105,13 @@ function ApptFormModal() {
         setIsOpen(false);
     }
 
+
     /* FORM INPUTS HANDLE CHANGE
     params: event, event.target,value (in this case patient field value)
-
     1) shows new patient form if patient is created
     2) grabs patient object and sets as global variable [ptntObj = {dict/obj}]
     3) sets the facility options if available in patient object [facilityOpts, setFacilityOpts = [array of names]] 
     4) pushes dict obj to _facs which stores an array of facility names and ids [{'id':fid, 'name':fac_obj['name']}]
-
     */
     function handlePatientChange(e) {
         const val = e.target.value; 
@@ -127,16 +127,16 @@ function ApptFormModal() {
             const pid = pat_arr[0];
             //const _patient = pat_arr[1];
             //using pid to filter the patient object and assign it to global variable 
-            ptntObj = patients.filter(ptnt => ptnt.id == pid)[0];
+            ptntObj = patients.filter(pVBT786TE 132QWECTB POIYTY75G4`tnt => ptnt.id == pid)[0];
 
             if (Object.keys(ptntObj).length != 0 && ptntObj['facilities'].length != 0) {
                 setFacilityOpts(ptntObj['facilities'].map((fid) => {
-                    const fac_obj = _facilities.filter(fac => {
+                    const fac = _facilities.filter(fac => {
                         return fac.id === fid;
                     })[0]
-                    if (!(typeof fac_obj === 'undefined')) {
-                        _facs.push({ 'id': fid, 'name': fac_obj['name'] });
-                        return fac_obj['name'];
+                    if (!(typeof fac === 'undefined')) {
+                        _facs.push({ 'id': fid, 'name': fac['name'] });
+                        return fac['name'];
                     }
                     return false;
                 }))
@@ -154,135 +154,37 @@ function ApptFormModal() {
         }
     }
 
-    ///////////////////////DELETE////////////////////////////
-    function setPatientInformation(ptntObj) { //inside use effect for [ptntObj]
-        console.log('PTNT OBJ', ptntObj)
-
-        if (Object.keys(ptntObj).length != 0 && ptntObj['facilities'].length != 0) {
-            setFacilityOpts(ptntObj['facilities'].map((fid) => {
-                const fac_obj = _facilities.filter(fac => {
-                    return fac.id === fid;
-                })[0]
-                if (!(typeof fac_obj === 'undefined')) {
-                    _facs.push({ 'id': fid, 'name': fac_obj['name'] });
-                    return fac_obj['name'];
-                }
-                return false;
-            }))
-            (typeof ptntObj['facilities'] != 'undefined') && (ptntFacilities = ptntObj['facilities']);
-            (typeof ptntObj['providers'] != 'undefined') && (ptntProviders = ptntObj['providers']);
-        }
-    }
-
-    useEffect( //currently does not get called on since ptntObj is now a variable not useState
-        () => {
-            console.log('PTNT OBJ', ptntObj)
-
-            if (Object.keys(ptntObj).length != 0 && ptntObj['facilities'].length != 0) {
-                setFacilityOpts(ptntObj['facilities'].map((fid) => {
-                    const fac_obj = _facilities.filter(fac => {
-                        return fac.id === fid;
-                    })[0]
-                    if (!(typeof fac_obj === 'undefined')) {
-                        _facs.push({ 'id': fid, 'name': fac_obj['name'] });
-                        return fac_obj['name'];
-                    }
-                    return false;
-                }))
-                ptntFacilities = (ptntObj['facilities'] != undefined) && ptntObj['facilities'];
-                (typeof ptntObj['providers'] != 'undefined') ? (ptntObj = patObj['providers']) : (ptntObj = []);
-            }
-        },
-        [ptntObj]
-    );
-    /////////////////////////////////////////////////////
-
-
-
-    //matches name input w/ facility id, makes a query to the database for the following info...
-    //providers if matched with patient's, and the address...
-    //sets providers the input suggestions, and fills in the address field
+    /*
+    params: event, event.target,value (in this case patient field value)
+    1) matches name input w/ facility id in _facs array, makes a query to the database for the following info...
+    providers if matched with patient's, and the address
+    2) sets providers the input suggestions, and fills in the address field
+    */
     function handleFacilityChange(e) { 
         const val = e.target.value; 
         setFacility(val);
         //grab the facility id from _facs array [{'id':fid, 'name':fac_obj['name']}]
-        const fac_id = _facs.filter(fac => {
+        const fac = _facs.filter(fac => {
             return fac.name === val;
         })[0];
         //[choose a different value/method to represent a new facility not just a numeric "0" which could be unstable]
-        facilityId = fac_id ? fac_id['id'] : 0;
         //console.log('FAC ID', fac_id['id'])
-        if(facilityId != 0) {
-            const fac_arr = _facilities.filter(fac => fac.id == facilityId);
-            const fac_obj = fac_arr.length > 0 ? fac_arr[0] : null;
+        if(fac) {
+            facObj = _facilities.filter(fac => fac.id == facilityId)[0];
+            //facObj = fac_arr.length > 0 ? fac_arr[0] : null;
         }
-        if (fac_obj != null) { // id == 0 means new facility 
-            setAddress(fac_obj['address']);
-            setProviders(fac_obj['providers'].filter((p, i) => {
-                return ptntProviders.includes(p);
+        if (facObj != null) { // id == 0 means new facility 
+            setAddress(facObj['address']);
+            setProviders(facObj['providers'].filter((p, i) => {
+                return ptntObj['providers'].includes(p);
             })); // set to fac_provs x ptnt_provs
-            facAddress = fac_obj['address'];
-            facProviders = fac_obj['providers'];
+
+            //facAddress = facObj['address']; 
+            //facProviders = facObj['providers'];
         }
     }
-
-    /////////////////////////////////////DELETE//////////////////////////////////
-    function setFacilityInfo(data) {
-        const fac_id = _facs.filter(fac => {
-            return fac.name === data;
-        })[0];
-        facilityId = fac_id ? fac_id['id'] : 0;
-        //console.log('FAC ID', fac_id['id'])
-        setFacility(data);
-        const fac_arr = _facilities.filter(fac => fac.id == facilityId);
-        const fac_obj = fac_arr.length > 0 ? fac_arr[0] : null; 
-
-        if (fac_obj != null) { // id == 0 means new facility 
-            setAddress(fac_obj['address']);
-            facAddress = fac_obj['address'];
-            facProviders = fac_obj['providers'];
-            setProviders(fac_obj['providers'].filter((p, i) => {
-                return ptntProviders.includes(p);
-            })); // set to fac_provs x ptnt_provs
-        }
-    }
-
-    useEffect(
-        () => {
-            if (facility != '') {
-                console.log('FACILITY OPT', facility)
-                const fac_id = _facs.filter(fac => {
-                    return fac.name === facility;
-                })[0];
-                //[choose a different value/method to represent a new facility not just a numeric "0" which could be unstable]
-                facilityId = fac_id ? fac_id['id'] : 0;
-                //console.log('FAC ID', fac_id['id'])
-                const fac_arr = _facilities.filter(fac => fac.id == facilityId);
-                const fac_obj = fac_arr.length > 0 ? fac_arr[0] : null;
-                setFacObj(facObj => ({
-                    ...facObj,
-                    ...fac_obj
-                }));
-
-                /////////////////////////////////////////////
-                if (Object.keys(fac_obj).length != 0) { // id == 0 means new facility 
-                    setAddress(fac_obj['address']);
-                    facAddress = fac_obj['address'];
-                    setProviders(fac_obj['providers'].filter((p, i) => {
-                        return ptntProviders.includes(p);
-                    })); // set to fac_provs x ptnt_provs
-                    facProviders = fac_obj['providers'];
-                }
-                /////POSSIBLY DELETE, COULD JUST STORE PTNT AND FAC DATA AS OBJECT NOT KEYS AS VARIABLES////////
-            }
-            
-
-        },
-        [facility]
-    );
-    ///////////////////////////////////////////////////////////////////
-
-
+    
+    //place inside of html
     function provInputChange(data) {
         const prov_ = data.split(";");
         setProvider(prov_[0]);
@@ -291,9 +193,6 @@ function ApptFormModal() {
         //setProvider(data)
     }
 
-    const checkKeyDown = (e) => {
-        if (e.code === 'Enter') e.preventDefault();
-    };
 
     async function handleSubmit(e) {
 
@@ -311,6 +210,8 @@ function ApptFormModal() {
 
         try {
             setError('')
+
+            //format datetime
             const _time = (time && !notKnowTime) ? time : '00:00';
             console.log('_TIME', _time);
             const _date = date ? new Date(date + 'T' + _time) : null;
@@ -321,31 +222,38 @@ function ApptFormModal() {
             const _patient = pat_arr[1];
 
 
-            console.log('ADDRESS', address, facAddress, !(address === facAddress));
+            console.log('ADDRESS', address, facObj['address'], !(address === facObj['address']));
             console.log('NOT KNOW TIME', notKnowTime, notKnowDuration, (!notKnowTime ? _time : 'poop'), (!notKnowDuration ? duration : 'poop'));
 
-            if (facility == '') {
+            //if facility field is left empty
+            if (facility === '') {
+                //create new appointment in db
                 db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? duration : ''), 'facility': facility, 'facilityId': facilityId, 'address': address, 'provider': provider + ';' + providerTitle, 'error': error }, 'appointments');
                 setIsOpen(false);
             }
 
+
+            //if facility does not exist...
             if (facility != '' && !(ptntFacilities.includes(facilityId))) {
-                db.send({ 'name': facility, 'address': address, 'providers': [...facProviders, provider + ';' + providerTitle] }, 'facilities').then(function (docRef) {
+                db.send({ 'name': facility, 'address': address, 'providers': [...fac_obj['providers'], provider + ';' + providerTitle] }, 'facilities').then(function (docRef) {
                     Promise.all([
+                        //edit patient['facilities] array in db if provider does not exist
                         !(ptntProviders.includes(provider + ';' + providerTitle)) && db.edit(pid, { 'facilities': [...ptntFacilities, docRef.id], 'providers': [...ptntProviders, provider + ';' + providerTitle] }, 'patients'),
+                        //create new appointment in db
                         db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': duration, 'facility': facility, 'facilityId': docRef.id, 'address': address, 'provider': provider + ';' + providerTitle, 'error': error }, 'appointments')
                     ]);
                     setIsOpen(false);
                 });
             }
 
+            //if facility exists...
             if (facility != '' && ptntFacilities.includes(facilityId)) {
                 console.log(ptntFacilities);
                 db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? duration : ''), 'facility': facility, 'facilityId': facilityId, 'address': address, 'provider': provider, 'error': error }, 'appointments').then(function (docRef) {
                     Promise.all([
                         !(providers.includes(provider + ';' + providerTitle)) && db.edit(pid, { 'providers': [...ptntProviders, provider + ';' + providerTitle] }, 'patients'),
-                        !(providers.includes(provider + ';' + providerTitle)) && db.edit(facilityId, { 'providers': [...facProviders, provider + ';' + providerTitle] }, 'facilities'),
-                        !(address === facAddress) && db.edit(facilityId, { 'address': address }, 'facilities'),
+                        !(providers.includes(provider + ';' + providerTitle)) && db.edit(facilityId, { 'providers': [...fac_obj['providers'], provider + ';' + providerTitle] }, 'facilities'),
+                        !(address === facObj['address']) && db.edit(facilityId, { 'address': address }, 'facilities'),
                     ]);
                     setIsOpen(false);
                 });
@@ -357,6 +265,9 @@ function ApptFormModal() {
     }
 
 
+    const checkKeyDown = (e) => {
+        if (e.code === 'Enter') e.preventDefault();
+    };
 
 
 
@@ -428,7 +339,7 @@ function ApptFormModal() {
 
                         <label>
                             Facility
-                            <Autocomplete suggestions={facilityOptions} setFormValue={e => { handlePatientChange(e) }} formValue={facility} />
+                            <Autocomplete suggestions={facilityOptions} setFormValue={e => { handleFacilityChange(e) }} formValue={facility} />
                         </label>
 
                         <label>
