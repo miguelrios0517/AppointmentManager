@@ -40,6 +40,7 @@ function useDB(room) {
     return appointments
 }
 
+
 const db = {}
 db.send = function(apt) {
     return store.collection(coll).add(apt)

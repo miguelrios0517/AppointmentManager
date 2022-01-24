@@ -8,18 +8,47 @@ class Autocomplete extends Component {
       activeSuggestion: 0,
       filteredSuggestions: [],
       showSuggestions: false,
-      userInput: ""
+      userInput: "",
+      focused: false
     };
+
+    this.searchInput = React.createRef(null);
+    //this.onFocus = this.onFocus.bind(this);
+    //this.onBlur = this.onBlur.bind(this);
+  }
+
+  onFocus() {
+    this.setState({
+      focused: true
+    });
+    console.log('ON FOCUS', this.state.focused)
+  }
+
+  onBlur() {
+    this.setState({
+      focused: false
+    });
+    console.log('ON BLUR', this.state.focused)
   }
 
   onChange = e => {
     const { suggestions, setFormValue } = this.props;
     const userInput = e.currentTarget.value;
-  
-    const filteredSuggestions = suggestions.filter(
-      suggestion =>
-        suggestion.toLowerCase().indexOf(userInput.toLowerCase()) > -1
-    );
+    let filteredSuggestions
+
+
+    
+
+    if (suggestions.length !== 0) {
+      console.log("all suggestions", suggestions)
+      filteredSuggestions = suggestions.filter(
+        suggestion =>
+          suggestion.toLowerCase().indexOf(userInput.toLowerCase()) > -1
+      );
+    } else {
+      filteredSuggestions = []
+    }
+    
 
     setFormValue(e.currentTarget.value)
   
@@ -85,8 +114,10 @@ class Autocomplete extends Component {
     } = this;
   
     let suggestionsListComponent;
-
-    if (showSuggestions && userInput) {
+    if(document.activeElement === this.searchInput.current) {
+    //if(!this.focused) {
+      console.log('AUTOCOMPLETE IS ACTIVE', document.getElementById('autoComp'), document.getElementById('autoComp') === document.activeElement)
+      if (showSuggestions && userInput) {
         if (filteredSuggestions.length) {
           suggestionsListComponent = (
             <ul class="suggestions">
@@ -113,14 +144,19 @@ class Autocomplete extends Component {
           );
         }
       }
+    } else {
+      suggestionsListComponent = (<></>)
+    }
 
-      return (
+    return (
           <Fragment>
             <input
+              ref={this.searchInput}
+              id = "autoComp"
               type="text"
               onChange={onChange}
               onKeyDown={onKeyDown}
-              value={userInput}
+              value={this.props.formValue}
             />
             {suggestionsListComponent}
           </Fragment>

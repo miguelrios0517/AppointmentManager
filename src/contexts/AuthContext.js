@@ -29,7 +29,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState()
   const [loading, setLoading] = useState(true)
-  const[users, setUsers] = useState([])
+  const [users, setUsers] = useState([])
 
   //database users
   function signup(email, password) {
@@ -65,8 +65,38 @@ export function AuthProvider({ children }) {
     return unsubscribe
   }, [])
 
+  useEffect(() => {
+    getDocument();
+  }, [])
+
+  const testFunction = (pid) => {
+    console.log('TEST FUNCTION WORKS', pid)
+  }
+
+  const getDocument=async(id, collect)=>{
+    /*
+    if (id && collect) {
+      const docRef=store.collection(collect).doc(id);
+      const doc=await docRef.get();
+      if(doc.exists) {
+        console.log('doc.data',doc.data())
+        return doc.data();
+      }
+    }
+    */
+
+    if (id && collect) {
+      store.collection(collect).doc(id).get()
+        .then(snapshot => {
+          //console.log("SNAPSHOT DATA", snapshot.data())
+          return snapshot.data()})
+    }
+  
+
+  }
+
   //database collections 
-  let store
+  let store;
   const coll = 'appointments'
 
   // room is the dataset (i.e., appointments, patients, etc.)
@@ -75,40 +105,40 @@ export function AuthProvider({ children }) {
     //const [item, setItem] = useState([])
 
     function add(a) {
-        setAppointments(current => {
-            const appts = [a, ...current]
-            appts.sort((a,b)=> (b.date - a.date))
-            return appts
-        })
+      setAppointments(current => {
+        const appts = [a, ...current]
+        appts.sort((a, b) => (b.date - a.date))
+        return appts
+      })
     }
 
     function remove(id) {
-        setAppointments(current=> current.filter(m=> m.id!==id))
+      setAppointments(current => current.filter(m => m.id !== id))
     }
 
     useEffect(() => {
-        const collection = collect? store.collection(collect) : 
+      const collection = collect ? store.collection(collect) :
         store.collection(coll)
-        
-        collection.onSnapshot(snap=> snap.docChanges().forEach(c=> {
-            const {doc, type} = c
-            //console.log(doc.data().uid)
-            if (doc.data().uid === currentUser.uid) {
-              //item? console.log('item available'): console.log('item not available')
-              if (item) {
-                if (doc.id === item) {
-                  //console.log('getting item', doc.data())
-                  if (type==='added') add({...doc.data(),id:doc.id})
-                  if (type==='removed') remove(doc.id)
-                }
-              } else {
-                //console.log('getting collection', doc.data())
-                if (type==='added') add({...doc.data(),id:doc.id})
-                if (type==='removed') remove(doc.id)
-              }
-              
+
+      collection.onSnapshot(snap => snap.docChanges().forEach(c => {
+        const { doc, type } = c
+        //console.log(doc.data().uid)
+        if (doc.data().uid === currentUser.uid) {
+          //item? console.log('item available'): console.log('item not available')
+          if (item) {
+            if (doc.id === item) {
+              //console.log('getting item', doc.data())
+              if (type === 'added') add({ ...doc.data(), id: doc.id })
+              if (type === 'removed') remove(doc.id)
             }
-        }))
+          } else {
+            //console.log('getting collection', doc.data())
+            if (type === 'added') add({ ...doc.data(), id: doc.id })
+            if (type === 'removed') remove(doc.id)
+          }
+
+        }
+      }))
     }, [])
 
     // filter the appointments for the
@@ -116,30 +146,30 @@ export function AuthProvider({ children }) {
     //console.log('AUTH CONTEXT', appointments)
     //const appts_user = item? appointments.filter(appt => appt.id == item)[0]: appointments
     return appointments
-}
+  }
 
-const db = {}
+  const db = {}
 
-db.send = function(data, collect) {
-  data.uid = currentUser.uid
-  return store.collection(collect).add(data)
-}
+  db.send = function (data, collect) {
+    data.uid = currentUser.uid
+    return store.collection(collect).add(data)
+  }
 
-db.delete = function(id, collect) {
-  return store.collection(collect).doc(id).delete()
-}
+  db.delete = function (id, collect) {
+    return store.collection(collect).doc(id).delete()
+  }
 
-db.edit = function(id, data, collect) {
-  return store.collection(collect).doc(id).set(data, {merge: true});
-}
+  db.edit = function (id, data, collect) {
+    return store.collection(collect).doc(id).set(data, { merge: true });
+  }
 
-db.get = async function(id, collect) {
+  db.get = async function (id, collect) {
     const collectRef = store.collection(collect)
-    collectRef.where('id', '==', id).get().then( snapshot => {
+    collectRef.where('id', '==', id).get().then(snapshot => {
       if (snapshot.empty) {
         //console.log('No matching documents.');
         return;
-      } 
+      }
       snapshot.forEach(doc => {
         //console.log(doc.id, '=>', doc.data());
       });
@@ -158,19 +188,21 @@ db.get = async function(id, collect) {
     } catch (error) {
       console.log(error)
     }*/
-}
+  }
 
-//database methods available to components
-const value = {
+  //database methods available to components
+  const value = {
     currentUser,
     login,
     signup,
     logout,
     resetPassword,
     updateEmail,
-    updatePassword, 
-    db, 
-    useDB
+    updatePassword,
+    db,
+    useDB, 
+    getDocument,
+    testFunction, 
   }
 
   store = app.firestore()
@@ -181,4 +213,3 @@ const value = {
     </AuthContext.Provider>
   )
 }
- 
