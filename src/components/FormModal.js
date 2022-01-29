@@ -206,7 +206,7 @@ function ApptFormModal() {
     function isFacility(val) {
         let exists = false;
         facilityObjs.forEach(function(item,index) {
-            console.log('isFacility', item.name, val, (item.name === val))
+            //console.log('isFacility', item.name, val, (item.name === val))
             if (item.name === val) exists = true;
         })
         return exists;
@@ -294,13 +294,19 @@ function ApptFormModal() {
             const pid = pat_arr[0];
             const _patient = pat_arr[1];
 
-            const facObj = facilityObjs.filter(fac => fac.name === facility)[0]
+            console.log('POO POO')
 
-            console.log('ADDRESS', address, facObj['address'], !(address === facObj['address']));
+            let facObj;
+            isFacility(facility) && (facObj = facilityObjs.filter(fac => fac.name === facility)[0])
+            console.log('PEE PEE')
+
+            console.log('FAC OBJ', facObj);
+
+            //console.log('ADDRESS', address, facObj['address'], !(address === facObj['address']));
             console.log('NOT KNOW TIME', notKnowTime, notKnowDuration, (!notKnowTime ? _time : 'poop'), (!notKnowDuration ? duration : 'poop'));
 
             //facility is left empty
-            if (facility == '') {
+            if (facility === '') {
                 console.log("SUBMITTING EMPTY FACILITY")
                 console.log("SUBMITTING EMPTY FACILITY")
                 console.log("SUBMITTING EMPTY FACILITY")
@@ -320,15 +326,25 @@ function ApptFormModal() {
                 console.log("SUBMITTING EMPTY FACILITY")
 
                 //create new appointment in db
-                db.send({ 'patient': _patient, 'pid': patientObj.id, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? duration : ''), 'facility': facility, 'facilityId': facObj.id, 'address': address, 'provider': provider + ';' + providerTitle, 'error': error }, 'appointments');
+                setTimeout(() => {db.send({ 'patient': _patient, 'pid': patientObj.id, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? duration : ''), 'facility': facility, 'facilityId': '', 'address': address, 'provider': provider + ';' + providerTitle, 'error': error }, 'appointments')}, 3000);
                 setIsOpen(false);
             }
 
             //facility does not exist...
             if (facility != '' && !isFacility(facility)) {
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+                console.log("SUBMITTING NEW FACILITY")
+
                 console.log('facility does not exists!', patientObj.facilities, 'patient object id', patientObj.id);
                 console.log('facObj id',facObj['id'], 'obj', facObj)
-                db.send({ 'name': facility, 'address': address, 'providers': [...facObj['providers'], provider + ';' + providerTitle] }, 'facilities').then(function (docRef) {
+                db.send({ 'name': facility, 'address': address, 'providers': [provider + ';' + providerTitle] }, 'facilities').then(function (docRef) {
                     Promise.all([
                         //edit patient['facilities] array in db if provider does not exist
                         !(patientObj['providers'].includes(provider + ';' + providerTitle)) && db.edit(pid, { 'facilities': [...patientObj['facilities'], docRef.id], 'providers': [...patientObj['providers'], provider + ';' + providerTitle] }, 'patients'),
@@ -341,6 +357,7 @@ function ApptFormModal() {
 
             //facility exists...
             if (facility != '' && isFacility(facility)) {
+                console.log('ISFACILITY', isFacility('poo poo'))
                 console.log('facility exists!', patientObj.facilities, 'patient object id', patientObj.id);
                 console.log('facObj id',facObj['id'], 'obj', facObj)
                 //create new appointment in db
@@ -431,7 +448,6 @@ function ApptFormModal() {
                             Provider's Full Name
                             <Autocomplete suggestions={providers.length !== 0 ? providers.map((prov) => {
                                 let split = prov.split(";")
-                                console.log('OPTION: ', split[0] + " (" + split[1] + ")")
                                 return(split[0] + " (" + split[1] + ")")
                             }) : []} setFormValue={provInputChange} formValue={provider} />     
                         </label>
