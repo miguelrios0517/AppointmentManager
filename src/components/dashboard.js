@@ -28,7 +28,9 @@ export default function Dashboard(props) {
 
     return(
         <div className = "dashboard"> 
-            <header className = 'header'>Dashboard Overview</header>
+            <header className="text-3xl font-bold underline">
+                Dashboard Overview
+            </header>
             <div className = "authTutor">
                 <Card>
                     <Card.Body>
