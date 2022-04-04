@@ -101,7 +101,6 @@ function Appointments() {
 
 
             <ApptFormModal />
-            <Empty />
 
 
         </div>

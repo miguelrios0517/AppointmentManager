@@ -100,14 +100,16 @@ function ApptFormModal() {
         setIsOpen(true);
     }
 
+    function closeModal() {
+        setIsOpen(false);
+    }
+
     function afterOpenModal() {
         // references are now sync'd and can be accessed.
         subtitle.style.color = '#000';
     }
 
-    function closeModal() {
-        setIsOpen(false);
-    }
+  
 
 
     /*useEffect(() => {
@@ -384,8 +386,7 @@ function ApptFormModal() {
 
 
     return (<div className="form-modal">
-
-        <button onClick={openModal}>Open Modal</button>
+        <button onClick={openModal} type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Add new appointment</button>
         <Modal
             isOpen={modalIsOpen}
             style={customStyles}
@@ -395,7 +396,7 @@ function ApptFormModal() {
                 <div>
                     <div className="modal-row">
                         <h3>New Appointment</h3>
-                        <button className="modal-button" onClick={closeModal}>Cancel</button>
+                        <button onClick={closeModal} type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Cancel</button>
                     </div>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} className='appt-form'>
