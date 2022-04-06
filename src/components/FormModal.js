@@ -394,22 +394,31 @@ function ApptFormModal() {
         >
             <div className="portfolio-modal">
                 <div>
-                    <div className="modal-row">
+                    <div className="flex justify-between">
                         <h3>New Appointment</h3>
-                        <button onClick={closeModal} type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Cancel</button>
+                        <button onClick={closeModal} type="button" class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-600 dark:focus:ring-blue-800">Cancel</button>
                     </div>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} className='appt-form'>
                         <label>
-                            <p>Patient:</p>
-                            <select value={patient} onChange={e => { handlePatientChange(e) }}>
-                                <option value='select'>Select a patient</option>
+                            Patient:
+                            <select value={patient} onChange={e => { handlePatientChange(e) }} class="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
+                            <option value='select'>Select a patient</option>
                                 <option value='new-patient'>Add a new patient</option>
                                 {patients.map((p, i) => {
                                     return <option value={p.id + ', ' + p.firstName + ' ' + p.lastName}>{((p.firstName + p.lastName) ? (p.firstName + ' ' + p.lastName) : 'name not entered') + ' (' + p.id + ')'} </option>
                                 })}
                             </select>
-                        </label>
+                        </label>   
+                        <div class="sm:w-1/3">
+                            <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
+                                Full Name
+                            </label>
+                        </div>
+                        <div class="sm:w-2/3">
+                            <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text" value="Jane Doe"/>
+                        </div>
+
 
                         <label>
                             Date:
@@ -436,7 +445,7 @@ function ApptFormModal() {
                         </label>
 
                         <label>
-                            Facility
+                            <p>Facility</p>
                             <Autocomplete suggestions={facilityObjs.length !== 0 ? facilityObjs.map(fac => fac.name): []} setFormValue={handleFacilityChange} formValue={facility} />
                         </label>
 

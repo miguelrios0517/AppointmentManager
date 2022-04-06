@@ -12,7 +12,9 @@ import Login from "./components/Login"
 
 import Dashboard from './components/dashboard';
 import Appointments from './components/appointments';
-import Appointment from './components/appointment'
+import Appointment from './components/appointment';
+import ApptForm from './components/appt_form';
+
 import Schedule from './components/schedule';
 import Patients from './components/patients';
 import Patient from './components/patient';
@@ -140,6 +142,7 @@ function App() {
           <PrivateRoute exact path="/patients/:id" component={Patient} />
           <PrivateRoute exact path="/appointments" component={Appointments} />
           <PrivateRoute exact path ="/appointments/:id" component ={Appointment} />
+          <PrivateRoute exact path ="/new-appointment" component ={ApptForm} />
           <PrivateRoute path="/schedule" component={Schedule} />
           <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
         </Switch>
