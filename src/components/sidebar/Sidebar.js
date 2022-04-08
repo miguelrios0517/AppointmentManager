@@ -21,8 +21,6 @@ import { SidebarData }  from './SidebarData'
 const drawerWidth = 240;
 
 export default function ClippedDrawer() {
-  console.log('SIDEBAR DATA HERE: ', SidebarData)
-  SidebarData.forEach((x,i) => console.log(x.title))
 
   return (
     <Box sx={{ display: 'flex' }}>

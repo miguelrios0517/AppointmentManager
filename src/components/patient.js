@@ -18,13 +18,13 @@ function Patient() {
     const _facilities = useDB('facilities')  
 
     let { id } = useParams()
-    console.log('id', id)
-    const _patient = db.get(id, 'patients');
-    console.log(_patient)
     
-    console.log(firstName)
+    const _patient = db.get(id, 'patients');
+    
+    
+    
     const patient = useDB('patients', id)
-    console.log(patient)
+    
     //console.log()
     //setFirstName(patient.firstName)
 

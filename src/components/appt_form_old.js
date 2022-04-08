@@ -55,7 +55,7 @@ function ApptForm(props) {
     
     /*useDB('patients').then(function(docRef) {
       patients = docRef.id
-      console.log(patients) });*/
+      
 
     /*
     
@@ -68,10 +68,10 @@ function ApptForm(props) {
       ]);
  
     allPromise.then(values => {
-      console.log('VALUES', values); // [valueOfPromise1, valueOfPromise2, ...]
+      
       patients = values[0]
     }).catch(error => {
-      console.log(error)  // rejectReason of any first rejected promise
+      
     });
     */
 
@@ -101,7 +101,7 @@ function ApptForm(props) {
             setError('')
             setLoading(true)
             const _time = (time && !notKnowTime)? time: '00:00'
-            console.log('_TIME', _time)
+            
             const _date = date? new Date(date+ 'T' + _time): null
             
             //taking the patient field set by ptntForm (set as a string "pid,patient name")
@@ -110,8 +110,8 @@ function ApptForm(props) {
             const _patient = pat_arr[1]
 
           
-            console.log('ADDRESS', address, facAddress, !(address === facAddress))
-            console.log('NOT KNOW TIME', notKnowTime, notKnowDuration, (!notKnowTime? _time:'poop'), (!notKnowDuration? duration:'poop'))
+            
+            
 
             if (facility == '') {
               db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':(!notKnowDuration? duration:''), 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider+';'+providerTitle, 'error':error}, 'appointments')
@@ -129,7 +129,7 @@ function ApptForm(props) {
             }
             
             if (facility!='' && facilities.includes(facilityId)) {
-              console.log(facilities)
+              
               db.send({'patient': _patient, 'pid': pid, 'date':_date, 'time':_time, 'duration':(!notKnowDuration? duration:''), 'facility':facility, 'facilityId':facilityId, 'address':address, 'provider':provider, 'error':error}, 'appointments').then(function(docRef) {
                 Promise.all([          
                   !(providers.includes(provider+';'+providerTitle)) && db.edit(pid,{'providers':[...ptntProviders, provider+';'+providerTitle]}, 'patients'), 
@@ -158,9 +158,9 @@ function ApptForm(props) {
 
             //if facility = existing option
             if (facilities.includes(facility)) {
-              console.log(facility)
+              
               const fac_obj = _facilities.filter(fac => fac.id == facility)[0]
-              console.log(fac_obj)
+              
               // if address = different than in db -> confirm with user if they want to replace main addres
               if (('address' in fac_obj && address != fac_obj['address']) || !('address' in fac_obj)) {
                 Promise.all([
@@ -254,7 +254,7 @@ function ApptForm(props) {
                   })[0]
                   var id = fac_id? fac_id['id']: 0
                   setFacilityId(id)
-                  //console.log('FAC ID', fac_id['id'])
+                  //
                   setFacility(data)
 
                   const fac_arr = _facilities.filter(fac => fac.id == id)

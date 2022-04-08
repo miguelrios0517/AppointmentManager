@@ -27,15 +27,15 @@ function Appointments() {
 
 
     const appointments = useDB('appointments');
-    console.log('APPOINTMENT LENGTH', appointments.length, appointments.length === 0)
-    console.log('APPPPPOINTMENT LENGTHHHHH')
-    console.log(appointments)
+    
+    
+    
 
 
     /*function newFormSubmit(appointment) { 
         appointment.time = appointment.time? appointment.time: '00:00'
         appointment.date = appointment.date? new Date(appointment.date+ 'T' + appointment.time): null
-        console.log(appointment)
+        
         db.send(appointment, 'appointments')
         setShowForm(false)
     }*/
@@ -43,6 +43,8 @@ function Appointments() {
     function deleteAppointment(id) {
         db.delete(id, 'appointments');
     }
+
+    
  
     return(
         <div className = "appointments"> 
@@ -64,7 +66,7 @@ function Appointments() {
                             var hour;
                             var minute = date.getMinutes();
                             (date.getHours() > 12)? (hour = date.getHours() - 12): (hour = date.getHours())
-                            console.log('APPT DURATION',appt.duration);
+                            
                             const ampm = (date.getHours() > 12?'PM':'AM') 
                             var _ampm = ampm
                             var endminute = minute + (appt.duration? parseInt(appt.duration):0);
@@ -73,18 +75,18 @@ function Appointments() {
                             if(endhour != hour){
                                 (endhour > 12) && (endhour = endhour - 12)
                                 (endhour >= 12) && ((ampm === 'PM')? (_ampm = 'AM'): (_ampm = 'PM'))
-                                console.log('AMPM', ampm, ampm === 'PM', _ampm)
+                                
                             }
-                            console.log('HOURS OVER', endhour, endminute/60)
+                            
                             hour = hour.toString();
                             (endminute > 60) && (endminute = endminute%60)
-                            console.log('END TIME', hour, endminute);
+                            
                             (hour.length == 1) && (hour != 0) && (hour = '0' + hour)
-                            console.log('DATE', date, hour, minute)
+                            
 
                             //provider clean up
                             var prov = appt.provider? appt.provider.split(';'): false
-                            console.log('PROVIDER',prov, typeof prov[1])
+                            
                             var prov_t =  (prov[1] === 'undefined' || prov[1] === '')? '' : (' (' + prov[1] + ')')
 
                             return <tr>
@@ -98,11 +100,10 @@ function Appointments() {
                         })}
                     </table>}
             </div>    
-
-
-            <ApptFormModal />
-
-
+            
+            <Link to = "/new-appointment">
+                <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Add new appointment</button>
+            </Link>
         </div>
     );
 }

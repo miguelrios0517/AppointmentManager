@@ -5,10 +5,8 @@ import { useAuth } from '../contexts/AuthContext'
 function Appointment() {
     let { id } = useParams();
     const { db, useDB } = useAuth()
-    console.log('id', id)
     
     const appointment = useDB('appointments', id)
-    console.log(appointment)
 
     
 

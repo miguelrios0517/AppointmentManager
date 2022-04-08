@@ -21,14 +21,14 @@ class Autocomplete extends Component {
     this.setState({
       focused: true
     });
-    console.log('ON FOCUS', this.state.focused)
+    
   }
 
   onBlur() {
     this.setState({
       focused: false
     });
-    console.log('ON BLUR', this.state.focused)
+    
   }
 
   onChange = e => {
@@ -40,7 +40,7 @@ class Autocomplete extends Component {
     
 
     if (suggestions.length !== 0) {
-      console.log("all suggestions", suggestions)
+      
       filteredSuggestions = suggestions.filter(
         suggestion =>
           suggestion.toLowerCase().indexOf(userInput.toLowerCase()) > -1
@@ -116,7 +116,7 @@ class Autocomplete extends Component {
     let suggestionsListComponent;
     if(document.activeElement === this.searchInput.current) {
     //if(!this.focused) {
-      console.log('AUTOCOMPLETE IS ACTIVE', document.getElementById('autoComp'), document.getElementById('autoComp') === document.activeElement)
+      
       if (showSuggestions && userInput) {
         if (filteredSuggestions.length) {
           suggestionsListComponent = (
@@ -157,6 +157,7 @@ class Autocomplete extends Component {
               onChange={onChange}
               onKeyDown={onKeyDown}
               value={this.props.formValue}
+              className={this.props.className}
             />
             {suggestionsListComponent}
           </Fragment>

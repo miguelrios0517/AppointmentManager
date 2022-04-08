@@ -17,6 +17,7 @@ import Autocomplete from './Autocomplete.js'
 import TextField from "@material-ui/core/TextField";
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
+import {Link} from "react-router-dom";
 
 import { Form, Button, Card, Alert } from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
@@ -40,27 +41,37 @@ let store = app.firestore()
 Modal.setAppElement('#root');
 
 function ApptForm() {
-    const [modalIsOpen, setIsOpen] = useState(false);
-    const [patient, setPatient] = useState(''); //  form field value
-    const [firstName, setFirstName] = useState(''); //  form field value
-    const [middleName, setMiddleName] = useState(''); //  form field value
-    const [lastName, setLastName] = useState(''); //  form field value
-    const [date, setDate] = useState(''); //  form field value
-    const [time, setTime] = useState(''); //  form field value
-    const [notKnowDuration, setNotKnowDuration] = useState(false); //  form field value
-    const [notKnowTime, setNotKnowTime] = useState(false); //  form field value
-    const [duration, setDuration] = useState(''); //  form field value
-    const [address, setAddress] = useState(''); //  form field value
-    const [facility, setFacility] = useState(''); //  form field value
-    const [facilityOptions, setFacilityOptions] = useState([]); // form field value suggestions, names of facility in patient object
-    const [provider, setProvider] = useState(''); // form field value
-    const [providers, setProviders] = useState([]); // form field value suggestions, intersection of ptntProviders and facProviders (list of ids)
-    const [providerTitle, setProviderTitle] = useState(''); // from field value
-    const [error, setError] = useState(''); // error message
-    const [showForm, setShowForm] = useState(false); // opens modal
-    const [patientObj, setPatientObj] = useState();
-    const [facilityObjs, setFacilityObjs] = useState([]);
+    // new patient form fields
+    const [firstName, setFirstName] = useState(''); 
+    const [middleName, setMiddleName] = useState(''); 
+    const [lastName, setLastName] = useState(''); 
 
+    //to get rid of 1) inside form 2) when submitting the appointment
+    const [notKnowDuration, setNotKnowDuration] = useState(false); 
+    const [notKnowTime, setNotKnowTime] = useState(false); 
+    const [showForm, setShowForm] = useState(false); // opens modal
+    
+    // appointment form fields 
+    const initialValues = {patient: '', date: '', time: '', duration: '', address: '', facility: '', provider:'', providerTitle:''}
+    const [formValues, setFormValues] = useState(initialValues);
+    const [errors, setErrors] = useState([]); 
+    
+    //Form state
+    const [error, setError] = useState(''); 
+    const [message, setMessage] = useState('');
+
+    //patient and facility objs
+    const [facilityObjs, setFacilityObjs] = useState([]);
+    const [patientObj, setPatientObj] = useState();
+
+    //for autocomplete
+    const [providers, setProviders] = useState([]); // form field value suggestions, intersection of ptntProviders and facProviders (list of ids)
+    const [facilityOptions, setFacilityOptions] = useState([]); // form field value suggestions, names of facility in patient object
+
+    //database objects
+    const { useDB, db} = useAuth();
+    const patients = useDB('patients');
+    const _facilities = useDB('facilities');
 
     //const [ptntObj, setPtntObj] = useState({});
     let ptntObj;
@@ -68,78 +79,17 @@ function ApptForm() {
     //const [facObj, setFacObj] = useState({});
     //other variables: const fac_obj
 
-
-
-    let patObj; //patient object 
-    let facilityId = ''; // the facility ID of the option selected (not rendered)
-    let ptntFacilities = []; // facility id's stored inside of patient (not rendered)
-    let ptntProviders = []; // stored patient providers (name;title)
-    let facProviders = [];  // stored facility providers (name;title) 
-    let facAddress = ''; // stored facility address
-    let _facs = []; //array of {'id':fid, 'name':fac_obj['name']}
-    let subtitle;
-
-    const { useDB, db, getDocument, testFunction } = useAuth();
-    const patients = useDB('patients');
-    const _facilities = useDB('facilities');
-
-
-
-
-    /*useEffect(() => {
-        if (patient == 'new-patient') { //create a new patient
-            setShowForm(true);
-        } else { // a patient is selected from dropdown
-            setShowForm(false);
-
-            //taking the patient field and splitting it into name and pid
-            const pat_arr = patient.split(", ");
-            const pid = pat_arr[0];
-            //const _patient = pat_arr[1];
-            //using pid to filter the patient object and assign it to global variable 
-            ptntObj = db.get(pid, 'patients');
-            handlePatientChange(ptntObj);
-    }
-    
-    }, [patient])*/
-
     useEffect(() => {
-        console.log('SET PATIENT OBJ', patientObj)
         if (typeof patientObj != 'undefined') {
             if ((Object.keys(patientObj).length != 0) && (typeof patientObj['facilities'] != 'undefined')) {
-                console.log('patientObj.facilities', patientObj['facilities'])
-                console.log('SET FACILITY OPTIONS 2', setFacilityOptions)
-    
-                /*const facility_opts = patientObj['facilities'].map((fid) => {
-                    const fac = getDocument(fid, 'facilities');
-                      const fac = _facilities.filter(fac => {
-                        return fac.id === fid;
-                    })[0];
-                    if (typeof fac != 'undefined') {
-                        _facs.push({ 'id': fid, 'name': fac['name'] });
-                        return fac['name'];
-                    }
-                    return false; })
-    
-                console.log('facility OPTIONS', facility_opts)
-                setFacilityOptions(facility_opts) 
-                
-                (typeof patientObj['facilities'] != 'undefined') && (ptntFacilities = patientObj['facilities']);
-                (typeof patientObj['providers'] != 'undefined') && (ptntProviders = patientObj['providers']);*/
-
                 patientObj['facilities'].map((fid) => {
                     store.collection('facilities').doc(fid).get().then(snapshot => {
-                        console.log('SNAPSHOT DATA FACILITY', snapshot.data())
                         setFacilityObjs(facs => [...facs, snapshot.data()]);
                     })
                 })
             }
         }
     }, [patientObj])
-
-    useEffect(()=>{
-        console.log('FACILITY OBJS SO FAR', facilityObjs)
-    }, [facilityObjs])
 
     /* params: event, event.target,value (in this case patient field value)
     1) shows new patient form if patient is created
@@ -148,14 +98,14 @@ function ApptForm() {
     4) pushes dict obj to _facs which stores an array of facility names and ids [{'id':fid, 'name':fac_obj['name']}] */
     function handlePatientChange(e) {
         const val = e.target.value; 
-        setPatient(val);
+        setFormValues({...formValues, patient:val})
+        //setPatient(val);
         setFacilityObjs([]);
         
 
         if (val == 'new-patient') { //create a new patient
             setShowForm(true);
         } else { // a patient is selected from dropdown
-            console.log('SET FACILITY OPTIONS', setFacilityOptions)
             setShowForm(false);
 
             //taking the patient field and splitting it into name and pid
@@ -163,14 +113,12 @@ function ApptForm() {
             const pid = pat_arr[0];
             //const _patient = pat_arr[1];
             //using pid to filter the patient object and assign it to global variable 
-            console.log('!!!!patient ob!11111', ptntObj)
             
             //ptntObj = getDocument(pid, 'patients');
             //console.log('!!!!patient ob!2222', ptntObj)
 
             store.collection('patients').doc(pid).get().then(snapshot => {
                 setPatientObj(snapshot.data());
-                console.log('SNAPSHOT DATA', snapshot.data())
                 ptntObj = snapshot.data();
             })
             
@@ -189,13 +137,22 @@ function ApptForm() {
 
     }
 
+    function provTitleInputChange(data) {
+        setFormValues({...formValues, providerTitle:data})
+    }
+
     /* params: event, event.target,value (in this case patient field value)
     1) matches name input w/ facility id in _facs array, makes a query to the database for the following info...
     providers if matched with patient's, and the address
     2) sets providers the input suggestions, and fills in the address field */
-    function handleFacilityChange(val) { 
-
-        setFacility(val)
+    function handleFacilityChange(val) {
+        setFormValues({...formValues, facility:val})
+    }
+    
+    function handleFacilityChange2(val) { 
+        setFormValues({...formValues, facility:val})
+        //setFacility(val)
+        console.log("Facility Value:", val)
         console.log('outside if', isFacility(val))
          
         if(isFacility(val)) {
@@ -208,13 +165,16 @@ function ApptForm() {
             //console.log('FAC ID', fac_id['id'])
             console.log('THE FACILITY OBJECT', facObj)
             if (facObj != null) { // id == 0 means new facility 
-                setAddress(facObj.address);
+                setFormValues({...formValues, address:facObj.address})
+                //setAddress(facObj.address);
 
+                
                 setProviders(facObj.providers.filter((p, i) => {
                     if (p.length > 1) {
                         return patientObj.providers.includes(p);
                     }
-                })); // set to fac_provs x ptnt_provs
+                }));// set to fac_provs x ptnt_provs
+
 
                 //facAddress = facObj['address']; 
                 //facProviders = facObj['providers'];
@@ -227,33 +187,37 @@ function ApptForm() {
     function provInputChange(data) {
         if (data.includes(" (")) {
             const prov_ = data.split(" (");
-            console.log('PROVIDER INPUT CHANGE')
-            setProvider(prov_[0]);
-            setProviderTitle(prov_[1].slice(0,-1));
+            setFormValues({...formValues, provider:prov_[0], providerTitle:prov_[1].slice(0,-1)})
+            //setProvider(prov_[0]);
+            //setProviderTitle(prov_[1].slice(0,-1));
         }
         else {
-            setProvider(data)
+            setFormValues({...formValues, provider:data})
+            //setProvider(data)
         }
         //setProviderTitle(title.substring(0, title_len-1))
         //setProvider(data)
     }
 
-    useEffect(()=>{console.log(provider)},[provider])
-
-    useEffect(()=>{console.log(providerTitle)},[providerTitle])
-
+    function provTitleInputChange(data) {
+        setFormValues({...formValues, providerTitle: data})
+    }
+    
 
     async function handleSubmit(e) {
-
         e.preventDefault();
+        console.log("HANDLE SUBMIT", formValues)
 
-        if (date == '') {
-            return setError('You must submit a date');
-        }
-        if (patient == 'select') {
+        if (formValues.patient == 'select' ) {
+            //setErrors(errors => [...errors, 'patient']);
             return setError('You must select a patient');
         }
-        if (time === '' && notKnowDuration == false && duration !== '') {
+        if (formValues.date == '') {
+            //setErrors(errors => [...errors, 'date']);
+            return setError('You must submit a date');
+        }
+        if (formValues.time === '' && notKnowDuration == false && formValues.duration !== '') {
+            //setErrors(errors => [...errors, 'time']); 
             return setError('You must input a time if a duration is present');
         }
 
@@ -261,71 +225,48 @@ function ApptForm() {
             setError('')
 
             //format datetime
-            const _time = (time && !notKnowTime) ? time : '00:00';
-            console.log('_TIME', _time);
-            const _date = date ? new Date(date + 'T' + _time) : null;
+            const _time = (formValues.time && !notKnowTime) ? formValues.time : '00:00';
+            const _date = formValues.date ? new Date(formValues.date + 'T' + _time) : null;
 
             //taking the patient field set by ptntForm (set as a string "pid,patient name")
-            const pat_arr = patient.split(", ");
+            const pat_arr = formValues.patient.split(", ");
             const pid = pat_arr[0];
             const _patient = pat_arr[1];
 
-            console.log('POO POO')
 
             let facObj;
-            isFacility(facility) && (facObj = facilityObjs.filter(fac => fac.name === facility)[0])
-            console.log('PEE PEE')
-
-            console.log('FAC OBJ', facObj);
-
-            //console.log('ADDRESS', address, facObj['address'], !(address === facObj['address']));
-            console.log('NOT KNOW TIME', notKnowTime, notKnowDuration, (!notKnowTime ? _time : 'poop'), (!notKnowDuration ? duration : 'poop'));
+            isFacility(formValues.facility) && (facObj = facilityObjs.filter(fac => fac.name === formValues.facility)[0])
 
             //facility is left empty
-            if (facility === '') {
-                console.log("SUBMITTING EMPTY FACILITY")
-                console.log("SUBMITTING EMPTY FACILITY")
-                console.log("SUBMITTING EMPTY FACILITY")
-             
-
+            if (formValues.facility === '') {             
                 //create new appointment in db
-                setTimeout(() => {db.send({ 'patient': _patient, 'pid': patientObj.id, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? duration : ''), 'facility': facility, 'facilityId': '', 'address': address, 'provider': provider + ';' + providerTitle, 'error': error }, 'appointments')}, 3000);
-                setIsOpen(false);
+                setTimeout(() => {db.send({ 'patient': _patient, 'pid': patientObj.id, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? formValues.duration : ''), 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error }, 'appointments')}, 3000);
+                setMessage('Appointment Submitted');
             }
 
             //facility does not exist...
-            if (facility != '' && !isFacility(facility)) {
-                console.log("SUBMITTING NEW FACILITY")
-                console.log("SUBMITTING NEW FACILITY")
-                console.log("SUBMITTING NEW FACILITY")
-   
-
-                console.log('facility does not exists!', patientObj.facilities, 'patient object id', patientObj.id);
-                console.log('facObj id',facObj['id'], 'obj', facObj)
-                db.send({ 'name': facility, 'address': address, 'providers': [provider + ';' + providerTitle] }, 'facilities').then(function (docRef) {
+            if (formValues.facility != '' && !isFacility(formValues.facility)) {
+                db.send({ 'name': formValues.facility, 'address': formValues.address, 'providers': [formValues.provider + ';' + formValues.providerTitle] }, 'facilities').then(function (docRef) {
                     Promise.all([
                         //edit patient['facilities] array in db if provider does not exist
-                        !(patientObj['providers'].includes(provider + ';' + providerTitle)) && db.edit(pid, { 'facilities': [...patientObj['facilities'], docRef.id], 'providers': [...patientObj['providers'], provider + ';' + providerTitle] }, 'patients'),
+                        !(patientObj['providers'].includes(formValues.provider + ';' + formValues.providerTitle)) && db.edit(pid, { 'facilities': [...patientObj['facilities'], docRef.id], 'providers': [...patientObj['providers'], formValues.provider + ';' + formValues.providerTitle] }, 'patients'),
                         //create new appointment in db
-                        db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': duration, 'facility': facility, 'facilityId': docRef.id, 'address': address, 'provider': provider + ';' + providerTitle, 'error': error }, 'appointments')
+                        db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': docRef.id, 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error }, 'appointments')
                     ]);
-                    setIsOpen(false);
+                    setMessage('Appointment Submitted');
                 });
             }
 
             //facility exists...
-            if (facility != '' && isFacility(facility)) {
-                console.log('ISFACILITY', isFacility('poo poo'))
-                console.log('facility exists!', patientObj.facilities, 'patient object id', patientObj.id);
-                console.log('facObj id',facObj['id'], 'obj', facObj)
+            if (formValues.facility != '' && isFacility(formValues.facility)) {
                 //create new appointment in db
-                db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? duration : ''), 'facility': facility, 'facilityId': facObj.id, 'address': address, 'provider': provider, 'error': error }, 'appointments').then(function (docRef) {
+                db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? formValues.duration : ''), 'facility': formValues.facility, 'facilityId': facObj.id, 'address': formValues.address, 'provider': formValues.provider, 'error': error }, 'appointments').then(function (docRef) {
                     Promise.all([
-                        !(providers.includes(provider + ';' + providerTitle)) && db.edit(pid, { 'providers': [...patientObj['providers'], provider + ';' + providerTitle] }, 'patients'),
-                        !(providers.includes(provider + ';' + providerTitle)) && db.edit(facObj.id, { 'providers': [...facObj['providers'], provider + ';' + providerTitle] }, 'facilities'),
-                        !(address === facObj['address']) && db.edit(facObj.id, { 'address': address }, 'facilities'),
+                        !(providers.includes(formValues.provider + ';' + formValues.providerTitle)) && db.edit(pid, { 'providers': [...patientObj['providers'], formValues.provider + ';' + formValues.providerTitle] }, 'patients'),
+                        !(providers.includes(formValues.provider + ';' + formValues.providerTitle)) && db.edit(facObj.id, { 'providers': [...facObj['providers'], formValues.provider + ';' + formValues.providerTitle] }, 'facilities'),
+                        !(formValues.address === facObj['address']) && db.edit(facObj.id, { 'address': formValues.address }, 'facilities'),
                     ]);
-                    setIsOpen(false);
+                    setMessage('Appointment Submitted');
                 });
             }
 
@@ -344,14 +285,15 @@ function ApptForm() {
     return (
         <div>
             {error && <Alert variant="danger">{error}</Alert>}
-            <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} class="w-full max-w-lg">
+            {message && <Alert variant="success">{message}</Alert>}
+            <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} class="w-full max-w-lg" id="appt-form" autocomplete="off">
                 
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full md:w-3/4 px-3 mb-6 md:mb-0">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Patient
                         </label>
-                        <select value={patient} onChange={e => { handlePatientChange(e) }} class="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
+                        <select value={formValues.patient} onChange={e => { handlePatientChange(e) }} class="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
                         <option value='select'>Select a patient</option>
                             <option value='new-patient'>Add a new patient</option>
                             {patients.map((p, i) => {
@@ -360,148 +302,91 @@ function ApptForm() {
                         </select>
                     </div>
                 </div>
+                
+
+
 
                 <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+
+                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Date
                         </label>
-                        <div class="datepicker relative form-floating mb-3 xl:w-96" data-mdb-toggle-button="false">
-                            <input type="text"
-                            class="form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                            placeholder="Select a date" data-mdb-toggle="datepicker" />
+                        <div className="relative w-full mb-2">
+                            <DatePicker
+                                selected={formValues.date}
+                                onChange={(val) => setFormValues({...formValues, date:val})}
+                                selectsStart   
+                                nextMonthButtonLabel=">"
+                                previousMonthButtonLabel="<"
+                                popperClassName="react-datepicker-left"
+                            />
                         </div>
+                        {error && <p class="text-red-500 text-xs italic">Please fill out this field.</p>}
+                    </div>
+
+                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Time
+                        </label>
+                        <div class="relative w-full" data-mdb-toggle-button="false">
+                            <input name="time" type="time" value={formValues.time} onChange={e => setFormValues({...formValues, time:e.target.value})} disabled={notKnowTime ? true : false} className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                        </div>
+                    </div>
+
+                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Duration
+                        </label>
+                        <input type="number" value={formValues.duration} onChange={e=>setFormValues({...formValues, duration:e.target.value})} class="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                        <p class="text-gray-600 text-xs italic">In minutes</p>
                     </div>
 
                 </div>
 
+                <div class="flex flex-wrap -mx-3 mb-6">
+                    
+                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Facility
+                        </label>
+                        <Autocomplete suggestions={facilityObjs.length !== 0 ? facilityObjs.map(fac => fac.name): []} setFormValue={handleFacilityChange} formValue={formValues.facility} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+
+                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Address
+                        </label>
+                        <input value={formValues.address} onChange={e => setFormValues({...formValues, address: e.target.value})} type="text" class="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                </div>
 
                 <div class="flex flex-wrap -mx-3 mb-6">
                     <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-                            First Name
+                            Provider's Full Name
                         </label>
-                        <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-first-name" type="text" placeholder="Jane"/>
-                        <p class="text-red-500 text-xs italic">Please fill out this field.</p>
-                    </div>
-                    <div class="w-full md:w-1/2 px-3">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-last-name">
-                            Last Name
-                        </label>
-                        <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-last-name" type="text" placeholder="Doe"/>
-                    </div>
-                </div>
-
-
-
-                <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full px-3">
-                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-password">
-                        Password
-                    </label>
-                    <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-password" type="password" placeholder="******************"/>
-                    <p class="text-gray-600 text-xs italic">Make it as long and as crazy as you'd like</p>
-                    </div>
-                </div>
-                <div class="flex flex-wrap -mx-3 mb-2">
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-city">
-                        City
-                    </label>
-                    <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-city" type="text" placeholder="Albuquerque"/>
-                    </div>
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-state">
-                        State
-                    </label>
-                    <div class="relative">
-                        <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-state">
-                        <option>New Mexico</option>
-                        <option>Missouri</option>
-                        <option>Texas</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                        </div>
-                    </div>
-                    </div>
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-zip">
-                        Zip
-                    </label>
-                    <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-zip" type="text" placeholder="90210"/>
-                    </div>
-                </div>
-            </form>
-            <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} className='appt-form'>
-                <label>
-                    Patient:
-                    <select value={patient} onChange={e => { handlePatientChange(e) }} class="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
-                    <option value='select'>Select a patient</option>
-                        <option value='new-patient'>Add a new patient</option>
-                        {patients.map((p, i) => {
-                            return <option value={p.id + ', ' + p.firstName + ' ' + p.lastName}>{((p.firstName + p.lastName) ? (p.firstName + ' ' + p.lastName) : 'name not entered') + ' (' + p.id + ')'} </option>
-                        })}
-                    </select>
-                </label>   
-                <div class="sm:w-1/3">
-                    <label class="block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4" for="inline-full-name">
-                        Full Name
-                    </label>
-                </div>
-                <div class="sm:w-2/3">
-                    <input class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500" id="inline-full-name" type="text" value="Jane Doe"/>
-                </div>
-
-
-                <label>
-                    Date:
-                    <DatePicker selected={date} onChange={(value) => setDate(value)} />
-                </label>
-
-                <div className="form-row">
-                    <label>
-                        <div>Time:</div>
-                        <input name="time" type="time" value={time} onChange={e => setTime(e.target.value)} disabled={notKnowTime ? true : false} />
-                    </label>
-                    <label className="time-checkbox">
-                        <div>Don't know time?</div>
-                        <input name="haveDuration" type="checkbox" checked={notKnowTime} onChange={e => {
-                            setNotKnowTime(e.target.checked)
-                            setNotKnowDuration(e.target.checked)
-                        }} />
-                    </label>
-                </div>
-
-                <label>
-                    <p>Duration (in minutes):</p>
-                    <TextField id="outlined-basic" label="Address" variant="outlined" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} disabled={(notKnowDuration) ? true : false} value={duration} onChange={e => setDuration(e.target.value)} />
-                </label>
-
-                <label>
-                    <p>Facility</p>
-                    <Autocomplete suggestions={facilityObjs.length !== 0 ? facilityObjs.map(fac => fac.name): []} setFormValue={handleFacilityChange} formValue={facility} />
-                </label>
-
-                <label>
-                    <p>Address</p>
-                    <TextField id="outlined-basic" label="Address" variant="outlined" value={address} onChange={e => setAddress(e.target.value)} />
-                </label>
-
-                <label>
-                    Provider's Full Name
-                    <Autocomplete suggestions={providers.length !== 0 ? providers.map((prov) => {
+                        <Autocomplete suggestions={providers.length !== 0 ? providers.map((prov) => {
                         let split = prov.split(";")
                         return(split[0] + " (" + split[1] + ")")
-                    }) : []} setFormValue={provInputChange} formValue={provider} />     
-                </label>
+                        }) : []} setFormValue={provInputChange} formValue={formValues.provider} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Provider's Title
+                        </label>
+                        <Autocomplete suggestions={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']} setFormValue={provTitleInputChange} formValue={formValues.providerTitle} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                        <p class="text-gray-600 text-xs italic">(i.e., doctor, nurse, physical therapist)</p>
+                    </div>
+                </div>
 
-                <label>
-                    Provider's Title (i.e., doctor, nurse, physical therapist):
-                    <Autocomplete suggestions={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']} setFormValue={setProviderTitle} formValue={providerTitle} />
-                </label>
-                <input className="submit-bttn" type="submit" value="Submit" disabled={(showForm) ? "disabled" : ""} />
             </form>
+            <div class="flex flex-wrap -mx-3 mb-6">
+                <button type="submit" form="appt-form" value="Submit"  disabled={(showForm) ? "disabled" : ""} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
+                <Link to = "/appointments">
+                    <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Cancel</button>
+                </Link>
+            </div>
         </div>
 
     
@@ -509,105 +394,56 @@ function ApptForm() {
 
 export default ApptForm;
 
-/*
-
-  <div className="new-ptnt-form">
-                            <label>
-                                <p>First Name</p>
-                                <input name="address" type="text" style={{ width: '100px' }} value={firstName} onChange={e => setFirstName(e.target.value)} />
-                            </label>
-                            <label>
-                                <p>Middle I.</p>
-                                <input name="address" type="text" style={{ width: '30px' }} value={middleName} onChange={e => setMiddleName(e.target.value)} />
-                            </label>
-                            <label>
-                                <p>Rios Name</p>
-                                <input name="address" type="text" style={{ width: '100px' }} value={lastName} onChange={e => setLastName(e.target.value)} />
-                            </label>
-                        </div>
-
-
- <Autocomplete suggestions={providers.length !== 0 ? providers.map((prov) => {
-                                if (prov.length > 1) {
-                                    let split = prov.split(";")
-                                    console.log('OPTION: ', split[0] + " (" + split[1] + ")")
-                                    return(split[0] + " (" + split[1] + ")")
-                                }
-                            }) : []} setFormValue={provInputChange} formValue={provider} />                   
-
-
-<Autocomplete suggestions={providers.length !== 0 ? providers.reduce(function (filtered, option) {
-                                if (option.length > 1) {
-                                    let split = option.split(";")
-                                    filtered.push(split[0] + " (" + split[1] + ")")
-                                    console.log('OPTION: ', split[0] + " (" + split[1] + ")")
-                                }
-                                return filtered;
-                            }, []) : []} setFormValue={provInputChange} formValue={provider} />
-
-
-                    <Autocomplete suggestions={["Oranges", "Apples", "Banana", "Kiwi", "Mango"]} setFormValue = {setFacilityInfo} formValue = {facility}/>
-
-                    <label>
-                    Facility
-                    <Autocomplete
-                        menuStyle = {{maxHeight: '550px'}}
-                        disablePortal
-                        id="free-solo-demo"
-                        freeSolo
-                        value={facility}
-                        onInputChange={(e, data) => {setFacilityInfo(data)}}
-                        options={facilityOptions}
-                        renderInput={(params) => (
-                        <TextField {...params} label="Facility" margin="normal" variant="outlined" />
-                        )}/>
-                    </label>
-
-                    <label>
-                    <p>Address</p>
-                    <TextField id="outlined-basic" label="Address" variant="outlined" value={address} onChange={e => setAddress(e.target.value)}/>
-                    </label>
-
-                    <label>
-                    Provider's Full Name                            
-                    <Autocomplete
-                        disablePortal
-                        id="free-solo-demo"
-                        freeSolo
-                        value={provider}
-                        onInputChange={(e, data) => { provInputChange(data) }}
-                        options={(providers.filter(p=>p.length>1))} //1 is the lenght of the space in line 275
-                        getOptionLabel = {option => { 
-                        var split = option.split(";")
-                        return (split[0] + " (" + split[1] + ")")
-                        }}
-                        renderOption = {option => { 
-                            var split = option.split(";")
-                            return <p>{(split[0] + " (" + split[1] + ")")}</p>
-                            }}
-                            
-                            renderInput={(params) => (
-                            <TextField {...params} label="Provider" margin="normal" variant="outlined" />
-                            )}/>
-                        </label>
-    
-                        <label>
-                            Provider's Title (i.e., doctor, nurse, physical therapist):
-                            <Autocomplete
-                            disablePortal
-                            id="free-solo-demo"
-                            freeSolo
-                            value={providerTitle}
-                            onInputChange={(e, data) => {
-                                setProviderTitle(data)
-                            }}
-                            options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                            renderInput={(params) => (
-                                <TextField {...params} label="Provider's Title" margin="normal" variant="outlined" />
-                                )}/>
-                        </label>
-    
-
-
-  
+/* 
+    const [patient, setPatient] = useState(''); 
+    const [date, setDate] = useState(''); 
+    const [time, setTime] = useState(''); 
+    const [duration, setDuration] = useState(''); 
+    const [address, setAddress] = useState(''); 
+    const [facility, setFacility] = useState(''); 
+    const [provider, setProvider] = useState('');
+    const [providerTitle, setProviderTitle] = useState(''); 
+    let patObj; //patient object 
+    let facilityId = ''; // the facility ID of the option selected (not rendered)
+    let ptntFacilities = []; // facility id's stored inside of patient (not rendered)
+    let ptntProviders = []; // stored patient providers (name;title)
+    let facProviders = [];  // stored facility providers (name;title) 
+    let facAddress = ''; // stored facility address
+    let _facs = []; //array of {'id':fid, 'name':fac_obj['name']}
+    let subtitle;
 */
+
+
+/*useEffect(() => {
+    if (patient == 'new-patient') { //create a new patient
+        setShowForm(true);
+    } else { // a patient is selected from dropdown
+        setShowForm(false);
+
+        //taking the patient field and splitting it into name and pid
+        const pat_arr = patient.split(", ");
+        const pid = pat_arr[0];
+        //const _patient = pat_arr[1];
+        //using pid to filter the patient object and assign it to global variable 
+        ptntObj = db.get(pid, 'patients');
+        handlePatientChange(ptntObj);
+}
+
+}, [patient])*/
+
+ /*const facility_opts = patientObj['facilities'].map((fid) => {
+                    const fac = getDocument(fid, 'facilities');
+                      const fac = _facilities.filter(fac => {
+                        return fac.id === fid;
+                    })[0];
+                    if (typeof fac != 'undefined') {
+                        _facs.push({ 'id': fid, 'name': fac['name'] });
+                        return fac['name'];
+                    }
+                    return false; })
+    
+                console.log('facility OPTIONS', facility_opts)
+                setFacilityOptions(facility_opts) 
+                
+                (typeof patientObj['facilities'] != 'undefined') && (ptntFacilities = patientObj['facilities']);
+                (typeof patientObj['providers'] != 'undefined') && (ptntProviders = patientObj['providers']);*/

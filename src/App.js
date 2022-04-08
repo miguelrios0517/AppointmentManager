@@ -14,13 +14,12 @@ import Dashboard from './components/dashboard';
 import Appointments from './components/appointments';
 import Appointment from './components/appointment';
 import ApptForm from './components/appt_form';
-
 import Schedule from './components/schedule';
 import Patients from './components/patients';
 import Patient from './components/patient';
-import Sidebar from './components/sidebar/Sidebar'
-import Toolbar from '@mui/material/Toolbar';
+import Lab from './components/lab';
 
+import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
@@ -58,9 +57,6 @@ const drawerWidth = 240;
 
 
 function App() {
-
-  //console.log(currentUser? currentUser: null)
-
   
   return (
     // why is authprovider needed as an enclosing tag for the entire app and the switch inside the router?
@@ -145,11 +141,16 @@ function App() {
           <PrivateRoute exact path ="/new-appointment" component ={ApptForm} />
           <PrivateRoute path="/schedule" component={Schedule} />
           <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
+          <PrivateRoute exact path = "/lab" component={Lab} />
         </Switch>
       </Box>
     </Box>
 )
 
+export default App;
+
+
+/*
 const LoginContainer = () => (
   <div className="container">
     <Route exact path="/" render={() => <Redirect to="/login" />} />
@@ -174,5 +175,4 @@ const DefaultContainer2 = () => (
     </div>
   </div>
 )
-
-export default App;
+*/

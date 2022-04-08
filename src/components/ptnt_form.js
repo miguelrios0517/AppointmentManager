@@ -163,7 +163,7 @@ export default function PtntForm(props) {
                           value={providerOneTitle}
                           onInputChange={(e, data) => {
                             setProviderOneTitle(data)
-                            console.log('data', data)
+                            
                           }}
                           options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
                           renderInput={(params) => (
@@ -189,7 +189,7 @@ export default function PtntForm(props) {
                         value={providerTwoTitle}
                         onInputChange={(e, data) => {
                           setProviderTwoTitle(data)
-                          console.log('data', data)
+                          
                         }}
                         options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
                         renderInput={(params) => (
@@ -215,7 +215,7 @@ export default function PtntForm(props) {
                       value={providerThreeTitle}
                       onInputChange={(e, data) => {
                         setProviderThreeTitle(data)
-                        console.log('data', data)
+                        
                       }}
                       options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
                       renderInput={(params) => (
@@ -240,7 +240,7 @@ export default function PtntForm(props) {
                       value={providerFourTitle}
                       onInputChange={(e, data) => {
                         setProviderFourTitle(data)
-                        console.log('data', data)
+                        
                       }}
                       options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
                       renderInput={(params) => (
@@ -265,7 +265,7 @@ export default function PtntForm(props) {
                       value={providerFiveTitle}
                       onInputChange={(e, data) => {
                         setProviderFiveTitle(data)
-                        console.log('data', data)
+                        
                       }}
                       options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
                       renderInput={(params) => (

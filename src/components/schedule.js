@@ -45,14 +45,14 @@ function Schedule(props) {
 
 
     const setToday = () => {
-        console.log('CLICKED')
+        
         setMonth(monthCur)
         setYear(yearCur)
         setCurrentDate(yearCur.toString() +  "-0" + monthCur.toString() + "-01")
     }
   
     const setCalendar = (event) => {
-        console.log(event.target.name)
+        
         if(event.target.name === "month") {
             setMonth(event.target.value)
             setCurrentDate(year.toString() + "-0" + event.target.value.toString() + "-01")
@@ -62,27 +62,27 @@ function Schedule(props) {
             setCurrentDate(event.target.value.toString() +  "-0" + month.toString() + "-01")
         }
         
-        console.log('value',event.target.value)
+        
 
 
     };
 
 
     function getAppointments() {
-        console.log(appointments)
+        
         const appts = []
         let i = 0
         for (const key in appointments){
             const appt = appointments[key]
             const duration = (appt.duration && appt.duration > 0) ? appt.duration:1
             if (appt.date) {
-                console.log(duration)
+                
                 const start = appt.date.toDate()
                 const endmin = start.getMinutes() + parseInt(duration)
-                console.log(start.getMinutes())
-                console.log(endmin)
+                
+                
                 const end = new Date(start.getFullYear(), start.getMonth(), start.getDate(), start.getHours(), endmin) 
-                console.log(end)
+                
 
                 appts.push({
                     startDate: start,
@@ -91,12 +91,12 @@ function Schedule(props) {
                     id: appt.id,
                     location: appt.location
                 })
-                console.log(start)
-                console.log(end)
+                
+                
             }
             i=i+1
         }
-        console.log(appts)
+        
         return appts;
     }
 

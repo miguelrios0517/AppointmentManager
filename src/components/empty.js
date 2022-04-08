@@ -30,7 +30,7 @@ function Empty() {
 
     useEffect(
       () => {
-        console.log(fruit)
+        
       },
       [fruit],
     );
