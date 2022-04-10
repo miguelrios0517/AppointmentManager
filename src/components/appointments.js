@@ -52,49 +52,51 @@ function Appointments() {
             <div className = "main main-appointments">
             {(appointments.length ===  0)? <p>There are no appointments to show. Click the button below to add a new appointment.</p>:<></>}
                 {(appointments.length !== 0) &&
-                <table style={{width:500}}>
+                <table style={{width:1200}}>
                         <tr>
-                            <th>Time</th>
                             <th>Patient</th>
+                            <th>Date</th>
+                            <th>Time</th>
                             <th>Facility</th>
+                            <th>Address</th>
                             <th>Provider</th>
+                            <th></th>
                         </tr>
                         {appointments.map((appt, i) => {
 
-                            //date cleanup
-                            const date = appt.date.toDate();
-                            var hour;
-                            var minute = date.getMinutes();
-                            (date.getHours() > 12)? (hour = date.getHours() - 12): (hour = date.getHours())
-                            
-                            const ampm = (date.getHours() > 12?'PM':'AM') 
-                            var _ampm = ampm
-                            var endminute = minute + (appt.duration? parseInt(appt.duration):0);
-                            var endhour = Math.floor(endminute/60);
-                            endhour = endhour + hour;
-                            if(endhour != hour){
-                                (endhour > 12) && (endhour = endhour - 12)
-                                (endhour >= 12) && ((ampm === 'PM')? (_ampm = 'AM'): (_ampm = 'PM'))
-                                
-                            }
-                            
-                            hour = hour.toString();
-                            (endminute > 60) && (endminute = endminute%60)
-                            
-                            (hour.length == 1) && (hour != 0) && (hour = '0' + hour)
-                            
+                            console.log('current appointment', appt)
+                            console.log('date' in appt)
+                            'date' in appt? console.log('date:' + appt.date): console.log('no date available')
 
-                            //provider clean up
-                            var prov = appt.provider? appt.provider.split(';'): false
+                            //date cleanup
                             
-                            var prov_t =  (prov[1] === 'undefined' || prov[1] === '')? '' : (' (' + prov[1] + ')')
+                            if (appt.time != null) {
+                                var period
+                                var hour = parseInt(appt.time.substring(0,2))
+                                var minutes = parseInt(appt.time.substring(3,5))
+                                //console.log(hour>12)
+                                if (hour > 12) {
+                                    hour = hour - 12
+                                    period = 'PM'
+                                }
+                                else {
+                                    period = 'AM'
+                                }
+                                console.log('time exists', appt.time, hour + ":" + minutes + " " + period)            
+                            } else {
+                                console.log('time does not exist')
+                            }
+                                    
+                            
+                            
 
                             return <tr>
-                                    <td>{(hour != 0)? (hour + ':' + minute + ampm + ' - ' + endhour + ':' + endminute + _ampm): 'not found'}</td>
-                                    <td>{appt.patient? appt.patient: 'n/a'}</td>
-                                    <td>{appt.facility? appt.facility: 'n/a'}</td>s
-                                    {}
-                                    <td>{prov? (prov[0] + ' ' + prov_t) : 'n/a'}</td>
+                                    <td>{"patient" in appt?appt.patient:'n/a'}({appt.pid?appt.pid:''})</td>
+                                    <td>{("date" in appt)?appt.date.toDate().toString().substring(0,15):'n/a'}</td>
+                                    <td>{"time" in appt?(hour + ":" + minutes + " " + period):'n/a'}</td>
+                                    <td>{"facility" in appt?appt.facility:'n/a'}</td>
+                                    <td>{"address" in appt?appt.address:'n/a'}</td>
+                                    <td>{"provider" in appt?appt.provider:'n/a'}</td>
                                     <td><span onClick = {() => deleteAppointment(appt.id, 'appointments')}>Delete</span> <Link to={`/appointments/${appt.id}`}>View</Link></td>
                                 </tr>
                         })}

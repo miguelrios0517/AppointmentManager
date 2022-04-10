@@ -41,55 +41,48 @@ let store = app.firestore()
 Modal.setAppElement('#root');
 
 function ApptForm() {
-    // new patient form fields
+
+    ///////////////////////////////////////////////variables///////////////////////////////////////////////////
+    //Appointment form fields 
+    const initialValues = {patient: '', date: '', time: '', duration: '', address: '', facility: '', provider:'', providerTitle:''}
+    const [formValues, setFormValues] = useState(initialValues);
+    const [errors, setErrors] = useState([]); 
+
+    //New patient form fields
+    const [showForm, setShowForm] = useState(false); // opens modal
     const [firstName, setFirstName] = useState(''); 
     const [middleName, setMiddleName] = useState(''); 
     const [lastName, setLastName] = useState(''); 
 
-    //to get rid of 1) inside form 2) when submitting the appointment
+    //To get rid of 1) inside form 2) when submitting the appointment
     const [notKnowDuration, setNotKnowDuration] = useState(false); 
     const [notKnowTime, setNotKnowTime] = useState(false); 
-    const [showForm, setShowForm] = useState(false); // opens modal
     
-    // appointment form fields 
-    const initialValues = {patient: '', date: '', time: '', duration: '', address: '', facility: '', provider:'', providerTitle:''}
-    const [formValues, setFormValues] = useState(initialValues);
-    const [errors, setErrors] = useState([]); 
-    
-    //Form state
+    //Form states
     const [error, setError] = useState(''); 
     const [message, setMessage] = useState('');
 
-    //patient and facility objs
-    const [facilityObjs, setFacilityObjs] = useState([]);
+    //Patient and facility objs
     const [patientObj, setPatientObj] = useState();
+    const [facilityObjs, setFacilityObjs] = useState([]);
+    const [facilityObj, setFacilityObj] = useState({});
+    const [providerExits, setProviderExits] = useState(false);
 
-    //for autocomplete
+    //For autocomplete
     const [providers, setProviders] = useState([]); // form field value suggestions, intersection of ptntProviders and facProviders (list of ids)
     const [facilityOptions, setFacilityOptions] = useState([]); // form field value suggestions, names of facility in patient object
 
-    //database objects
+    //Database objects
     const { useDB, db} = useAuth();
     const patients = useDB('patients');
     const _facilities = useDB('facilities');
 
-    //const [ptntObj, setPtntObj] = useState({});
-    let ptntObj;
-    let facObj;
-    //const [facObj, setFacObj] = useState({});
-    //other variables: const fac_obj
+    
 
-    useEffect(() => {
-        if (typeof patientObj != 'undefined') {
-            if ((Object.keys(patientObj).length != 0) && (typeof patientObj['facilities'] != 'undefined')) {
-                patientObj['facilities'].map((fid) => {
-                    store.collection('facilities').doc(fid).get().then(snapshot => {
-                        setFacilityObjs(facs => [...facs, snapshot.data()]);
-                    })
-                })
-            }
-        }
-    }, [patientObj])
+    /////////////////////////////////////////////handle input change/////////////////////////////////////////////////////
+
+    //verify that the correct facility objects are set
+    //useEffect(() => {console.log('Facility Objects', facilityObjs)}, [facilityObjs])
 
     /* params: event, event.target,value (in this case patient field value)
     1) shows new patient form if patient is created
@@ -99,34 +92,96 @@ function ApptForm() {
     function handlePatientChange(e) {
         const val = e.target.value; 
         setFormValues({...formValues, patient:val})
-        //setPatient(val);
-        setFacilityObjs([]);
+        setFacilityObjs([]); //clear facilities from previous patient entry
         
 
         if (val == 'new-patient') { //create a new patient
             setShowForm(true);
         } else { // a patient is selected from dropdown
             setShowForm(false);
-
-            //taking the patient field and splitting it into name and pid
+            //seperate patient name and patient id from select input ("[patient name],[id]")
             const pat_arr = val.split(", ");
-            const pid = pat_arr[0];
-            //const _patient = pat_arr[1];
-            //using pid to filter the patient object and assign it to global variable 
-            
-            //ptntObj = getDocument(pid, 'patients');
-            //console.log('!!!!patient ob!2222', ptntObj)
-
+            const pid = pat_arr[0];  
+            //grab the patient from the database and store it in PatientObj hook
             store.collection('patients').doc(pid).get().then(snapshot => {
-                setPatientObj(snapshot.data());
-                ptntObj = snapshot.data();
+                const _pat = snapshot.data()
+                _pat.id = snapshot.id 
+                console.log('Making sure id is in _pat', _pat)
+                setPatientObj(_pat);
+                //ptntObj = snapshot.data();
             })
-            
-            //ptntObj = patients.filter(ptnt => ptnt.id == pid)[0];
-          
         }
     }
 
+ /*
+    checks for patientObj. Once hook is set...
+    1) grabs the array of facility ids [fids] from the patient obj
+    2) maps array to a function in which each fid (item) is used to query the database for its corresponding facility object
+    3) appends the facility object to the current facilityObjs (i.e., [...facilityObjs, newObj]) and sets the resulting array 
+    */
+    useEffect(() => {
+        if (typeof patientObj != 'undefined') {
+            console.log('Patient Object', patientObj)
+            if ((Object.keys(patientObj).length != 0) && (typeof patientObj['facilities'] != 'undefined')) {
+                console.log('inside if')
+                console.log('Facilities', patientObj.facilities)
+                patientObj['facilities'].map((fid) => {
+                    console.log('inside map')
+                    store.collection('facilities').doc(fid).get().then(snapshot => {
+                        console.log('FacObj from database (snapshot.data)', snapshot.data(), fid, snapshot.id)
+                        const _fac = snapshot.data()
+                        _fac.id = snapshot.id 
+                        console.log('Making sure id is in _fac', _fac)
+                        setFacilityObjs(facs => [...facs, _fac]);
+                    })
+                })
+            }
+        }
+    }, [patientObj])
+
+    /* params: event, event.target,value (in this case patient field value)
+    1) matches name input w/ facility id in _facs array, makes a query to the database for the following info...
+    providers if matched with patient's, and the address
+    2) sets providers the input suggestions, and fills in the address field */
+    function handleFacilityChange(val) {
+        if(isFacility(val)) {
+            //grab the facility object that matches the input name
+            const facObj = facilityObjs.filter(fac => {
+                return fac.name === val;
+            })[0];
+            console.log('THE FACILITY EXISTS', facObj)
+
+            //set the facility name, address and provider autocomplete suggestions
+            if (facObj != null) {
+                setFacilityObj(facObj)
+                setFormValues({...formValues, facility:val, address:facObj.address})
+                setProviders(facObj.providers)
+            } 
+        } else {
+            //if facility does not exist only set the facility name
+            console.log('NEW FACILITY ENTRY')
+            setFormValues({...formValues, facility:val})
+            setFacilityObj({})
+            setProviders([])
+
+        }
+    }
+
+    function provTitleInputChange(data) {
+        setFormValues({...formValues, providerTitle:data})
+    }
+
+    function provInputChange(data) {
+        if (data.includes(" (")) {
+            const prov_ = data.split(" (");
+            setFormValues({...formValues, provider:prov_[0], providerTitle:prov_[1].slice(0,-1)})
+        }
+        else {
+            setFormValues({...formValues, provider:data})
+        }
+    }
+
+    /////////////////////////////////////////////helper functions/////////////////////////////////////////////////////
     function isFacility(val) {
         let exists = false;
         facilityObjs.forEach(function(item,index) {
@@ -134,91 +189,38 @@ function ApptForm() {
             if (item.name === val) exists = true;
         })
         return exists;
-
     }
 
-    function provTitleInputChange(data) {
-        setFormValues({...formValues, providerTitle:data})
-    }
-
-    /* params: event, event.target,value (in this case patient field value)
-    1) matches name input w/ facility id in _facs array, makes a query to the database for the following info...
-    providers if matched with patient's, and the address
-    2) sets providers the input suggestions, and fills in the address field */
-    function handleFacilityChange(val) {
-        setFormValues({...formValues, facility:val})
-    }
-    
-    function handleFacilityChange2(val) { 
-        setFormValues({...formValues, facility:val})
-        //setFacility(val)
-        console.log("Facility Value:", val)
-        console.log('outside if', isFacility(val))
-         
-        if(isFacility(val)) {
-            console.log('inside if')
-             //grab the facility id from _facs array [{'id':fid, 'name':fac_obj['name']}]
-            const facObj = facilityObjs.filter(fac => {
-                return fac.name === val;
-            })[0];
-            //[choose a different value/method to represent a new facility not just a numeric "0" which could be unstable]
-            //console.log('FAC ID', fac_id['id'])
-            console.log('THE FACILITY OBJECT', facObj)
-            if (facObj != null) { // id == 0 means new facility 
-                setFormValues({...formValues, address:facObj.address})
-                //setAddress(facObj.address);
-
-                
-                setProviders(facObj.providers.filter((p, i) => {
-                    if (p.length > 1) {
-                        return patientObj.providers.includes(p);
-                    }
-                }));// set to fac_provs x ptnt_provs
-
-
-                //facAddress = facObj['address']; 
-                //facProviders = facObj['providers'];
+    function isProvider() {
+        console.log("CHECKING IF PROVIDER")
+        if(Object.keys(facilityObj).length != 0) {
+            for(var i=0;i<facilityObj.providers.length; i++) {
+                if((facilityObj.providers[i].provider === formValues.provider) && (facilityObj.providers[i].providerTitle === formValues.providerTitle)) {
+                    console.log('--------------------')
+                    console.log(formValues.provider, formValues.providerTitle)
+                    return true
+                }
             }
         }
-       
-    }
-    
-    //place inside of html
-    function provInputChange(data) {
-        if (data.includes(" (")) {
-            const prov_ = data.split(" (");
-            setFormValues({...formValues, provider:prov_[0], providerTitle:prov_[1].slice(0,-1)})
-            //setProvider(prov_[0]);
-            //setProviderTitle(prov_[1].slice(0,-1));
-        }
-        else {
-            setFormValues({...formValues, provider:data})
-            //setProvider(data)
-        }
-        //setProviderTitle(title.substring(0, title_len-1))
-        //setProvider(data)
-    }
+        return false
+    } 
 
-    function provTitleInputChange(data) {
-        setFormValues({...formValues, providerTitle: data})
-    }
-    
+    const checkKeyDown = (e) => {
+        if (e.code === 'Enter') e.preventDefault();
+    };
 
+    /////////////////////////////////////////////handle form submit/////////////////////////////////////////////////////
     async function handleSubmit(e) {
         e.preventDefault();
         console.log("HANDLE SUBMIT", formValues)
 
         if (formValues.patient == 'select' ) {
-            //setErrors(errors => [...errors, 'patient']);
+            //setErrors(errors => [...errors, 'patient']); 
             return setError('You must select a patient');
         }
         if (formValues.date == '') {
             //setErrors(errors => [...errors, 'date']);
             return setError('You must submit a date');
-        }
-        if (formValues.time === '' && notKnowDuration == false && formValues.duration !== '') {
-            //setErrors(errors => [...errors, 'time']); 
-            return setError('You must input a time if a duration is present');
         }
 
         try {
@@ -233,17 +235,46 @@ function ApptForm() {
             const pid = pat_arr[0];
             const _patient = pat_arr[1];
 
+            console.log('DATE & TIME', _date, _time)
 
-            let facObj;
-            isFacility(formValues.facility) && (facObj = facilityObjs.filter(fac => fac.name === formValues.facility)[0])
-
-            //facility is left empty
+            /*//facility is left empty
             if (formValues.facility === '') {             
                 //create new appointment in db
-                setTimeout(() => {db.send({ 'patient': _patient, 'pid': patientObj.id, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? formValues.duration : ''), 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error }, 'appointments')}, 3000);
+                db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error}, 'appointments');
+                //db.send({'pid': pid, 'patient': _patient, 'date': _date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error }, 'appointments');
                 setMessage('Appointment Submitted');
+            }*/
+            var provObj = {'provider': formValues.provider, 'providerTitle': formValues.providerTitle}
+            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provObj': provObj, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error}, 'appointments');
+        
+        
+            //facility exists 
+            if (Object.keys(facilityObj).length != 0) {
+                console.log('############################')
+                console.log('facility exists', facilityObj)
+                Promise.all([
+                    !(facilityObj.address === formValues.address) && db.edit(facilityObj.id, { 'address': formValues.address}, 'facilities'),
+                    !(facilityObj.address === formValues.address) && console.log('ADDRESS NOT MATCH IN DB, EDITING FACILITIES OBJECT '),
+                    !isProvider() && db.edit(facilityObj.id, { 'providers': [...facilityObj['providers'], provObj]}, 'facilities'),
+                    !isProvider() && console.log('PROVIDER DOES NOT EXIST, EDITING FACILITIES OBJECT')
+                ]);
+            } 
+
+            //facility does not exist
+            if (Object.keys(facilityObj).length == 0) {
+                console.log('facility does not exist', facilityObj)
+                //create new facility document in db
+                db.send({ 'name': formValues.facility, 'pid': pid, 'address': formValues.address, 'providers': [provObj]}, 'facilities').then(function (docRef) {
+                    console.log("NEW FACILITY ENTRY")
+                    db.edit(patientObj.id, { 'facilities': [...patientObj['facilities'], docRef.id]}, 'patients')
+                    console.log("EDIT PATIENT OBJECT (adding new fid to facilities)")
+                })
             }
 
+            
+            setMessage('Appointment Submitted');
+            setFormValues(initialValues)
+            /*
             //facility does not exist...
             if (formValues.facility != '' && !isFacility(formValues.facility)) {
                 db.send({ 'name': formValues.facility, 'address': formValues.address, 'providers': [formValues.provider + ';' + formValues.providerTitle] }, 'facilities').then(function (docRef) {
@@ -269,35 +300,32 @@ function ApptForm() {
                     setMessage('Appointment Submitted');
                 });
             }
-
+            */
         } catch {
             setError('Failed to submit appointment')
         }
     }
 
 
-    const checkKeyDown = (e) => {
-        if (e.code === 'Enter') e.preventDefault();
-    };
-
+ 
 
 
     return (
         <div>
             {error && <Alert variant="danger">{error}</Alert>}
             {message && <Alert variant="success">{message}</Alert>}
-            <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} class="w-full max-w-lg" id="appt-form" autocomplete="off">
+            <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} className="w-full max-w-lg" id="appt-form" autocomplete="off">
                 
-                <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full md:w-3/4 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                <div className="flex flex-wrap -mx-3 mb-6">
+                    <div className="w-full md:w-3/4 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Patient
                         </label>
-                        <select value={formValues.patient} onChange={e => { handlePatientChange(e) }} class="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
+                        <select value={formValues.patient} onChange={e => { handlePatientChange(e) }} className="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
                         <option value='select'>Select a patient</option>
                             <option value='new-patient'>Add a new patient</option>
                             {patients.map((p, i) => {
-                                return <option value={p.id + ', ' + p.firstName + ' ' + p.lastName}>{((p.firstName + p.lastName) ? (p.firstName + ' ' + p.lastName) : 'name not entered') + ' (' + p.id + ')'} </option>
+                                return <option key={i} value={p.id + ', ' + p.firstName + ' ' + p.lastName}>{((p.firstName + p.lastName) ? (p.firstName + ' ' + p.lastName) : 'name not entered') + ' (' + p.id + ')'} </option>
                             })}
                         </select>
                     </div>
@@ -306,10 +334,10 @@ function ApptForm() {
 
 
 
-                <div class="flex flex-wrap -mx-3 mb-6">
+                <div className="flex flex-wrap -mx-3 mb-6">
 
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                    <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Date
                         </label>
                         <div className="relative w-full mb-2">
@@ -322,66 +350,65 @@ function ApptForm() {
                                 popperClassName="react-datepicker-left"
                             />
                         </div>
-                        {error && <p class="text-red-500 text-xs italic">Please fill out this field.</p>}
+                        {error && <p className ="text-red-500 text-xs italic">Please fill out this field.</p>}
                     </div>
 
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                    <div className ="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label className ="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Time
                         </label>
-                        <div class="relative w-full" data-mdb-toggle-button="false">
+                        <div className ="relative w-full" data-mdb-toggle-button="false">
                             <input name="time" type="time" value={formValues.time} onChange={e => setFormValues({...formValues, time:e.target.value})} disabled={notKnowTime ? true : false} className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                         </div>
                     </div>
 
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                    <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Duration
                         </label>
-                        <input type="number" value={formValues.duration} onChange={e=>setFormValues({...formValues, duration:e.target.value})} class="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
-                        <p class="text-gray-600 text-xs italic">In minutes</p>
+                        <input type="number" value={formValues.duration} onChange={e=>setFormValues({...formValues, duration:e.target.value})} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                        <p className="text-gray-600 text-xs italic">In minutes</p>
                     </div>
 
                 </div>
 
-                <div class="flex flex-wrap -mx-3 mb-6">
+                <div className="flex flex-wrap -mx-3 mb-6">
                     
-                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Facility
                         </label>
                         <Autocomplete suggestions={facilityObjs.length !== 0 ? facilityObjs.map(fac => fac.name): []} setFormValue={handleFacilityChange} formValue={formValues.facility} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                     </div>
 
-                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Address
                         </label>
-                        <input value={formValues.address} onChange={e => setFormValues({...formValues, address: e.target.value})} type="text" class="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                        <input value={formValues.address} onChange={e => setFormValues({...formValues, address: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                <div className="flex flex-wrap -mx-3 mb-6">
+                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Provider's Full Name
                         </label>
                         <Autocomplete suggestions={providers.length !== 0 ? providers.map((prov) => {
-                        let split = prov.split(";")
-                        return(split[0] + " (" + split[1] + ")")
+                        return(prov.provider + " (" + prov.providerTitle + ")")
                         }) : []} setFormValue={provInputChange} formValue={formValues.provider} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                     </div>
-                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Provider's Title
                         </label>
                         <Autocomplete suggestions={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']} setFormValue={provTitleInputChange} formValue={formValues.providerTitle} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
-                        <p class="text-gray-600 text-xs italic">(i.e., doctor, nurse, physical therapist)</p>
+                        <p className="text-gray-600 text-xs italic">(i.e., doctor, nurse, physical therapist)</p>
                     </div>
                 </div>
 
             </form>
-            <div class="flex flex-wrap -mx-3 mb-6">
+            <div className="flex flex-wrap -mx-3 mb-6">
                 <button type="submit" form="appt-form" value="Submit"  disabled={(showForm) ? "disabled" : ""} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
                 <Link to = "/appointments">
                     <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Cancel</button>
