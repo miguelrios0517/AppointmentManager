@@ -21,7 +21,7 @@ import {Link} from "react-router-dom";
 
 import { Form, Button, Card, Alert } from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
-import { ShortPtntForm } from './ptnt_form.js'
+import { ShortPtntForm } from './ptnt_form_old.js'
 import FreeSolo from './freeSolo';
 // import DatePicker from '@mui/lab/DatePicker';
 // import AdapterDateFns from '@mui/lab/AdapterDateFns';
@@ -43,41 +43,31 @@ Modal.setAppElement('#root');
 function ApptForm() {
 
     ///////////////////////////////////////////////variables///////////////////////////////////////////////////
+    
     //Appointment form fields 
     const initialValues = {patient: '', date: '', time: '', duration: '', address: '', facility: '', provider:'', providerTitle:''}
     const [formValues, setFormValues] = useState(initialValues);
-    const [errors, setErrors] = useState([]); 
-
+    
     //New patient form fields
     const [showForm, setShowForm] = useState(false); // opens modal
     const [firstName, setFirstName] = useState(''); 
     const [middleName, setMiddleName] = useState(''); 
     const [lastName, setLastName] = useState(''); 
 
-    //To get rid of 1) inside form 2) when submitting the appointment
-    const [notKnowDuration, setNotKnowDuration] = useState(false); 
-    const [notKnowTime, setNotKnowTime] = useState(false); 
-    
     //Form states
     const [error, setError] = useState(''); 
+    const [errors, setErrors] = useState([]); 
     const [message, setMessage] = useState('');
 
-    //Patient and facility objs
+    //Patient, facility and provider objs
     const [patientObj, setPatientObj] = useState();
     const [facilityObjs, setFacilityObjs] = useState([]);
     const [facilityObj, setFacilityObj] = useState({});
-    const [providerExits, setProviderExits] = useState(false);
+    const [providers, setProviders] = useState([]); 
 
-    //For autocomplete
-    const [providers, setProviders] = useState([]); // form field value suggestions, intersection of ptntProviders and facProviders (list of ids)
-    const [facilityOptions, setFacilityOptions] = useState([]); // form field value suggestions, names of facility in patient object
-
-    //Database objects
+    //Database
     const { useDB, db} = useAuth();
     const patients = useDB('patients');
-    const _facilities = useDB('facilities');
-
-    
 
     /////////////////////////////////////////////handle input change/////////////////////////////////////////////////////
 
@@ -227,7 +217,7 @@ function ApptForm() {
             setError('')
 
             //format datetime
-            const _time = (formValues.time && !notKnowTime) ? formValues.time : '00:00';
+            const _time = formValues.time ? formValues.time : '00:00';
             const _date = formValues.date ? new Date(formValues.date + 'T' + _time) : null;
 
             //taking the patient field set by ptntForm (set as a string "pid,patient name")
@@ -237,15 +227,10 @@ function ApptForm() {
 
             console.log('DATE & TIME', _date, _time)
 
-            /*//facility is left empty
-            if (formValues.facility === '') {             
-                //create new appointment in db
-                db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error}, 'appointments');
-                //db.send({'pid': pid, 'patient': _patient, 'date': _date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error }, 'appointments');
-                setMessage('Appointment Submitted');
-            }*/
             var provObj = {'provider': formValues.provider, 'providerTitle': formValues.providerTitle}
-            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provObj': provObj, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error}, 'appointments');
+            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provObj': provObj, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error}, 'appointments').then(function (docRef) {
+                db.edit(pid, {appointments: [...patientObj.appointments, docRef.id]},  'patients')
+            })
         
         
             //facility exists 
@@ -271,36 +256,9 @@ function ApptForm() {
                 })
             }
 
-            
             setMessage('Appointment Submitted');
             setFormValues(initialValues)
-            /*
-            //facility does not exist...
-            if (formValues.facility != '' && !isFacility(formValues.facility)) {
-                db.send({ 'name': formValues.facility, 'address': formValues.address, 'providers': [formValues.provider + ';' + formValues.providerTitle] }, 'facilities').then(function (docRef) {
-                    Promise.all([
-                        //edit patient['facilities] array in db if provider does not exist
-                        !(patientObj['providers'].includes(formValues.provider + ';' + formValues.providerTitle)) && db.edit(pid, { 'facilities': [...patientObj['facilities'], docRef.id], 'providers': [...patientObj['providers'], formValues.provider + ';' + formValues.providerTitle] }, 'patients'),
-                        //create new appointment in db
-                        db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': docRef.id, 'address': formValues.address, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error }, 'appointments')
-                    ]);
-                    setMessage('Appointment Submitted');
-                });
-            }
 
-            //facility exists...
-            if (formValues.facility != '' && isFacility(formValues.facility)) {
-                //create new appointment in db
-                db.send({ 'patient': _patient, 'pid': pid, 'date': _date, 'time': _time, 'duration': (!notKnowDuration ? formValues.duration : ''), 'facility': formValues.facility, 'facilityId': facObj.id, 'address': formValues.address, 'provider': formValues.provider, 'error': error }, 'appointments').then(function (docRef) {
-                    Promise.all([
-                        !(providers.includes(formValues.provider + ';' + formValues.providerTitle)) && db.edit(pid, { 'providers': [...patientObj['providers'], formValues.provider + ';' + formValues.providerTitle] }, 'patients'),
-                        !(providers.includes(formValues.provider + ';' + formValues.providerTitle)) && db.edit(facObj.id, { 'providers': [...facObj['providers'], formValues.provider + ';' + formValues.providerTitle] }, 'facilities'),
-                        !(formValues.address === facObj['address']) && db.edit(facObj.id, { 'address': formValues.address }, 'facilities'),
-                    ]);
-                    setMessage('Appointment Submitted');
-                });
-            }
-            */
         } catch {
             setError('Failed to submit appointment')
         }
@@ -358,7 +316,7 @@ function ApptForm() {
                             Time
                         </label>
                         <div className ="relative w-full" data-mdb-toggle-button="false">
-                            <input name="time" type="time" value={formValues.time} onChange={e => setFormValues({...formValues, time:e.target.value})} disabled={notKnowTime ? true : false} className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                            <input name="time" type="time" value={formValues.time} onChange={e => setFormValues({...formValues, time:e.target.value})} className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                         </div>
                     </div>
 

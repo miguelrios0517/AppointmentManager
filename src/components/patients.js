@@ -8,7 +8,7 @@ import {
     useRouteMatch
   } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext'
-import PtntForm from './ptnt_form.js';
+import PtntForm from './ptnt_form_old.js';
 
 function Patients() {
     const {path, url} = useRouteMatch();    
@@ -43,18 +43,13 @@ function Patients() {
                         })}
                 </div>
                 <div className = "main main-vertical">
-                    {showForm? 
-                        <div onClick = {() => setShowForm(false)} className = "new-appt-bttn">Cancel</div>:
-                        <div onClick = {() => setShowForm(true)} className = "new-appt-bttn">Add a Patient</div> 
-                    }
-                    {showForm ? 
-                    <PtntForm
-                        setShowForm = {setShowForm}
-                    />
-                    :null}
                 </div> 
-            </div>    
+                    <Link to = "/new-patient">
+                        <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Add new patient</button>
+                    </Link>
+                </div>    
         </div>
+        
     );
 }
 

@@ -20,7 +20,7 @@ import Modal from 'react-modal';
 
 import { Form, Button, Card, Alert } from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
-import { ShortPtntForm } from './ptnt_form.js'
+import { ShortPtntForm } from './ptnt_form_old.js'
 import FreeSolo from './freeSolo';
 // import DatePicker from '@mui/lab/DatePicker';
 // import AdapterDateFns from '@mui/lab/AdapterDateFns';

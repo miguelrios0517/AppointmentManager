@@ -1,363 +1,354 @@
-import React from 'react';
-import {Form, Button, Card, Alert} from 'react-bootstrap'
-import { useAuth } from '../contexts/AuthContext'
-import { useState, useEffect } from 'react';
-
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import TextField from "@material-ui/core/TextField";
-
-//import { FacilityForm } from './fac_form';
-
-//left of trying to figure out schema 
-// so far facilities fields are name, address, providers, and phone numbers
-// should providers be its own collection or be stored within facilities
-// how should providers be stored inside of facilities
-//    possible option: provider fields could be firstName, lastName, title(doctor, nurse, etc), phoneNum, email
-
-
-
-export function ShortPtntForm(props) {
-    const [firstName, setFirstName] = useState('');
-    const [middleInitial, setMiddleInitial] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [error, setError] = useState('');
-    const { db } = useAuth()
-  
-  
-
-  const handleSubmit = (e) => {
-    setError('')
-    e.preventDefault();
-    db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName}, 'patients').then(function(docRef) {
-        props.setPatient(docRef.id + ', ' + firstName + ' ' + lastName) })
-    props.setShowForm(false)
-  }
-    
-    return (
-        <div>
-            <button onClick={() => { 
-                props.setShowForm(false) 
-                props.setPatient("select")
-            }} className = "new-appt-bttn">Cancel</button>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <form onSubmit={e => { handleSubmit(e) }} className = 'appt-form'>
-                <label>
-                First Name:
-                <input name="firstName" type="text" value={firstName} onChange={e => setFirstName(e.target.value)}/>
-                </label>
-                <label>
-                Middle Initial:
-                <input name="middleInitial" type="text" value={middleInitial} maxlength="1" onChange={e => setMiddleInitial(e.target.value)}/>
-                </label>
-                <label>
-                Last Name: 
-                <input name="lastName" type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
-                </label>
-                <input className = "submit-bttn" type="submit" value="Submit" />
-            </form>
-        </div>
-      );
-    }
-
-
-export default function PtntForm(props) {
-    const [firstName, setFirstName] = useState('');
-    const [middleInitial, setMiddleInitial] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phoneNum, setPhoneNum] = useState('');
-    const [facility, setFacility] = useState('');
-    const [facilityAdd, setFacilityAdd] = useState('');
-    const [providerOne, setProviderOne] = useState('');
-    const [providerTwo, setProviderTwo] = useState('');
-    const [providerThree, setProviderThree] = useState('');
-    const [providerFour, setProviderFour] = useState('');
-    const [providerFive, setProviderFive] = useState('');
-    const [providerOneTitle, setProviderOneTitle] = useState('');
-    const [providerTwoTitle, setProviderTwoTitle] = useState('');
-    const [providerThreeTitle, setProviderThreeTitle] = useState('');
-    const [providerFourTitle, setProviderFourTitle] = useState('');
-    const [providerFiveTitle, setProviderFiveTitle] = useState('');
-    const [provNums, setProvNums] = useState(0);
-    const [providerEmail, setProviderEmail] = useState('');
-    const [providerPhone, setProviderPhone] = useState('');
-    const [error, setError] = useState('');
-    const { db } = useAuth()
-    var _facility;
-    var _provNums = ['one', 'two', 'three', 'four', 'five']
-
-  
-    const handleSubmit = (e) => {
-      setError('')
-      e.preventDefault();
-      var providers = [(providerOne?providerOne:'')+';'+(providerOneTitle?providerOneTitle:''), 
-      providerTwo+';'+providerTwoTitle,
-      providerThree+';'+providerThreeTitle,
-      providerFour+';'+providerFourTitle,
-      providerFive+';'+providerFiveTitle,]
-
-      db.send({'name': facility, 'address':facilityAdd, 'providers': providers}, 'facilities').then(function(docRef) {
-        db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[docRef.id], 'providers':providers}, 'patients').then(function(docRef) {
-          props.setShowForm(false) }) 
-        })
-
-      //{'name':provider, 'title':providerTitle, 'email':providerEmail, 'phone':providerPhone
-    } 
-    
-    return (
-        <div>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <form onSubmit={e => { handleSubmit(e) }} className = 'appt-form'>
-                <label>
-                First name:
-                <input name="firstName" type="text" value={firstName} onChange={e => setFirstName(e.target.value)}/>
-                </label>
-                <label>
-                Middle initial:
-                <input name="middleInitial" type="text" value={middleInitial} maxlength="1" onChange={e => setMiddleInitial(e.target.value)}/>
-                </label>
-                <label>
-                Last name: 
-                <input name="lastName" type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
-                </label>
-                <label>
-                Phone number:  
-                <input name="phoneNum" type="text" value={phoneNum} onChange={e => setPhoneNum(e.target.value)} />
-                </label>
-                <label>
-                Email: 
-                <input name="email" type="text" value={email} onChange={e => setEmail(e.target.value)} />
-                </label>
-                <div>---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---  ---</div>
-                <label>
-                Facility: 
-                <input name="facility" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
-                </label>
-                <label>
-                Facility Address (street, city, zip state) 
-                <input name="facAddress" type="text" value={facilityAdd} onChange={e => setFacilityAdd(e.target.value)} />
-                </label>
-                <label>
-                Facility Phone Number:
-                <input name="facPhoneNum" type="text" value={providerPhone} onChange={e => setProviderPhone(e.target.value)} />
-                </label>
-                <label>
-                Facility Contact Email:
-                <input name="facEmail" type="text" value={providerEmail} onChange={e => setProviderEmail(e.target.value)} />
-                </label>
-                
-
-                {provNums >= 1 ? 
-                    <div>
-                      <div>
-                      <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
-                        <label>
-                        Provider #1:
-                        <input name="email" type="text" value={providerOne} onChange={e => {setProviderOne(e.target.value)}} />
-                        </label>
-                        <label>
-                        Provider #1 Title (i.e., doctor, nurse, physical therapist):
-                        <Autocomplete
-                          id="free-solo-demo"
-                          freeSolo
-                          value={providerOneTitle}
-                          onInputChange={(e, data) => {
-                            setProviderOneTitle(data)
-                            
-                          }}
-                          options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                          renderInput={(params) => (
-                            <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                            )}/>
-                        </label>
-                      </div>
-                    </div>
-                  :null}
-
-                {provNums >= 2 ? 
-                    <div>
-                      <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
-                      <label>
-                      Provider #2:
-                      <input name="email" type="text" value={providerTwo} onChange={e => {setProviderTwo(e.target.value)}} />
-                      </label>
-                      <label>
-                      Provider #2 Title (i.e., doctor, nurse, physical therapist):
-                      <Autocomplete
-                        id="free-solo-demo"
-                        freeSolo
-                        value={providerTwoTitle}
-                        onInputChange={(e, data) => {
-                          setProviderTwoTitle(data)
-                          
-                        }}
-                        options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                        renderInput={(params) => (
-                          <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                          )}/>
-                      </label>
-                    </div>
-                  :null}
-                
-
-                {provNums >= 3 ?
-                  <div>
-                    <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
-                    <label>
-                    Provider #3 :
-                    <input name="email" type="text" value={providerThree} onChange={e => {setProviderThree(e.target.value)}} />
-                    </label>
-                    <label>
-                    Provider #3 Title (i.e., doctor, nurse, physical therapist):
-                    <Autocomplete
-                      id="free-solo-demo"
-                      freeSolo
-                      value={providerThreeTitle}
-                      onInputChange={(e, data) => {
-                        setProviderThreeTitle(data)
-                        
-                      }}
-                      options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                      renderInput={(params) => (
-                        <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                        )}/>
-                    </label>
-                  </div>
-                :null}
-
-                {provNums >= 4 ?
-                  <div>
-                    <div>---------------------------------------------------------------------------</div>
-                    <label>
-                    Provider #4 :
-                    <input name="email" type="text" value={providerFour} onChange={e => {setProviderFour(e.target.value)}} />
-                    </label>
-                    <label>
-                    Provider #4 Title (i.e., doctor, nurse, physical therapist):
-                    <Autocomplete
-                      id="free-solo-demo"
-                      freeSolo
-                      value={providerFourTitle}
-                      onInputChange={(e, data) => {
-                        setProviderFourTitle(data)
-                        
-                      }}
-                      options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                      renderInput={(params) => (
-                        <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                        )}/>
-                    </label>
-                  </div>
-                :null}
-
-              {provNums >= 5 ?
-                  <div>
-                    <div>-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -</div>
-                    <label>
-                    Provider #5 :
-                    <input name="email" type="text" value={providerFive} onChange={e => {setProviderFive(e.target.value)}} />
-                    </label>
-                    <label>
-                    Provider #5 Title (i.e., doctor, nurse, physical therapist):
-                    <Autocomplete
-                      id="free-solo-demo"
-                      freeSolo
-                      value={providerFiveTitle}
-                      onInputChange={(e, data) => {
-                        setProviderFiveTitle(data)
-                        
-                      }}
-                      options={['Doctor', 'Nurse', 'Physical Therapist', 'Dentist']}
-                      renderInput={(params) => (
-                        <TextField {...params} label="freeSolo" margin="normal" variant="outlined" />
-                        )}/>
-                    </label>
-                  </div>
-                :null}
-                
-                {provNums>=1? <div onClick = {() => setProvNums(provNums-1)} className = "new-appt-bttn">Delete provider</div>:null }
-                <br/>
-                {provNums<5? <div onClick = {() => setProvNums(provNums+1)} className = "new-appt-bttn">Add a provider</div>:null }
-                
-
-                <br/>
-                <input className = "new-appt-bttn" type="submit" value="Submit" />
-            </form>
-        </div>
-      );
-}
-  
 /*
- <label>
-                Facility: 
-                <input name="facility" type="text" value={facility} onChange={e => setFacility(e.target.value)} />
-                </label>
-                <label>
-                Provider: 
-                <input name="provider" type="text" value={provider} onChange={e => setProvider(e.target.value)} />
-                </label>
+TODO:
+- Make sure all fields are clear if user clicks "cancel" on modal, i.e., closes the modal
+- make sure the flow is fully correct/functional, should be able to input fields regardless if previous input were entered 
+        - i.e., do not deactivate fields in flow order
+        - i.e., user should be able to enter field names (such as facility or patient) regardless if previous values were submitted
+        (like patient) and if suggestions are provided
+- clean up handleFacilityChange and setting the provider suggestions options (instead of setting as a seperate useState, use 
+    the facility obj itself like fac.providers.map(...))
 */
 
 
-/*
+import React, { useState, useEffect } from 'react';
+//import Modal from 'react-awesome-modal';
+//import Autocomplete from "@material-ui/lab/Autocomplete";
+import Autocomplete from './Autocomplete.js'
+import TextField from "@material-ui/core/TextField";
+import ReactDOM from 'react-dom';
+import Modal from 'react-modal';
+import {Link} from "react-router-dom";
+
+import { Form, Button, Card, Alert, NavItem } from 'react-bootstrap'
+import { useAuth } from '../contexts/AuthContext'
+import { ShortPtntForm } from './ptnt_form_old.js'
+import FreeSolo from './freeSolo';
+// import DatePicker from '@mui/lab/DatePicker';
+// import AdapterDateFns from '@mui/lab/AdapterDateFns';
+// import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import DatePicker from "react-datepicker";
+import app from "../firebase"
+
+import "react-datepicker/dist/react-datepicker.css";
+
+let store = app.firestore()
+
+// CSS Modules, react-datepicker-cssmodules.css
+// import 'react-datepicker/dist/react-datepicker-cssmodules.css';
 
 
+// Make sure to bind modal to your appElement (https://reactcommunity.org/react-modal/accessibility/)
+Modal.setAppElement('#root');
 
-class PatientForm extends React.Component {
-    constructor(props) {
-      super(props);
-      this.showForm = props.showForm;
-      this.newFormSubmit = props.newFormSubmit;
-      this.handleChange = this.handleChange.bind(this);
-      this.handleSubmit = this.handleSubmit.bind(this);
+function PtntForm(props) {
+
+    //Patient form fields 
+    const initialValues = {firstName: '', middleInitial: '', lastName: '', phoneNumber: '', email: '', homeAddress: ''}
+    const [formValues, setFormValues] = useState(initialValues);
+
+    //const initialData = [{ id: 1, author: "john", text: "foo" }, { id: 2, author: "bob", text: "bar" }]
+    const [facilities, setFacilities] = useState([]);
+
+    const [data, setData] = useState([
+        {
+          id:   1,
+          name: 'Hannah',
+          gender: 'Female'
+        },
+        {
+          id:   2,
+          name: 'Tom',
+          gender: 'Male'
+        }
+      ]);
+
+    const [data2, setData2] = useState([
+        'first item',
+        'second item',
+        'third item',
+        'fourth item', 
+    ])
+
+    //Form states
+    const [error, setError] = useState(''); 
+    const [errors, setErrors] = useState([]); 
+    const [message, setMessage] = useState('');
+
+    //database
+    const { db } = useAuth();
+
+    /////////////////////////////////////////////helper functions/////////////////////////////////////////////////////
+    const checkKeyDown = (e) => {
+        if (e.code === 'Enter') e.preventDefault();
+    };
+
+    function addFacility () {
+        setFacilities([...facilities, {name: '', address: '', phoneNumber: '', email: '', provider: '', providerTitle: ''}])
     }
-  
-    handleChange(event) {
-      const target = event.target;
-      const value = target.type === 'checkbox' ? target.checked : target.value;
-      const name = target.name;
-      this.setState ({[name]: value});
-    }
-  
-    handleSubmit(event) {
-      event.preventDefault();
 
-      this.setState({error: ''}, () => {
-        this.newFormSubmit(this.state)
-        this.setState({firstName: '', lastName: '', email: '', phoneNum: '', provider: ''});
-      })
+    function removeFacility (index) {
+        setFacilities(facilities.filter((o,i) => index !== i))
     }
-  
-    render() {
-      return (
+
+    const updateFieldChanged = index => e => {
+        console.log('index: ' + index);
+        console.log('property name: '+ e.target.name, 'target value: '+ e.target.value);
+        let key = e.target.name 
+        var newArr2 = data.map(target => {
+            if (target.id === index) {
+                target[key] = e.target.value
+            }
+            return target
+            //target.id === index? (target[key] = e.target.value): target
+            //{...target, key: e.target.value}: target
+        })
+        console.log('DATA UPDATED', newArr2)
+        setFacilities(newArr2);
+        //console.log('DATA UPDATED', newArr)
+    }
+
+    const updateFacilitiesInfo = index => e => {
+        console.log('index: ' + index);
+        console.log('property name: '+ e.target.name, 'target value: '+ e.target.value);
+        let key = e.target.name 
+        var newArr2 = data.map(target => {
+            if (target.id === index) {
+                target[key] = e.target.value
+            }
+            return target
+            //target.id === index? (target[key] = e.target.value): target
+            //{...target, key: e.target.value}: target
+        })
+        console.log('DATA UPDATED', newArr2)
+        setFacilities(newArr2);
+        //console.log('DATA UPDATED', newArr)
+    }
+
+    useEffect(()=> {console.log('USE STATE UPDATED', facilities)}, [facilities]) 
+
+    function handleFacilitiesEdit(id, source) {
+        console.log('----------------------------------')
+        console.log('handle facilities edit', id, source)
+        //var _facilities = facilities.map(target => target.id === id? Object.assign({}, target, source):target)
+        //var _facilities =  facilities.map(target => target.id === id? {...target, source}: target)
+        //setFacilities(_facilities)
+        //console.log('updated facilities array', _facilities)
+        console.log('----------------------------------')
+
+        //var _facilities = this.facilities.map(target => target.id === id? Object.assign(target, source):target)
+        /*
+        this.setState({
+            data: this.state.data.map(el => (el.id === id ? Object.assign({}, el, { text }) : el))
+        });*/
+    }
+
+    /////////////////////////////////////////////handle submit/////////////////////////////////////////////////////
+    async function handleSubmit (e) {
+        setError('')
+        e.preventDefault();
+        db.send({'firstName': formValues.firstName, 'middleInitial':formValues.middleInitial, 'lastName':formValues.lastName, 'phoneNumber':formValues.phoneNumber, 'email':formValues.email, 'homeAddress':formValues.homeAddress, 'facilities': [], 'appointments': []}, 'patients')
+        setFormValues(initialValues)
+
+        /*db.send({'name': facility, 'address':facilityAdd, 'providers': providers}, 'facilities').then(function(docRef) {
+            db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[docRef.id], 'providers':providers}, 'patients')
+        })*/
+    }
+
+
+
+    return (
         <div>
-          {this.state.error && <Alert variant="danger">{this.state.error}</Alert>}
-          <form onSubmit={this.handleSubmit} className = 'appt-form'>
-            <label>
-              First Name:
-              <input name="firstName" type="text" value={this.state.firstName} onChange={this.handleChange} />
-            </label>
-            <label>
-              Last Name: 
-              <input name="lastName" type="text" value={this.state.lastName} onChange={this.handleChange} />
-            </label>
-            <label>
-              Phone Number:  
-              <input name="phoneNum" type="text" value={this.state.phoneNum} onChange={this.handleChange} />
-            </label>
-            <label>
-              Email: 
-              <input name="email" type="text" value={this.state.email} onChange={this.handleChange} />
-            </label>
-            <label>
-              Provider: 
-              <input name="provider" type="text" value={this.state.provider} onChange={this.handleChange} />
-            </label>
-            <input className = "submit-bttn" type="submit" value="Submit" />
-          </form>
+            {error && <Alert variant="danger">{error}</Alert>}
+            {message && <Alert variant="success">{message}</Alert>}
+            <form onSubmit={e => { handleSubmit(e) }} onKeyDown={(e) => checkKeyDown(e)} className="w-full max-w-lg" id="ptnt-form" autocomplete="off">
+                <div className="flex flex-wrap -mx-3 mb-6">
+                    <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            First Name
+                        </label>
+                        <input value={formValues.firstName} onChange={e => setFormValues({...formValues, firstName: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                    <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Middle Initial
+                        </label>
+                        <input value={formValues.middleInitial} onChange={e => setFormValues({...formValues, middleInitial: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                    <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Last Name
+                        </label>
+                        <input value={formValues.lastName} onChange={e => setFormValues({...formValues, lastName: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap -mx-3 mb-6">
+                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Phone number
+                        </label>
+                        <input value={formValues.phoneNumber} onChange={e => setFormValues({...formValues, phoneNumber: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Email
+                        </label>
+                        <input value={formValues.email} onChange={e => setFormValues({...formValues, email: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap -mx-3 mb-6">
+                    <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                            Home address
+                        </label>
+                        <input value={formValues.homeAddress} onChange={e => setFormValues({...formValues, homeAddress: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    </div>
+                </div>
+
+                <React.Fragment>
+                    {data.map((datum, index) => {
+                    return(<div key={index}>
+                        <input type="text" name="name" value={datum.name} onChange={updateFieldChanged(datum.id)}  />
+                        <input type="text" name="gender" value={datum.gender} onChange={updateFieldChanged(datum.id)}  />
+                    </div>)
+                    })}
+                </React.Fragment>
+
+                {facilities.map((f,i) => {
+                    return(
+                        <div key={i}>
+                            <FacForm id = {i} removeFacility={removeFacility} updateFacilities={updateFacilitiesInfo}/>
+                        </div>
+                    )
+                })}
+            </form>
+
+            <div className="flex flex-wrap -mx-3 mb-6">
+                <button onClick = {()=> addFacility()} class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                    <span>Facility</span>
+                </button>
+                <button type="submit" form="ptnt-form" value="Submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
+                <Link to = "/patients">
+                    <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Cancel</button>
+                </Link>
+            </div>
         </div>
 
-      );
-    }
-  }
-  */
+    
+);}
+
+
+function FacForm(props){
+    const initialValues = {name: '', address: '', phoneNumber: '', email: '', provider: '', providerTitle: ''}
+    const [formValues, setFormValues] = useState(initialValues)
+    
+    return(
+        <>
+            <div className="relative flex flex-wrap -mx-3 mb-6">
+                <button onClick={()=> props.removeFacility(props.id)} className="absolute -top-3 right-5 h-6 w-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+                <div className="md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                        Facility Name
+                    </label>
+                    <input value={formValues.name} onChange={e => setFormValues({...formValues, name: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                </div>
+                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                        Address
+                    </label>
+                    <input value={formValues.address} onChange={e => setFormValues({...formValues, address: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                </div>
+            </div>
+            <div className="flex flex-wrap -mx-3 mb-6">
+                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                        Telephone Number
+                    </label>
+                    <input value={formValues.phoneNumber} onChange={e => setFormValues({...formValues, phoneNumber: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                </div>
+                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                        Email
+                    </label>
+                    <input value={formValues.email} onChange={e => setFormValues({...formValues, email: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                </div>
+            </div>
+            <div className="flex flex-wrap -mx-3 mb-6">
+                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                        Primary Provider
+                    </label>
+                    <input value={formValues.provider} onChange={e => setFormValues({...formValues, provider: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                </div>
+                <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                    <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
+                        Provider Title
+                    </label>
+                    <input value={formValues.providerTitle} onChange={e => setFormValues({...formValues, providerTitle: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default PtntForm;
+
+/* 
+    const [patient, setPatient] = useState(''); 
+    const [date, setDate] = useState(''); 
+    const [time, setTime] = useState(''); 
+    const [duration, setDuration] = useState(''); 
+    const [address, setAddress] = useState(''); 
+    const [facility, setFacility] = useState(''); 
+    const [provider, setProvider] = useState('');
+    const [providerTitle, setProviderTitle] = useState(''); 
+    let patObj; //patient object 
+    let facilityId = ''; // the facility ID of the option selected (not rendered)
+    let ptntFacilities = []; // facility id's stored inside of patient (not rendered)
+    let ptntProviders = []; // stored patient providers (name;title)
+    let facProviders = [];  // stored facility providers (name;title) 
+    let facAddress = ''; // stored facility address
+    let _facs = []; //array of {'id':fid, 'name':fac_obj['name']}
+    let subtitle;
+*/
+
+
+/*useEffect(() => {
+    if (patient == 'new-patient') { //create a new patient
+        setShowForm(true);
+    } else { // a patient is selected from dropdown
+        setShowForm(false);
+
+        //taking the patient field and splitting it into name and pid
+        const pat_arr = patient.split(", ");
+        const pid = pat_arr[0];
+        //const _patient = pat_arr[1];
+        //using pid to filter the patient object and assign it to global variable 
+        ptntObj = db.get(pid, 'patients');
+        handlePatientChange(ptntObj);
+}
+
+}, [patient])*/
+
+ /*const facility_opts = patientObj['facilities'].map((fid) => {
+                    const fac = getDocument(fid, 'facilities');
+                      const fac = _facilities.filter(fac => {
+                        return fac.id === fid;
+                    })[0];
+                    if (typeof fac != 'undefined') {
+                        _facs.push({ 'id': fid, 'name': fac['name'] });
+                        return fac['name'];
+                    }
+                    return false; })
+    
+                console.log('facility OPTIONS', facility_opts)
+                setFacilityOptions(facility_opts) 
+                
+                (typeof patientObj['facilities'] != 'undefined') && (ptntFacilities = patientObj['facilities']);
+                (typeof patientObj['providers'] != 'undefined') && (ptntProviders = patientObj['providers']);*/

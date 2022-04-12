@@ -52,7 +52,7 @@ function Appointments() {
             <div className = "main main-appointments">
             {(appointments.length ===  0)? <p>There are no appointments to show. Click the button below to add a new appointment.</p>:<></>}
                 {(appointments.length !== 0) &&
-                <table style={{width:1200}}>
+                <table className = "table-auto" style={{width:1200}}>
                         <tr>
                             <th>Patient</th>
                             <th>Date</th>

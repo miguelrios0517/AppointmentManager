@@ -17,6 +17,7 @@ import ApptForm from './components/appt_form';
 import Schedule from './components/schedule';
 import Patients from './components/patients';
 import Patient from './components/patient';
+import PtntForm from './components/ptnt_form';
 import Lab from './components/lab';
 
 import Toolbar from '@mui/material/Toolbar';
@@ -136,6 +137,7 @@ function App() {
           <PrivateRoute exact path="/" component={Dashboard} />
           <PrivateRoute exact path="/patients" component={Patients} />
           <PrivateRoute exact path="/patients/:id" component={Patient} />
+          <PrivateRoute exact path ="/new-patient" component ={PtntForm} />
           <PrivateRoute exact path="/appointments" component={Appointments} />
           <PrivateRoute exact path ="/appointments/:id" component ={Appointment} />
           <PrivateRoute exact path ="/new-appointment" component ={ApptForm} />
