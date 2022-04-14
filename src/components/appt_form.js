@@ -17,7 +17,7 @@ import Autocomplete from './Autocomplete.js'
 import TextField from "@material-ui/core/TextField";
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
-import {Link} from "react-router-dom";
+import {Link, useHistory } from "react-router-dom";
 
 import { Form, Button, Card, Alert } from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
@@ -69,6 +69,10 @@ function ApptForm() {
     const { useDB, db} = useAuth();
     const patients = useDB('patients');
 
+    //Router
+    const history = useHistory();
+
+
     /////////////////////////////////////////////handle input change/////////////////////////////////////////////////////
 
     //verify that the correct facility objects are set
@@ -115,8 +119,9 @@ function ApptForm() {
             if ((Object.keys(patientObj).length != 0) && (typeof patientObj['facilities'] != 'undefined')) {
                 console.log('inside if')
                 console.log('Facilities', patientObj.facilities)
-                patientObj['facilities'].map((fid) => {
+                patientObj['facilities'].map((item) => {
                     console.log('inside map')
+                    let fid = item.facility
                     store.collection('facilities').doc(fid).get().then(snapshot => {
                         console.log('FacObj from database (snapshot.data)', snapshot.data(), fid, snapshot.id)
                         const _fac = snapshot.data()
@@ -226,10 +231,13 @@ function ApptForm() {
             const _patient = pat_arr[1];
 
             console.log('DATE & TIME', _date, _time)
+            let appt_id;
+            let fac_id = (Object.keys(facilityObj).length != 0)? facilityObj.id: ''
 
             var provObj = {'provider': formValues.provider, 'providerTitle': formValues.providerTitle}
-            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': '', 'address': formValues.address, 'provObj': provObj, 'provider': formValues.provider + ';' + formValues.providerTitle, 'error': error}, 'appointments').then(function (docRef) {
+            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': fac_id, 'address': formValues.address, 'provObj': provObj, 'provider': formValues.provider + ';' + formValues.providerTitle}, 'appointments').then(function (docRef) {
                 db.edit(pid, {appointments: [...patientObj.appointments, docRef.id]},  'patients')
+                appt_id = docRef.id;
             })
         
         
@@ -251,13 +259,16 @@ function ApptForm() {
                 //create new facility document in db
                 db.send({ 'name': formValues.facility, 'pid': pid, 'address': formValues.address, 'providers': [provObj]}, 'facilities').then(function (docRef) {
                     console.log("NEW FACILITY ENTRY")
-                    db.edit(patientObj.id, { 'facilities': [...patientObj['facilities'], docRef.id]}, 'patients')
+                    db.edit(patientObj.id, { 'facilities': [...patientObj['facilities'], {'facility':docRef.id, 'primary':false}]}, 'patients')
                     console.log("EDIT PATIENT OBJECT (adding new fid to facilities)")
+                    db.edit(appt_id, {'facilityID':docRef.id}, 'appointments')
                 })
             }
 
             setMessage('Appointment Submitted');
             setFormValues(initialValues)
+            history.push("/appointments")
+
 
         } catch {
             setError('Failed to submit appointment')

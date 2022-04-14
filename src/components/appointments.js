@@ -97,7 +97,7 @@ function Appointments() {
                                     <td>{"facility" in appt?appt.facility:'n/a'}</td>
                                     <td>{"address" in appt?appt.address:'n/a'}</td>
                                     <td>{"provider" in appt?appt.provider:'n/a'}</td>
-                                    <td><span onClick = {() => deleteAppointment(appt.id, 'appointments')}>Delete</span> <Link to={`/appointments/${appt.id}`}>View</Link></td>
+                                    <td><span onClick = {() => deleteAppointment(appt.id)}>Delete</span> <Link to={`/appointments/${appt.id}`}>View</Link></td>
                                 </tr>
                         })}
                     </table>}

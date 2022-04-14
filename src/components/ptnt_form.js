@@ -17,7 +17,7 @@ import Autocomplete from './Autocomplete.js'
 import TextField from "@material-ui/core/TextField";
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
-import {Link} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 
 import { Form, Button, Card, Alert, NavItem } from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
@@ -46,28 +46,10 @@ function PtntForm(props) {
     const initialValues = {firstName: '', middleInitial: '', lastName: '', phoneNumber: '', email: '', homeAddress: ''}
     const [formValues, setFormValues] = useState(initialValues);
 
-    //const initialData = [{ id: 1, author: "john", text: "foo" }, { id: 2, author: "bob", text: "bar" }]
+    //Facilities
     const [facilities, setFacilities] = useState([]);
-
-    const [data, setData] = useState([
-        {
-          id:   1,
-          name: 'Hannah',
-          gender: 'Female'
-        },
-        {
-          id:   2,
-          name: 'Tom',
-          gender: 'Male'
-        }
-      ]);
-
-    const [data2, setData2] = useState([
-        'first item',
-        'second item',
-        'third item',
-        'fourth item', 
-    ])
+    const [numFacilities, setNumFacilities] = useState(0);
+    const [index, setIndex] = useState(0);
 
     //Form states
     const [error, setError] = useState(''); 
@@ -77,77 +59,100 @@ function PtntForm(props) {
     //database
     const { db } = useAuth();
 
+    //Router
+    const history = useHistory();
+
     /////////////////////////////////////////////helper functions/////////////////////////////////////////////////////
     const checkKeyDown = (e) => {
         if (e.code === 'Enter') e.preventDefault();
     };
 
     function addFacility () {
-        setFacilities([...facilities, {name: '', address: '', phoneNumber: '', email: '', provider: '', providerTitle: ''}])
+        setNumFacilities(numFacilities + 1)
+        setFacilities([...facilities, {id: numFacilities + 1, name: '', address: '', phoneNumber: '', email: '', provider: '', providerTitle: ''}])
     }
 
-    function removeFacility (index) {
-        setFacilities(facilities.filter((o,i) => index !== i))
+    function deleteFacility (id) {
+        console.log('DELETING FACILITY ID', id, facilities)
+        setFacilities(facilities.filter((fac,i) => fac.id !== id))
     }
 
-    const updateFieldChanged = index => e => {
+    const updateFacilities = (index, e) => {
         console.log('index: ' + index);
         console.log('property name: '+ e.target.name, 'target value: '+ e.target.value);
         let key = e.target.name 
-        var newArr2 = data.map(target => {
+        var updatedFacilities = facilities.map(target => {
             if (target.id === index) {
                 target[key] = e.target.value
             }
             return target
-            //target.id === index? (target[key] = e.target.value): target
-            //{...target, key: e.target.value}: target
         })
-        console.log('DATA UPDATED', newArr2)
-        setFacilities(newArr2);
-        //console.log('DATA UPDATED', newArr)
-    }
-
-    const updateFacilitiesInfo = index => e => {
-        console.log('index: ' + index);
-        console.log('property name: '+ e.target.name, 'target value: '+ e.target.value);
-        let key = e.target.name 
-        var newArr2 = data.map(target => {
-            if (target.id === index) {
-                target[key] = e.target.value
-            }
-            return target
-            //target.id === index? (target[key] = e.target.value): target
-            //{...target, key: e.target.value}: target
-        })
-        console.log('DATA UPDATED', newArr2)
-        setFacilities(newArr2);
-        //console.log('DATA UPDATED', newArr)
+        console.log('DATA UPDATED', updatedFacilities)
+        setFacilities(updatedFacilities);
     }
 
     useEffect(()=> {console.log('USE STATE UPDATED', facilities)}, [facilities]) 
 
-    function handleFacilitiesEdit(id, source) {
-        console.log('----------------------------------')
-        console.log('handle facilities edit', id, source)
-        //var _facilities = facilities.map(target => target.id === id? Object.assign({}, target, source):target)
-        //var _facilities =  facilities.map(target => target.id === id? {...target, source}: target)
-        //setFacilities(_facilities)
-        //console.log('updated facilities array', _facilities)
-        console.log('----------------------------------')
-
-        //var _facilities = this.facilities.map(target => target.id === id? Object.assign(target, source):target)
-        /*
-        this.setState({
-            data: this.state.data.map(el => (el.id === id ? Object.assign({}, el, { text }) : el))
-        });*/
-    }
-
     /////////////////////////////////////////////handle submit/////////////////////////////////////////////////////
     async function handleSubmit (e) {
-        setError('')
         e.preventDefault();
-        db.send({'firstName': formValues.firstName, 'middleInitial':formValues.middleInitial, 'lastName':formValues.lastName, 'phoneNumber':formValues.phoneNumber, 'email':formValues.email, 'homeAddress':formValues.homeAddress, 'facilities': [], 'appointments': []}, 'patients')
-        setFormValues(initialValues)
+        console.log("HANDLE SUBMIT", formValues)
+
+        if (formValues.firstName == '' ) {
+            //setErrors(errors => [...errors, 'patient']); 
+            return setError('You must enter a first name');
+        }
+        if (formValues.lastName == '') {
+            //setErrors(errors => [...errors, 'date']);
+            return setError('You must enter a last name');
+        }
+
+        for(var i = 0; i<facilities.length; i++){
+            let fac = facilities[i]
+            console.log('VALIDATING FACILITY INPUTS', fac)
+            if (fac.name == '' ){
+                return setError('You must enter a name for each facility');
+            }
+            if (fac.address == '' ){
+                return setError('You must enter an address for each facility');
+            }
+        }
+
+        try {
+            setError('')
+            db.send({'firstName': formValues.firstName, 'middleInitial':formValues.middleInitial, 'lastName':formValues.lastName, 'phoneNumber':formValues.phoneNumber, 'email':formValues.email, 'homeAddress':formValues.homeAddress, 'facilities': [], 'appointments': []}, 'patients').then(function (docRef) {
+                let pid = docRef.id
+                console.log('Submitted patient obj',docRef.id)
+                if(facilities.length > 0) {
+                    console.log('submitting facilities')
+                    let facArr = [];
+                    for(var i = 0; i<facilities.length; i++){
+                        let fac = facilities[i]
+                        let primary = (i === 0)? true: false;                        
+                        console.log('submitting facility', fac, 'index', i, 'primary', primary)
+                        db.send({'patient':pid, 'name': fac.name, 'address': fac.address, 'phoneNumber': fac.phoneNumber, 'email': fac.email, 'providers': (fac.provider != ''? [{'provider': fac.provider, 'providerTitle': fac.providerTitle}]:[]), 'primary': (i===0?true:false)}, 'facilities').then((docRef)=> {
+                            console.log('SENT FACILITY TO DATABASE', docRef.id)
+                            facArr.push({'facility': docRef.id, 'primary':primary})
+                            console.log(facArr)
+                            db.edit(pid, {'facilities': facArr}, 'patients')
+                        })
+                        setIndex(index + 1)
+                    }
+                } else {
+                    console.log('no facilities submitted')
+                }
+            })
+            
+            setFormValues(initialValues)
+            setFacilities([])
+            setMessage('Patient Submitted');
+            history.push("/patients")
+
+        } catch {
+            setError('Failed to submit appointment')
+        }
+
+        
 
         /*db.send({'name': facility, 'address':facilityAdd, 'providers': providers}, 'facilities').then(function(docRef) {
             db.send({'firstName': firstName, 'middleInitial':middleInitial, 'lastName': lastName, 'email':email, 'phoneNum':phoneNum, 'facilities':[docRef.id], 'providers':providers}, 'patients')
@@ -172,7 +177,7 @@ function PtntForm(props) {
                         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Middle Initial
                         </label>
-                        <input value={formValues.middleInitial} onChange={e => setFormValues({...formValues, middleInitial: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                        <input value={formValues.middleInitial} maxlength="1" onChange={e => setFormValues({...formValues, middleInitial: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                     </div>
                     <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
                         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
@@ -206,19 +211,11 @@ function PtntForm(props) {
                     </div>
                 </div>
 
-                <React.Fragment>
-                    {data.map((datum, index) => {
-                    return(<div key={index}>
-                        <input type="text" name="name" value={datum.name} onChange={updateFieldChanged(datum.id)}  />
-                        <input type="text" name="gender" value={datum.gender} onChange={updateFieldChanged(datum.id)}  />
-                    </div>)
-                    })}
-                </React.Fragment>
-
                 {facilities.map((f,i) => {
+                    let primary = (i===0)? true: false
                     return(
-                        <div key={i}>
-                            <FacForm id = {i} removeFacility={removeFacility} updateFacilities={updateFacilitiesInfo}/>
+                        <div className="mb-6" key={f.id}>
+                            <FacForm id = {f.id} deleteFacility={deleteFacility} updateFacilities={updateFacilities} primary={primary}/>
                         </div>
                     )
                 })}
@@ -245,55 +242,82 @@ function FacForm(props){
     const [formValues, setFormValues] = useState(initialValues)
     
     return(
-        <>
+        <div class="border-r border-b border-l border-t border-gray-400 bg-white rounded-r rounded-l p-4 leading-normal">
             <div className="relative flex flex-wrap -mx-3 mb-6">
-                <button onClick={()=> props.removeFacility(props.id)} className="absolute -top-3 right-5 h-6 w-6">
+                <button onClick={()=> {
+                    console.log('CLICKED DELETE - ID:', props.id)
+                    props.deleteFacility(props.id)}} className="absolute -top-3 right-5 h-6 w-6">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </button>
                 <div className="md:w-1/2 px-3 mb-6 md:mb-0">
+                    <span>{props.primary?'PRIMARY':''}</span>
                     <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Facility Name
                     </label>
-                    <input value={formValues.name} onChange={e => setFormValues({...formValues, name: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    <input name="name" value={formValues.name} onChange={e => {
+                        console.log('FACILITY NAME CHANGE')
+                        props.updateFacilities(props.id, e)
+                        setFormValues({...formValues, name: e.target.value})
+                }} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                 </div>
                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Address
                     </label>
-                    <input value={formValues.address} onChange={e => setFormValues({...formValues, address: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    <input name="address" value={formValues.address} onChange={e => {
+                        console.log('Address NAME CHANGE')
+                        props.updateFacilities(props.id, e)
+                        setFormValues({...formValues, address: e.target.value})
+                }} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                 </div>
             </div>
             <div className="flex flex-wrap -mx-3 mb-6">
                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
-                        Telephone Number
+                        Phone Number
                     </label>
-                    <input value={formValues.phoneNumber} onChange={e => setFormValues({...formValues, phoneNumber: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    <input name="phoneNumber" value={formValues.phoneNumber} onChange={e => {
+                        console.log('Phone NAME CHANGE')
+                        props.updateFacilities(props.id, e)
+                        setFormValues({...formValues, phoneNumber: e.target.value})
+                }} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                 </div>
                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Email
                     </label>
-                    <input value={formValues.email} onChange={e => setFormValues({...formValues, email: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    <input name="email" value={formValues.email} onChange={e => {
+                        console.log('Email NAME CHANGE')
+                        props.updateFacilities(props.id, e)
+                        setFormValues({...formValues, email: e.target.value})
+                }} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                 </div>
             </div>
-            <div className="flex flex-wrap -mx-3 mb-6">
+            <div className="flex flex-wrap -mx-3 mb-2">
                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Primary Provider
                     </label>
-                    <input value={formValues.provider} onChange={e => setFormValues({...formValues, provider: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    <input name="provider" value={formValues.provider} onChange={e => {
+                        console.log('Prov NAME CHANGE')
+                        props.updateFacilities(props.id, e)
+                        setFormValues({...formValues, provider: e.target.value})
+                }} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                 </div>
                 <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
                     <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                         Provider Title
                     </label>
-                    <input value={formValues.providerTitle} onChange={e => setFormValues({...formValues, providerTitle: e.target.value})} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                    <input name="providerTitle" value={formValues.providerTitle} onChange={e => {
+                        console.log('Prov Title NAME CHANGE')
+                        props.updateFacilities(props.id, e)
+                        setFormValues({...formValues, providerTitle: e.target.value})
+                }} type="text" className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 
