@@ -119,9 +119,8 @@ function ApptForm() {
             if ((Object.keys(patientObj).length != 0) && (typeof patientObj['facilities'] != 'undefined')) {
                 console.log('inside if')
                 console.log('Facilities', patientObj.facilities)
-                patientObj['facilities'].map((item) => {
+                patientObj['facilities'].map((fid) => {
                     console.log('inside map')
-                    let fid = item.facility
                     store.collection('facilities').doc(fid).get().then(snapshot => {
                         console.log('FacObj from database (snapshot.data)', snapshot.data(), fid, snapshot.id)
                         const _fac = snapshot.data()
@@ -190,7 +189,7 @@ function ApptForm() {
         console.log("CHECKING IF PROVIDER")
         if(Object.keys(facilityObj).length != 0) {
             for(var i=0;i<facilityObj.providers.length; i++) {
-                if((facilityObj.providers[i].provider === formValues.provider) && (facilityObj.providers[i].providerTitle === formValues.providerTitle)) {
+                if((facilityObj.providers[i].name === formValues.provider) && (facilityObj.providers[i].title === formValues.providerTitle)) {
                     console.log('--------------------')
                     console.log(formValues.provider, formValues.providerTitle)
                     return true
@@ -234,8 +233,8 @@ function ApptForm() {
             let appt_id;
             let fac_id = (Object.keys(facilityObj).length != 0)? facilityObj.id: ''
 
-            var provObj = {'provider': formValues.provider, 'providerTitle': formValues.providerTitle}
-            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': fac_id, 'address': formValues.address, 'provObj': provObj, 'provider': formValues.provider + ';' + formValues.providerTitle}, 'appointments').then(function (docRef) {
+            var provObj = {'name': formValues.provider, 'title': formValues.providerTitle}
+            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': fac_id, 'address': formValues.address, 'provider': provObj}, 'appointments').then(function (docRef) {
                 db.edit(pid, {appointments: [...patientObj.appointments, docRef.id]},  'patients')
                 appt_id = docRef.id;
             })
@@ -254,12 +253,12 @@ function ApptForm() {
             } 
 
             //facility does not exist
-            if (Object.keys(facilityObj).length == 0) {
+            if (Object.keys(facilityObj).length == 0 && formValues.facility != '') {
                 console.log('facility does not exist', facilityObj)
                 //create new facility document in db
                 db.send({ 'name': formValues.facility, 'pid': pid, 'address': formValues.address, 'providers': [provObj]}, 'facilities').then(function (docRef) {
                     console.log("NEW FACILITY ENTRY")
-                    db.edit(patientObj.id, { 'facilities': [...patientObj['facilities'], {'facility':docRef.id, 'primary':false}]}, 'patients')
+                    db.edit(patientObj.id, { 'facilities': [...patientObj['facilities'], docRef.id]}, 'patients')
                     console.log("EDIT PATIENT OBJECT (adding new fid to facilities)")
                     db.edit(appt_id, {'facilityID':docRef.id}, 'appointments')
                 })
@@ -364,7 +363,7 @@ function ApptForm() {
                             Provider's Full Name
                         </label>
                         <Autocomplete suggestions={providers.length !== 0 ? providers.map((prov) => {
-                        return(prov.provider + " (" + prov.providerTitle + ")")
+                        return(prov.name + " (" + prov.title + ")")
                         }) : []} setFormValue={provInputChange} formValue={formValues.provider} className="form-input appearance-none block w-full px-3 py-1.5 mb-2 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                     </div>
                     <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">

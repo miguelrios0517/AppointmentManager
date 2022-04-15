@@ -120,21 +120,29 @@ function PtntForm(props) {
 
         try {
             setError('')
-            db.send({'firstName': formValues.firstName, 'middleInitial':formValues.middleInitial, 'lastName':formValues.lastName, 'phoneNumber':formValues.phoneNumber, 'email':formValues.email, 'homeAddress':formValues.homeAddress, 'facilities': [], 'appointments': []}, 'patients').then(function (docRef) {
+            db.send({'firstName': formValues.firstName, 'middleInitial':formValues.middleInitial, 'lastName':formValues.lastName, 'phoneNumber':formValues.phoneNumber, 'email':formValues.email, 'homeAddress':formValues.homeAddress, 'primaryFacility':{'name':'', 'id':''}, 'primaryProvider':{'name':'', 'title':''} , 'facilities': [], 'appointments': []}, 'patients').then(function (docRef) {
                 let pid = docRef.id
                 console.log('Submitted patient obj',docRef.id)
                 if(facilities.length > 0) {
                     console.log('submitting facilities')
                     let facArr = [];
+                    let primaryFacility = {'name': '', 'id': ''}
+                    let primaryProvider = {'name': '', 'title': ''}
                     for(var i = 0; i<facilities.length; i++){
                         let fac = facilities[i]
                         let primary = (i === 0)? true: false;                        
                         console.log('submitting facility', fac, 'index', i, 'primary', primary)
-                        db.send({'patient':pid, 'name': fac.name, 'address': fac.address, 'phoneNumber': fac.phoneNumber, 'email': fac.email, 'providers': (fac.provider != ''? [{'provider': fac.provider, 'providerTitle': fac.providerTitle}]:[]), 'primary': (i===0?true:false)}, 'facilities').then((docRef)=> {
-                            console.log('SENT FACILITY TO DATABASE', docRef.id)
-                            facArr.push({'facility': docRef.id, 'primary':primary})
+                        db.send({'patient':pid, 'name': fac.name, 'address': fac.address, 'phoneNumber': fac.phoneNumber, 'email': fac.email, 'providers': (fac.provider != ''? [{'name': fac.provider, 'title': fac.providerTitle}]:[]), 'primary': (i===0?true:false)}, 'facilities').then((docRef)=> {
+                            if (primary) {
+                                primaryFacility['name'] = fac.name
+                                primaryFacility['id'] = docRef.id
+                                primaryProvider['name'] = fac.provider
+                                primaryProvider['title'] = fac.providerTitle
+                            }
+                            console.log('SENT FACILITY TO DATABASE', docRef.id, 'PRIMARY FACILITY & PROVIDER', primaryFacility, primaryProvider)
+                            facArr.push(docRef.id)
                             console.log(facArr)
-                            db.edit(pid, {'facilities': facArr}, 'patients')
+                            db.edit(pid, {'facilities': facArr, 'primaryFacility':primaryFacility, 'primaryProvider':primaryProvider }, 'patients')
                         })
                         setIndex(index + 1)
                     }

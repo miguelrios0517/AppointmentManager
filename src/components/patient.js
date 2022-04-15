@@ -55,10 +55,8 @@ function Patient() {
                                     })[0]
                                     return <div>
                                         <ul>{fac['name']}</ul>
-                                        <ul>{fac['providers'].map(_p => {
-                                            
-                                            const prov = p['providers'] && p['providers'].includes(_p)? (_p.split(';')[0] + ' (' + _p.split(';')[1] +')'): ''
-                                            return<ul>{prov}</ul>
+                                        <ul>{fac['providers'].map(prov => {                                            
+                                            return<ul>{prov.name}</ul>
                                         })}</ul>
                                         </div>}): 'n/a'} 
 

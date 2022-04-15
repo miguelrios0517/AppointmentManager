@@ -73,13 +73,15 @@ function Appointments() {
                             if (appt.time != null) {
                                 var period
                                 var hour = parseInt(appt.time.substring(0,2))
-                                var minutes = parseInt(appt.time.substring(3,5))
+                                var minutes = appt.time.substring(3,5)
+                                minutes = (minutes === '00')? minutes: parseInt(minutes)
                                 //console.log(hour>12)
                                 if (hour > 12) {
                                     hour = hour - 12
                                     period = 'PM'
                                 }
                                 else {
+                                    hour = (hour == 0)? 12: hour
                                     period = 'AM'
                                 }
                                 console.log('time exists', appt.time, hour + ":" + minutes + " " + period)            
@@ -96,7 +98,7 @@ function Appointments() {
                                     <td>{"time" in appt?(hour + ":" + minutes + " " + period):'n/a'}</td>
                                     <td>{"facility" in appt?appt.facility:'n/a'}</td>
                                     <td>{"address" in appt?appt.address:'n/a'}</td>
-                                    <td>{"provider" in appt?appt.provider:'n/a'}</td>
+                                    <td>{"provider" in appt?(appt.provider.name + ((appt.provider.title != '')?(' (' + appt.provider.title +')'): appt.provider.title)):'n/a'}</td>
                                     <td><span onClick = {() => deleteAppointment(appt.id)}>Delete</span> <Link to={`/appointments/${appt.id}`}>View</Link></td>
                                 </tr>
                         })}

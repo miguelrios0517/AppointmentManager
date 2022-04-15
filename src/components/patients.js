@@ -32,9 +32,9 @@ function Patients() {
 
     function deletePatient(p) {
         console.log('ALL FACILITIES', p.facilities, p)
-        p.facilities.forEach((f) => {
-            console.log('DELETING FACILITY', f.facility)
-            db.delete(f.facility, 'facilities')
+        p.facilities.forEach((fid) => {
+            console.log('DELETING FACILITY', fid)
+            db.delete(fid, 'facilities')
         })
         db.delete(p.id, 'patients')
     }
@@ -57,16 +57,31 @@ function Patients() {
                                 </tr>
                         {patients.map((p, i) =>  {
                             console.log('ADDING CURRENT PATIENT OBJ', p)
+                            
+                            /*
                             let primaryFacility = ''
                             let primaryProvider = ''
+                            p.facilities.forEach((f)=> {
+                                console.log('CURRENT FACILITY', f)
+                                if(f.primary == true) {
+                                    store.collection('facilities').doc(f.facility).get().then(snapshot => {
+                                        console.log('PRIMARY FACILITY OBJ', f, snapshot.data())
+                                        let fObj = snapshot.data()
+                                        console.log('fOBJ', fObj)
+                                        primaryFacility = fObj.name
+                                        primaryProvider = (fObj.providers.length !=0) ? fObj.providers[0].provider + '(' + fObj.providers[0].providerTitle + ')': primaryProvider
+                                        console.log('Primary Facility', primaryFacility, 'Primary Provider', primaryProvider)
+                                    })
+                                }
+                            })*/
 
                             return(
                             <tr>
                                 <td>{"firstName" in p?p.firstName:''}{"middleInitial" in p? ' ' + p.middleInitial + ' ':' '}{"lastName" in p?p.lastName:''}</td>
                                 <td>{"phoneNumber" in p?p.phoneNumber:''}</td>
                                 <td>{"email" in p?p.email:''}</td>
-                                <td>{primaryFacility}</td>
-                                <td>{primaryProvider}</td>
+                                <td>{"primaryFacility" in p?p.primaryFacility.name: ''}</td>
+                                <td>{"primaryProvider" in p?(p.primaryProvider.name + ((p.primaryProvider.title != '')?(' (' + p.primaryProvider.title + ')'):p.primaryProvider.title)): ''}</td>
                                 <td><span onClick = {() => deletePatient(p)}>Delete</span> <Link to={`/patients/${p.id}`}>View</Link></td>
                             </tr>
                         )})}
