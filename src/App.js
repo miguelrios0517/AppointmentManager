@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {useState, useEffect} from 'react'
 import Signup from "./components/Signup"
 import { AuthProvider } from "./contexts/AuthContext"
-import { BrowserRouter as Router, Switch, Route, Redirect, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route, Redirect, Link, useHistory } from 'react-router-dom'
 
 import PrivateRoute from "./components/PrivateRoute.js"
 
@@ -18,7 +18,9 @@ import Schedule from './components/schedule';
 import Patients from './components/patients';
 import Patient from './components/patient';
 import PtntForm from './components/ptnt_form';
+import Profile from './components/profile'
 import Lab from './components/lab';
+
 
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -35,6 +37,13 @@ import ListItemText from '@mui/material/ListItemText';
 //import MailIcon from '@mui/icons-material/Mail';
 import DashboardRoundedIcon from '@material-ui/icons/DashboardRounded';
 import EventNoteRoundedIcon from '@material-ui/icons/EventNoteRounded';
+import IconButton from '@mui/material/IconButton';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
+import { Alert } from 'react-bootstrap'
+import { useAuth } from './contexts/AuthContext'
+
 
 import { SidebarData }  from './components/sidebar/SidebarData'
 
@@ -76,14 +85,78 @@ function App() {
   );
 }
 
- const DefaultContainer = () => (
+function DefaultContainer () {
+  const [auth, setAuth] = React.useState(true);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [error, setError] = useState('')
+  const { currentUser, logout } = useAuth()
+  const history = useHistory()
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  async function handleLogout() {
+    setError('')
+    try {
+        await logout()
+        history.push('/login')
+    } catch {
+        setError('Failed to log out')
+    }
+  }
+
+  /*const handleClose = (route) => {
+    if (route == 'profile') {
+      history.push('/profile')
+    }
+    setAnchorEl(null);
+  };*/
+
+  const handleClose = (route) => {
+    setAnchorEl(null);
+  };
+
+  return(
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Appointment Manager
           </Typography>
+          <div>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <Link to={'/profile'} style={{textDecoration: 'none'}}>
+                  <MenuItem onClick={handleClose}>Profile</MenuItem>
+                </Link>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
+            </div>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -133,6 +206,7 @@ function App() {
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
+        {error && <Alert variant = "danger">{error}</Alert>} 
         <Switch>
           <PrivateRoute exact path="/" component={Dashboard} />
           <PrivateRoute exact path="/patients" component={Patients} />
@@ -142,12 +216,14 @@ function App() {
           <PrivateRoute exact path ="/appointments/:id" component ={Appointment} />
           <PrivateRoute exact path ="/new-appointment" component ={ApptForm} />
           <PrivateRoute path="/schedule" component={Schedule} />
+          <PrivateRoute exact path = "/profile" component={Profile} />
           <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />
           <PrivateRoute exact path = "/lab" component={Lab} />
         </Switch>
       </Box>
     </Box>
-)
+  );
+}
 
 export default App;
 
@@ -161,7 +237,6 @@ const LoginContainer = () => (
     <Route path="/forgot-password" component={ForgotPassword}/> 
   </div>
 )
-
 const DefaultContainer2 = () => (
   <div>
     <Sidebar />
