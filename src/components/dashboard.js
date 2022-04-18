@@ -7,23 +7,22 @@ import { LocalDiningOutlined, PinDropSharp } from '@material-ui/icons';
 import { Card, Alert, Button } from 'react-bootstrap'
 import { useAuth } from '../contexts/AuthContext'
 import { Link, useHistory } from 'react-router-dom'
+import "./dashboard.scss";
 
 export default function Dashboard(props) {
     return(
         <div className = "dashboard"> 
-            <header className="text-3xl font-bold underline">
-                Dashboard Overview
-            </header>
             <div className = "main">
-                <div className="widgets">
+                <div className="home home-container widgets">
                     <Widget type="user" />
                     <Widget type="order" />
                     <Widget type="earning" />
                     <Widget type="balance" />
                 </div>
-                <ApptPreview appointments={props.appointments} />  
-                <ToDo />
-                <ApptCarousel />
+                <div className="py-4" id = "appointment-preview-list">
+                    <ApptPreview appointments={props.appointments} /> 
+
+                </div>
             </div>
         </div>
     ); 
