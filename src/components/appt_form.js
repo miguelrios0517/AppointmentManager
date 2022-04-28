@@ -304,33 +304,29 @@ function ApptForm() {
 
                 <div className="flex flex-wrap -mx-3 mb-6">
 
-                    <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                    <div className="w-full md:w-2/5 px-3 mb-6 md:mb-0">
                         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Date
                         </label>
                         <div className="relative w-full mb-2">
-                            <DatePicker
-                                selected={formValues.date}
-                                onChange={(val) => setFormValues({...formValues, date:val})}
-                                selectsStart   
-                                nextMonthButtonLabel=">"
-                                previousMonthButtonLabel="<"
-                                popperClassName="react-datepicker-left"
-                            />
+                        <input type="date" name="date"
+                            value={formValues.date}
+                            onChange={e => setFormValues({...formValues, date:e.target.value})} 
+                            className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" />
                         </div>
                         {error && <p className ="text-red-500 text-xs italic">Please fill out this field.</p>}
                     </div>
 
-                    <div className ="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                    <div className ="w-full md:w-2/5 px-3 mb-6 md:mb-0">
                         <label className ="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Time
                         </label>
                         <div className ="relative w-full" data-mdb-toggle-button="false">
-                            <input name="time" type="time" value={formValues.time} onChange={e => setFormValues({...formValues, time:e.target.value})} className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
+                        <input name="time" type="time" value={formValues.time} onChange={e => setFormValues({...formValues, time:e.target.value})} className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"/>
                         </div>
                     </div>
 
-                    <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                    <div className="w-full md:w-1/5 px-3 mb-6 md:mb-0">
                         <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-first-name">
                             Duration
                         </label>

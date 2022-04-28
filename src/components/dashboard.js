@@ -17,10 +17,10 @@ export default function Dashboard(props) {
         <div className = "dashboard"> 
             <div className = "main">
                 <div className="home home-container widgets">
-                    <Widget type="user" />
-                    <Widget type="order" />
-                    <Widget type="earning" />
-                    <Widget type="balance" />
+                    <Widget type="currentPatients" />
+                    <Widget type="appointmentsWeek" />
+                    <Widget type="incomeWeek" />
+                    <Widget type="miles" />
                 </div>
                 <div className="py-4 flex justify-between" id = "appointment-preview-list">
                     <ApptPreview appointments={props.appointments}/> 

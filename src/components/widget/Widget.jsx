@@ -5,6 +5,13 @@ import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalance
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 
+/*
+<Widget type="appointmentsWeek" />
+                    <Widget type="currentPatients" />
+                    <Widget type="incomeTotal" />
+                    <Widget type="miles" />
+*/
+
 const Widget = ({ type }) => {
   let data;
 
@@ -13,9 +20,9 @@ const Widget = ({ type }) => {
   const diff = 20;
 
   switch (type) {
-    case "user":
+    case "appointmentsWeek":
       data = {
-        title: "USERS",
+        title: "APPOINTMENTS - WEEK",
         isMoney: false,
         link: "See all users",
         icon: (
@@ -29,9 +36,9 @@ const Widget = ({ type }) => {
         ),
       };
       break;
-    case "order":
+    case "currentPatients":
       data = {
-        title: "ORDERS",
+        title: "ONGOING PATIENTS",
         isMoney: false,
         link: "View all orders",
         icon: (
@@ -45,9 +52,9 @@ const Widget = ({ type }) => {
         ),
       };
       break;
-    case "earning":
+    case "incomeWeek":
       data = {
-        title: "EARNINGS",
+        title: "INCOME - WEEK",
         isMoney: true,
         link: "View net earnings",
         icon: (
@@ -58,9 +65,9 @@ const Widget = ({ type }) => {
         ),
       };
       break;
-    case "balance":
+    case "miles":
       data = {
-        title: "BALANCE",
+        title: "MILES - WEEK",
         isMoney: true,
         link: "See details",
         icon: (

@@ -75,7 +75,7 @@ const ApptListPreview = () => {
                 <TableCell className="tableCell">Patient</TableCell>
                 <TableCell className="tableCell">Facility</TableCell>
                 <TableCell className="tableCell">Provider</TableCell>
-                <TableCell className="tableCell">Payment Method</TableCell>
+                <TableCell className="tableCell">Address</TableCell>
                 <TableCell className="tableCell">Form Status</TableCell>
             </TableRow>
             </TableHead>

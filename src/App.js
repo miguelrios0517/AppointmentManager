@@ -22,6 +22,7 @@ import Profile from './components/profile'
 import Lab from './components/lab';
 
 
+
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -40,7 +41,7 @@ import EventNoteRoundedIcon from '@material-ui/icons/EventNoteRounded';
 import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
+import Menu from '@mui/material/Menu';  
 import { Alert } from 'react-bootstrap'
 import { useAuth } from './contexts/AuthContext'
 
@@ -213,8 +214,8 @@ function DefaultContainer () {
           <PrivateRoute exact path="/patients/:id" component={Patient} />
           <PrivateRoute exact path ="/new-patient" component ={PtntForm} />
           <PrivateRoute exact path="/appointments" component={Appointments} />
-          <PrivateRoute exact path ="/appointments/:id" component ={Appointment} />
-          <PrivateRoute exact path ="/new-appointment" component ={ApptForm} />
+          <PrivateRoute path ="/appointments/:id" component ={Appointment} />
+          <PrivateRoute exact path ="/appointments-new" component ={ApptForm} />
           <PrivateRoute path="/schedule" component={Schedule} />
           <PrivateRoute exact path = "/profile" component={Profile} />
           <PrivateRoute exact path = "/update-profile" component={UpdateProfile} />

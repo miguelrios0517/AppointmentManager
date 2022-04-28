@@ -19,18 +19,25 @@ function Appointment() {
                 {appointment.length === 0? <p>There is no appointment to show</p>:
                         appointment.map((p, i) => {
                             return <div key={i}>
-                                <b>Patient:</b> {p.patient? p.patient:'n/a'} <br/>
-                                <b>Date:</b> {p.date? p.date.toDate().toString().substring(0,24): 'n/a'} <br/>
-                                <b>Facility:</b> {p.facility? p.facility: 'n/a'} <br/>
-                                <b>Provider:</b> {p.provider? p.provider: 'n/a'} <br/>
-                                <b>Duration:</b> {p.duration? p.duration + 'minutes': 'n/a'} <br/>
-                                <b>Address:</b> {p.address? p.address: 'n/a'} <br/>
-                                <b>Notes:</b> {'n/a'} 
+                                    <b>Patient:</b> {p.patient? p.patient:''} <br/>
+                                    <b>Date:</b> {p.date? p.date.toDate().toString().substring(0,15): ''} <br/>
+                                    <b>Facility:</b> {p.facility? p.facility: ''} <br/>
+                                    <b>Provider:</b> {p.provider? p.provider.name + ((p.provider.title != '')?(' (' + p.provider.title + ')'):''): 'n/a'} <br/>
+                                    <b>Duration:</b> {p.duration? p.duration + 'minutes': ''} <br/>
+                                    <b>Address:</b> {p.address? p.address: ''} <br/>
+                                    <b>Notes:</b>
                                 </div> 
-                        })}
+                        })
+                }
             </div>
         </div>
     );
 }
 
 export default Appointment;  
+
+/*
+                                <b>Duration:</b> {p.duration? p.duration + 'minutes': 'n/a'} <br/>
+                                <b>Address:</b> {p.address? p.address: 'n/a'} <br/>
+                                <b>Notes:</b> {'n/a'}
+*/
