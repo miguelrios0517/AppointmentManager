@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useRef, Component } from 'react';
 
 import patientProfile from '../images/patient_profile.jpg'; // Tell webpack this JS file uses this image
 import headacheIcon from '../icons/disease_injury/icons8-alzheimer-100.png'; 
@@ -26,8 +26,12 @@ add arrows at the top to scroll through the appointments
 
 
 function ApptPreview(props) {
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef(null);
+  const [open, setOpen] = useState(false);
+  const [patient, setPatient] = useState({name: '', gender: '', age: ''})
+  const [location, setLocation] = useState('');
+  const [time, setTime] = useState(''); 
+  const [notes, setNotes] = useState('');
+  const anchorRef = useRef(null);
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);

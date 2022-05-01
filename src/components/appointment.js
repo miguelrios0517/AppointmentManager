@@ -20,7 +20,7 @@ function Appointment() {
                         appointment.map((p, i) => {
                             return <div key={i}>
                                     <b>Patient:</b> {p.patient? p.patient:''} <br/>
-                                    <b>Date:</b> {p.date? p.date.toDate().toString().substring(0,15): ''} <br/>
+                                    <b>Date:</b> {p.date? new Date(p.date).toString().substring(0,15): ''} <br/>
                                     <b>Facility:</b> {p.facility? p.facility: ''} <br/>
                                     <b>Provider:</b> {p.provider? p.provider.name + ((p.provider.title != '')?(' (' + p.provider.title + ')'):''): 'n/a'} <br/>
                                     <b>Duration:</b> {p.duration? p.duration + 'minutes': ''} <br/>

@@ -183,7 +183,7 @@ function DefaultContainer () {
 
           <Divider />
           <List>
-            {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+            {['Forms', 'Maps', 'Directory'].map((text, index) => (
                 <ListItem button key={text}>
                   <ListItemIcon>
                     {index % 2 === 0 ? <DashboardRoundedIcon /> : <EventNoteRoundedIcon />}
@@ -194,7 +194,7 @@ function DefaultContainer () {
           </List>
           <Divider />
           <List>
-            {['All mail', 'Trash', 'Spam'].map((text, index) => (
+            {['Inbox', 'Starred', 'Sent'].map((text, index) => (
                 <ListItem button key={text}>
                   <ListItemIcon>
                     {index % 2 === 0 ? <DashboardRoundedIcon /> : <EventNoteRoundedIcon />}
@@ -212,7 +212,7 @@ function DefaultContainer () {
           <PrivateRoute exact path="/" component={Dashboard} />
           <PrivateRoute exact path="/patients" component={Patients} />
           <PrivateRoute exact path="/patients/:id" component={Patient} />
-          <PrivateRoute exact path ="/new-patient" component ={PtntForm} />
+          <PrivateRoute exact path ="/patients-new" component ={PtntForm} />
           <PrivateRoute exact path="/appointments" component={Appointments} />
           <PrivateRoute path ="/appointments/:id" component ={Appointment} />
           <PrivateRoute exact path ="/appointments-new" component ={ApptForm} />

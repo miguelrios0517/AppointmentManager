@@ -61,18 +61,17 @@ function Schedule(props) {
             const appt = appointments[key]
             const duration = (appt.duration && appt.duration > 0) ? appt.duration:1
             if (appt.date) {
-                
-                const start = appt.date.toDate()
+                const start = new Date(appt.date.replace(/-/g, '\/') + ' ' + appt.time)
                 const endmin = start.getMinutes() + parseInt(duration)
                 
                 
                 const end = new Date(start.getFullYear(), start.getMonth(), start.getDate(), start.getHours(), endmin) 
                 
-
+                console.log('START OF APPOINTMENT', start, 'END OF APPOINTMENT', end, 'DURATION', appt.duration, endmin)
                 appts.push({
                     startDate: start,
                     endDate: end,
-                    title: appt.patient + ', ' + appt.provider,
+                    title: appt.patient + (appt.facility!= ''?(', ' + appt.facility):'') + (appt.provider.name != ''? (' - ' + appt.provider.name + (appt.provider.title != ''?(' (' + appt.provider.title + ')'):appt.provider.title)): ''),
                     id: appt.id,
                     location: appt.location
                 })

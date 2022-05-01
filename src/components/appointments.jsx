@@ -4,10 +4,18 @@ import { userColumns, userRows } from "./datatablesource";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from '../contexts/AuthContext'
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Modal from '@mui/material/Modal';
 
+const dayInMonthComparator = (v1, v2) => {
+  console.log(new Date(v1), new Date(v2))
+  return new Date(v1) - new Date(v2)
+};
 
-
-const apptColumns = [
+const appointmentColumns = [
   {
     field: "patient",
     headerName: "Patient",
@@ -24,30 +32,53 @@ const apptColumns = [
   {
     field: "formattedDate",
     headerName: "Date",
-    width: 130,
+    //valueGetter: (params) => params.row.dateCreated,
+    width: 140,
+    type: 'date',
+    sortComparator: dayInMonthComparator,
+    valueFormatter: (params) => {
+      if (params.value == null) {
+        return '';
+      }
+      return params.value.substring(0,15)
+    },
   },
 
   {
     field: "formattedTime",
     headerName: "Time",
     width: 100,
+    sortable: false,
   },
   {
     field: "facility",
     headerName: "Facility",
     width: 140,
   },
-  { field: "formattedProvider", headerName: "Provider", width: 140 },
-  { field: "address", headerName: "Address", width: 140 },
-  { field: "id", headerName: "ID", width: 40 },
+  { field: "formattedProvider", headerName: "Provider", width: 165 },
+  { field: "address", headerName: "Address", width: 165 },
+  { field: "id", headerName: "ID", width: 50 },
 ];
 
-
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 const Appointments = () => {
   const { db, useDB } = useAuth();
   const appointments = useDB('appointments');
   const [data, setData] = useState([]);
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   console.log('ALL APPOINTMENTS', appointments)
 
@@ -112,7 +143,6 @@ const Appointments = () => {
     //delete appt['pid']
     //delete appt['facilityId']
     //delete appt['uid']
-    appt['formattedProvider'] = appt.provider.name + ((appt.provider.title != '')?(' (' + appt.provider.title + ')'):'')
     if (appt.time != null) {
         var period
         var hour = parseInt(appt.time.substring(0,2))
@@ -131,10 +161,14 @@ const Appointments = () => {
     } else {
         console.log('time does not exist')
     }
-    appt['formattedTime'] = hour + ":" + minutes + " " + period
-    //let dateString = appt.date.toDate().toString()
-    //dateString = dateString.substring(0,15)
-    appt['formattedDate'] = appt.date.toDate().toString().substring(0,15)
+    let formattedTime = hour + ":" + minutes + " " + period
+    appt['formattedTime'] = formattedTime 
+    //let dateString = toDate().toString().substring(0,15)
+    let dateFormatted = new Date(appt.date.replace(/-/g, '\/'))
+    dateFormatted = dateFormatted.toString().substring(0,15) + ' ' + formattedTime
+    appt['formattedDate'] = dateFormatted;
+    appt['formattedProvider'] = appt.provider.name + ((appt.provider.title != '')?(' (' + appt.provider.title + ')'):'')
+    //.toString().substring(0,15)
     /*setTimeout(() => {
         delete appt['date']
     }, 300)*/
@@ -146,19 +180,53 @@ const Appointments = () => {
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        Add New User
-        <Link to="/appointments-new" className="link">
-          Add New
-        </Link>
+        Appointments
+        <div className="flex row"> 
+          <div className="link mr-2">
+            <Link to="/appointments-new" className="link-text" style={{ textDecoration: 'none' }}>
+              New Appointment
+            </Link>
+          </div>
+          <button onClick={handleOpen} className="link mr-3">
+            Import CSV
+          </button>
+        </div>
       </div>
       <DataGrid
         className="datagrid"
         rows = {appointments} 
-        columns={apptColumns.concat(actionColumn)}
+        columns={appointmentColumns.concat(actionColumn)}
+        initialState={{
+          sorting:{
+            sortModel:[
+              {
+                field: 'formattedDate',
+                sort: 'desc',
+              }
+            ]
+          }
+        }}
         pageSize={9}
         rowsPerPageOptions={[9]}
         checkboxSelection
       />
+      <div>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Import your data
+            </Typography>
+            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+              Import a csv file of your appointments with the following header columns: patient, date, time, duration, facility, provider, and address 
+            </Typography>
+          </Box>
+        </Modal>
+      </div>
     </div>
   );
 };

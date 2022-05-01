@@ -12,25 +12,25 @@ import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlin
                     <Widget type="miles" />
 */
 
-const Widget = ({ type }) => {
+const Widget = (props) => {
   let data;
-
+  
   //temporary
-  const amount = 100;
   const diff = 20;
+  const amount = props.amount; 
 
-  switch (type) {
+  switch (props.type) {
     case "appointmentsWeek":
       data = {
         title: "APPOINTMENTS - WEEK",
         isMoney: false,
         link: "See all users",
         icon: (
-          <PersonOutlinedIcon
+          <AccountBalanceWalletOutlinedIcon
             className="icon"
             style={{
-              color: "crimson",
-              backgroundColor: "rgba(255, 0, 0, 0.2)",
+              backgroundColor: "rgba(128, 0, 128, 0.2)",
+              color: "purple",
             }}
           />
         ),
@@ -42,11 +42,11 @@ const Widget = ({ type }) => {
         isMoney: false,
         link: "View all orders",
         icon: (
-          <ShoppingCartOutlinedIcon
+          <PersonOutlinedIcon
             className="icon"
             style={{
-              backgroundColor: "rgba(218, 165, 32, 0.2)",
-              color: "goldenrod",
+              color: "crimson",
+              backgroundColor: "rgba(255, 0, 0, 0.2)",
             }}
           />
         ),
@@ -68,14 +68,14 @@ const Widget = ({ type }) => {
     case "miles":
       data = {
         title: "MILES - WEEK",
-        isMoney: true,
+        isMoney: false,
         link: "See details",
         icon: (
-          <AccountBalanceWalletOutlinedIcon
+          <ShoppingCartOutlinedIcon
             className="icon"
             style={{
-              backgroundColor: "rgba(128, 0, 128, 0.2)",
-              color: "purple",
+              backgroundColor: "rgba(218, 165, 32, 0.2)",
+              color: "goldenrod",
             }}
           />
         ),
