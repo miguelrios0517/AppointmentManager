@@ -41,7 +41,6 @@ let store = app.firestore()
 Modal.setAppElement('#root');
 
 function PtntForm(props) {
-
     //Patient form fields 
     const initialValues = {firstName: '', middleInitial: '', lastName: '', phoneNumber: '', email: '', homeAddress: ''}
     const [formValues, setFormValues] = useState(initialValues);
@@ -61,6 +60,8 @@ function PtntForm(props) {
 
     //Router
     const history = useHistory();
+    //console.log('prev path', 'prevPath' in history.location.state?history.location.state.prevPath:undefined)
+    console.log('history.location', typeof history.location.state != 'undefined'? history.location.state.prevPath:undefined)
 
     /////////////////////////////////////////////helper functions/////////////////////////////////////////////////////
     const checkKeyDown = (e) => {
@@ -149,12 +150,19 @@ function PtntForm(props) {
                 } else {
                     console.log('no facilities submitted')
                 }
+                setFormValues(initialValues)
+                setFacilities([])
+                setMessage('Patient Submitted');
+                if (typeof history.location.state != 'undefined' && typeof history.location.state.prevPath != 'undefined' && history.location.state.prevPath!='') {
+                    console.log('GOING BACK TO APPOINTMENT FORM', 'patient = ' + pid)
+                    history.push(('/'+ history.location.state.prevPath), {patient: (pid + ', '+ formValues.firstName + ' ' + formValues.lastName)})
+                } else {
+                    console.log('GOING BACK TO PATIENTS')
+                    history.push("/patients")
+                }
             })
             
-            setFormValues(initialValues)
-            setFacilities([])
-            setMessage('Patient Submitted');
-            history.push("/patients")
+            
 
         } catch {
             setError('Failed to submit appointment')

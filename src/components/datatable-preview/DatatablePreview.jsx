@@ -56,16 +56,13 @@ const DatatablePreview = (props) => {
     setData(data.filter((item) => item.id !== id));
   };
 
+  let formattedTime;
   props.appointments.forEach((appt) => {
-    //delete appt['pid']
-    //delete appt['facilityId']
-    //delete appt['uid']
-    if (appt.time != null) {
+    if (appt.time != '') {
         var period
         var hour = parseInt(appt.time.substring(0,2))
         var minutes = appt.time.substring(3,5)
         minutes = (minutes === '00')? minutes: parseInt(minutes)
-        //console.log(hour>12)
         if (hour > 12) {
             hour = hour - 12 
             period = 'PM'
@@ -74,24 +71,19 @@ const DatatablePreview = (props) => {
             hour = (hour == 0)? 12: hour
             period = 'AM'
         }
-        console.log('time exists', appt.time, hour + ":" + minutes + " " + period)            
+        console.log('time exists', appt.time, hour + ":" + minutes + " " + period)
+        formattedTime = hour + ":" + minutes + " " + period
     } else {
         console.log('time does not exist')
+        formattedTime = appt.time
     }
-    let formattedTime = hour + ":" + minutes + " " + period
-    appt['formattedTime'] = formattedTime 
-    //let dateString = toDate().toString().substring(0,15)
     let dateFormatted = new Date(appt.date.replace(/-/g, '\/'))
     dateFormatted = dateFormatted.toString().substring(0,15) + ' ' + formattedTime
+    
+    appt['formattedTime'] = formattedTime 
     appt['formattedDate'] = dateFormatted;
     appt['formattedProvider'] = appt.provider.name + ((appt.provider.title != '')?(' (' + appt.provider.title + ')'):'')
-    //.toString().substring(0,15)
-    /*setTimeout(() => {
-        delete appt['date']
-    }, 300)*/
-    //return appt
   })
-
 
   const actionColumn = [
     {

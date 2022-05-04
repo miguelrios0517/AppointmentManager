@@ -15,8 +15,9 @@ import { DataGrid } from "@mui/x-data-grid";
 const Patients = () => {
     const { db, useDB } = useAuth();
     const patients = useDB('patients')
+    
     const handleDelete = (id) => {  
-      
+      db.delete(id, 'patients');
     };
   
     console.log('ALL PATIENTS', patients)
@@ -72,6 +73,12 @@ const Patients = () => {
               <Link to={`/patients/${params.row.id}`} style={{ textDecoration: "none" }}>
                 <div className="viewButton">View</div>
               </Link>
+              <div
+                className="deleteButton"
+                onClick={() => handleDelete(params.row.id)}
+              >
+                Delete
+              </div>
             </div>
           );
         },

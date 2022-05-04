@@ -59,24 +59,26 @@ function Schedule(props) {
         let i = 0
         for (const key in appointments){
             const appt = appointments[key]
-            const duration = (appt.duration && appt.duration > 0) ? appt.duration:1
             if (appt.date) {
+                console.log('DURATION', appt.duration, appt.duration?'true':'false')
                 const start = new Date(appt.date.replace(/-/g, '\/') + ' ' + appt.time)
+                const duration = appt.duration?appt.duration:1
                 const endmin = start.getMinutes() + parseInt(duration)
-                
-                
                 const end = new Date(start.getFullYear(), start.getMonth(), start.getDate(), start.getHours(), endmin) 
-                
+                console.log('START HOUR and Minute', start.getHours(), start.getMinutes())
                 console.log('START OF APPOINTMENT', start, 'END OF APPOINTMENT', end, 'DURATION', appt.duration, endmin)
                 appts.push({
                     startDate: start,
                     endDate: end,
-                    title: appt.patient + (appt.facility!= ''?(', ' + appt.facility):'') + (appt.provider.name != ''? (' - ' + appt.provider.name + (appt.provider.title != ''?(' (' + appt.provider.title + ')'):appt.provider.title)): ''),
+                    title: (
+                        appt.patient + (
+                        appt.facility!= ''?(', ' + appt.facility):'') + 
+                        (appt.provider.name != ''? (' - ' + appt.provider.name + 
+                        (appt.provider.title != ''?(' (' + appt.provider.title + ')'):appt.provider.title)): '') +
+                        (appt.time == ''? ' (time unknown)': '')
+                    ),
                     id: appt.id,
-                    location: appt.location
                 })
-                
-                
             }
             i=i+1
         }

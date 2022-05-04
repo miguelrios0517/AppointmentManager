@@ -41,11 +41,23 @@ let store = app.firestore()
 Modal.setAppElement('#root');
 
 function ApptForm() {
+     //Database
+     const { useDB, db} = useAuth();
+     const patients = useDB('patients');
+ 
+     //Router
+     const history = useHistory();
 
     ///////////////////////////////////////////////variables///////////////////////////////////////////////////
     
     //Appointment form fields 
     const initialValues = {patient: '', date: '', time: '', duration: '', address: '', facility: '', provider:'', providerTitle:''}
+    console.log('history.location.state.patient', typeof history.location.state != 'undefined'? history.location.state.patient:undefined)
+    if (typeof history.location.state != 'undefined' && typeof history.location.state.patient != 'undefined' && history.location.state.patient!='') {
+        console.log('PATIENT EXISTS!')
+        initialValues['patient'] = history.location.state.patient
+    }
+    
     const [formValues, setFormValues] = useState(initialValues);
     
     //New patient form fields
@@ -65,14 +77,6 @@ function ApptForm() {
     const [facilityObj, setFacilityObj] = useState({});
     const [providers, setProviders] = useState([]); 
 
-    //Database
-    const { useDB, db} = useAuth();
-    const patients = useDB('patients');
-
-    //Router
-    const history = useHistory();
-
-
     /////////////////////////////////////////////handle input change/////////////////////////////////////////////////////
 
     //verify that the correct facility objects are set
@@ -85,10 +89,11 @@ function ApptForm() {
     4) pushes dict obj to _facs which stores an array of facility names and ids [{'id':fid, 'name':fac_obj['name']}] */
     function handlePatientChange(e) {
         const val = e.target.value; 
+        if (val == 'new-patient') {
+            history.push('/patients-new', {prevPath: 'appointments-new'})
+        }
         setFormValues({...formValues, patient:val})
         setFacilityObjs([]); //clear facilities from previous patient entry
-        
-
         if (val == 'new-patient') { //create a new patient
             setShowForm(true);
         } else { // a patient is selected from dropdown
@@ -216,6 +221,9 @@ function ApptForm() {
             //setErrors(errors => [...errors, 'date']);
             return setError('You must submit a date');
         }
+        if (formValues.duration != '' && formValues.time == '') {
+            return setError('You must submit a time or leave duration blank');
+        }
 
         try {
             setError('')
@@ -223,6 +231,7 @@ function ApptForm() {
             //format datetime
             const _time = formValues.time ? formValues.time : '00:00';
             const _date = formValues.date ? new Date(formValues.date + 'T' + _time) : null;
+            //const knowTime = formValues.time ? true:false
 
             //taking the patient field set by ptntForm (set as a string "pid,patient name")
             const pat_arr = formValues.patient.split(", ");
@@ -234,7 +243,7 @@ function ApptForm() {
             let fac_id = (Object.keys(facilityObj).length != 0)? facilityObj.id: ''
 
             var provObj = {'name': formValues.provider, 'title': formValues.providerTitle}
-            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time': _time, 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': fac_id, 'address': formValues.address, 'provider': provObj}, 'appointments').then(function (docRef) {
+            db.send({'pid': pid, 'patient': _patient, 'date': formValues.date, 'time':(formValues.time ? formValues.time : ''), 'duration': formValues.duration, 'facility': formValues.facility, 'facilityId': fac_id, 'address': formValues.address, 'provider': provObj}, 'appointments').then(function (docRef) {
                 db.edit(pid, {appointments: [...patientObj.appointments, docRef.id]},  'patients')
                 appt_id = docRef.id;
             })
@@ -290,12 +299,14 @@ function ApptForm() {
                             Patient
                         </label>
                         <select value={formValues.patient} onChange={e => { handlePatientChange(e) }} className="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example">
-                        <option value='select'>Select a patient</option>
+                            <option value='select'>Select a patient</option>
                             <option value='new-patient'>Add a new patient</option>
+                            <option value='test'>Test Patient</option>
                             {patients.map((p, i) => {
                                 return <option key={i} value={p.id + ', ' + p.firstName + ' ' + p.lastName}>{((p.firstName + p.lastName) ? (p.firstName + ' ' + p.lastName) : 'name not entered') + ' (' + p.id + ')'} </option>
                             })}
                         </select>
+                        {(error && formValues.patient == 'select') && <p className ="text-red-500 text-xs italic">Please fill out this field.</p>}
                     </div>
                 </div>
                 
@@ -314,7 +325,7 @@ function ApptForm() {
                             onChange={e => setFormValues({...formValues, date:e.target.value})} 
                             className ="form-input appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" />
                         </div>
-                        {error && <p className ="text-red-500 text-xs italic">Please fill out this field.</p>}
+                        {(error && formValues.date == '') && <p className ="text-red-500 text-xs italic">Please fill out this field.</p>}
                     </div>
 
                     <div className ="w-full md:w-2/5 px-3 mb-6 md:mb-0">
